@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 interface CarouselImage {
   id?: string
@@ -257,16 +258,24 @@ export default function FashionCarouselManagementPage() {
 
                 <div className="grid md:grid-cols-3 gap-4 mb-4">
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image URL *
-                    </label>
-                    <input
-                      type="url"
-                      value={image.url}
-                      onChange={(e) => handleImageChange(index, 'url', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
-                      placeholder="https://images.unsplash.com/photo-..."
+                    <ImageUpload
+                      label="Image *"
+                      currentImage={image.url}
+                      onUpload={(url) => handleImageChange(index, 'url', url)}
+                      onDelete={() => handleImageChange(index, 'url', '')}
                     />
+                    {!image.url && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Or paste URL: 
+                        <input
+                          type="url"
+                          value={image.url}
+                          onChange={(e) => handleImageChange(index, 'url', e.target.value)}
+                          className="ml-2 px-2 py-1 border border-gray-300 rounded text-xs"
+                          placeholder="https://images.unsplash.com/..."
+                        />
+                      </p>
+                    )}
                   </div>
 
                   <div>

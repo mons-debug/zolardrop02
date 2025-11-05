@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 interface ArchiveImage {
   url: string
@@ -192,16 +193,24 @@ export default function ArchiveManagementPage() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Image URL *
-                    </label>
-                    <input
-                      type="url"
-                      value={image.url}
-                      onChange={(e) => handleImageChange(index, 'url', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
-                      placeholder="https://example.com/image.jpg or upload via /api/upload"
+                    <ImageUpload
+                      label={`Image ${index + 1} URL *`}
+                      currentImage={image.url}
+                      onUpload={(url) => handleImageChange(index, 'url', url)}
+                      onDelete={() => handleImageChange(index, 'url', '')}
                     />
+                    {!image.url && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Or paste URL: 
+                        <input
+                          type="url"
+                          value={image.url}
+                          onChange={(e) => handleImageChange(index, 'url', e.target.value)}
+                          className="ml-2 px-2 py-1 border border-gray-300 rounded text-xs w-full mt-1"
+                          placeholder="https://example.com/image.jpg"
+                        />
+                      </p>
+                    )}
                   </div>
 
                   <div>
