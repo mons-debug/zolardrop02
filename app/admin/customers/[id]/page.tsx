@@ -38,10 +38,10 @@ export default function CustomerProfilePage() {
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       fetchCustomer(params.id as string)
     }
-  }, [params.id])
+  }, [params?.id])
 
   const fetchCustomer = async (id: string) => {
     try {
