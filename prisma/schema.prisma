@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id             String    @id @default(uuid())
+  sku            String    @unique
+  title          String
+  description    String?
+  images         String?
+  priceCents     Int
+  salePriceCents Int?
+  currency       String    @default("USD")
+  stock          Int
+  category       String?
+  tags           String?
+  status         String    @default("published") // draft, published, archived
+  seoTitle       String?
+  seoDescription String?
+  variants       Variant[]
+  metadata       String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Variant {
+  id         String  @id @default(uuid())
+  product    Product @relation(fields: [productId], references: [id])
+  productId  String
+  color      String
+  sku        String  @unique
+  priceCents Int
+  stock      Int
+  images     String?
+  metadata   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String   @unique
+  city        String?
+  email       String?
+  totalOrders Int      @default(0)
+  totalSpent  Int      @default(0)  // in cents
+  tags        String?  // JSON: ["VIP", "Loyal", "New"]
+  notes       String?  // Admin notes about customer
+  isBlocked   Boolean  @default(false)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id            String    @id @default(uuid())
+  customerId    String?
+  customer      Customer? @relation(fields: [customerId], references: [id])
+  userId        String?
+  items         String     // store [{ productId, variantId, qty, priceCents }]
+  subtotalCents Int
+  taxCents      Int
+  shippingCents Int
+  totalCents    Int
+  status        String    @default("pending")  // pending, confirmed, shipped, delivered, cancelled, refunded
+  paymentMethod String    @default("COD")
+  paymentId     String?
+  refundReason  String?
+  adminNotes    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  name             String?
+  role             String    @default("customer") // customer, VIEWER, MANAGER, ADMIN, SUPER_ADMIN
+  passwordHash     String
+  isActive         Boolean   @default(true)
+  lastLogin        DateTime?
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model ArchiveCollection {
+  id        String   @id @default(uuid())
+  images    String   // JSON array of image URLs
+  title     String   @default("BORDERLINE")
+  subtitle  String   @default("DROP 01")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FashionCarousel {
+  id        String   @id @default(uuid())
+  url       String
+  alt       String
+  size      String   // 'small', 'medium', 'large'
+  order     Int      // Display order
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
