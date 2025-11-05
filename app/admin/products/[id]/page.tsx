@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import ImageGallery from '@/components/admin/ImageGallery'
+import ImageUpload from '@/components/admin/ImageUpload'
 
 interface Variant {
   id?: string
@@ -100,45 +102,12 @@ export default function EditProductPage() {
     }
   }
 
-  const handleImageUpload = async (files: FileList | null, isVariant: boolean = false) => {
-    if (!files || files.length === 0) return
-
-    setUploadingImages(true)
-    const uploadedUrls: string[] = []
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ filename: files[i].name })
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          uploadedUrls.push(data.url)
-        }
-      }
-
-      if (isVariant) {
-        setVariantImages([...variantImages, ...uploadedUrls])
-      } else {
-        setImages([...images, ...uploadedUrls])
-      }
-    } catch (error) {
-      console.error('Upload error:', error)
-      alert('Failed to upload images')
-    } finally {
-      setUploadingImages(false)
-    }
+  const handleVariantImageUpload = (url: string) => {
+    setVariantImages([...variantImages, url])
   }
 
-  const removeImage = (index: number, isVariant: boolean = false) => {
-    if (isVariant) {
-      setVariantImages(variantImages.filter((_, i) => i !== index))
-    } else {
-      setImages(images.filter((_, i) => i !== index))
-    }
+  const removeVariantImage = (index: number) => {
+    setVariantImages(variantImages.filter((_, i) => i !== index))
   }
 
   const addVariant = () => {
@@ -243,11 +212,14 @@ export default function EditProductPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-8">
-          {/* Basic Information */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Main Form */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-8 space-y-8">
+              {/* Basic Information */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b">Basic Information</h2>
             
             <div className="space-y-4">
               <div>
@@ -316,216 +288,295 @@ export default function EditProductPage() {
                   required
                 />
               </div>
+              </div>
             </div>
-          </div>
 
-          {/* Product Images */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Product Images *</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Images
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => handleImageUpload(e.target.files)}
-                  disabled={uploadingImages}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                />
+            {/* Product Images */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b">Product Images *</h2>
+              
+              <ImageGallery
+                images={images}
+                onImagesChange={setImages}
+                label=""
+              />
+            </div>
+
+            {/* Variants */}
+            <div>
+              <div className="flex items-center justify-between mb-4 pb-2 border-b">
+                <h2 className="text-xl font-semibold text-gray-900">Variants (Colors)</h2>
+                <button
+                  type="button"
+                  onClick={() => setShowVariantForm(!showVariantForm)}
+                  className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                >
+                  {showVariantForm ? 'Cancel' : '+ Add Variant'}
+                </button>
               </div>
 
-              {images.length > 0 && (
-                <div className="grid grid-cols-4 gap-4">
-                  {images.map((url, index) => (
-                    <div key={index} className="relative group">
-                      <div className="relative h-24 w-full rounded-lg overflow-hidden border-2 border-gray-200">
-                        <Image
-                          src={url}
-                          alt={`Product image ${index + 1}`}
-                          fill
-                          sizes="150px"
-                          className="object-cover"
-                        />
+              {showVariantForm && (
+                <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg space-y-5 mb-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Color Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={variantColor}
+                        onChange={(e) => setVariantColor(e.target.value)}
+                        placeholder="e.g., Black, Navy"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Variant SKU *
+                      </label>
+                      <input
+                        type="text"
+                        value={variantSku}
+                        onChange={(e) => setVariantSku(e.target.value)}
+                        placeholder="e.g., TK-SLIM-004-BLK"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price (USD) *
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={variantPrice}
+                        onChange={(e) => setVariantPrice(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Stock *
+                      </label>
+                      <input
+                        type="number"
+                        value={variantStock}
+                        onChange={(e) => setVariantStock(e.target.value)}
+                        placeholder="0"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Variant Images */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Variant Images (Optional)
+                    </label>
+                    
+                    {/* Image Gallery */}
+                    {variantImages.length > 0 && (
+                      <div className="grid grid-cols-4 gap-3 mb-3">
+                        {variantImages.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
+                              <img
+                                src={url}
+                                alt={`Variant ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeVariantImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Upload Component */}
+                    <ImageUpload
+                      onUpload={handleVariantImageUpload}
+                      label=""
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={addVariant}
+                    className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                  >
+                    Add Variant
+                  </button>
+                </div>
+              )}
+
+              {variants.length > 0 && (
+                <div className="space-y-3">
+                  {variants.map((variant, index) => (
+                    <div key={index} className="flex items-start justify-between p-5 bg-white border-2 border-gray-200 rounded-lg hover:border-orange-200 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="font-semibold text-gray-900 text-lg">{variant.color}</h3>
+                          <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded font-medium">
+                            {variant.sku}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          <span className="flex items-center gap-1">
+                            <span className="font-medium text-gray-900">${(variant.priceCents / 100).toFixed(2)}</span>
+                          </span>
+                          <span>•</span>
+                          <span>Stock: <span className="font-medium text-gray-900">{variant.stock}</span></span>
+                        </div>
+                        {variant.images && variant.images.length > 0 && (
+                          <div className="flex gap-2">
+                            {variant.images.slice(0, 4).map((img, imgIdx) => (
+                              <div key={imgIdx} className="w-12 h-12 rounded border border-gray-200 overflow-hidden">
+                                <img src={img} alt="" className="w-full h-full object-cover" />
+                              </div>
+                            ))}
+                            {variant.images.length > 4 && (
+                              <div className="w-12 h-12 rounded border border-gray-200 bg-gray-100 flex items-center justify-center text-xs text-gray-600">
+                                +{variant.images.length - 4}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeVariant(index)}
+                        className="ml-4 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
-                        ×
+                        Remove
                       </button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Variants */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">Variants (Colors)</h2>
+            {/* Submit Button */}
+            <div className="flex space-x-4 pt-4 border-t">
               <button
-                type="button"
-                onClick={() => setShowVariantForm(!showVariantForm)}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                type="submit"
+                disabled={saving}
+                className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
-                {showVariantForm ? 'Cancel' : '+ Add Variant'}
+                {saving ? 'Saving Changes...' : 'Save Changes'}
               </button>
+              <Link
+                href="/admin/products"
+                className="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+              >
+                Cancel
+              </Link>
             </div>
+          </form>
+        </div>
 
-            {showVariantForm && (
-              <div className="bg-gray-50 p-6 rounded-lg space-y-4 mb-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Color Name
-                    </label>
-                    <input
-                      type="text"
-                      value={variantColor}
-                      onChange={(e) => setVariantColor(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Variant SKU
-                    </label>
-                    <input
-                      type="text"
-                      value={variantSku}
-                      onChange={(e) => setVariantSku(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price (USD)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={variantPrice}
-                      onChange={(e) => setVariantPrice(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Stock
-                    </label>
-                    <input
-                      type="number"
-                      value={variantStock}
-                      onChange={(e) => setVariantStock(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Variant Images (Optional)
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(e) => handleImageUpload(e.target.files, true)}
-                    disabled={uploadingImages}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+        {/* Right Column - Preview & Info */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-8 space-y-6">
+            {/* Product Preview */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Preview</h3>
+              
+              {/* Preview Image */}
+              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden mb-4">
+                {images.length > 0 ? (
+                  <img
+                    src={images[0]}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
                   />
-                </div>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
 
-                {variantImages.length > 0 && (
-                  <div className="grid grid-cols-4 gap-4">
-                    {variantImages.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <div className="relative h-20 w-full rounded-lg overflow-hidden border-2 border-gray-200">
-                          <Image
-                            src={url}
-                            alt={`Variant image ${index + 1}`}
-                            fill
-                            sizes="100px"
-                            className="object-cover"
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index, true)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          ×
-                        </button>
+              {/* Preview Info */}
+              <div className="space-y-2">
+                <h4 className="font-semibold text-gray-900">
+                  {title || 'Product Title'}
+                </h4>
+                <p className="text-2xl font-bold text-gray-900">
+                  ${priceCents ? parseFloat(priceCents).toFixed(2) : '0.00'}
+                </p>
+                {variants.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {variants.map((v, idx) => (
+                      <div
+                        key={idx}
+                        className="px-3 py-1 border border-gray-300 rounded text-xs font-medium"
+                      >
+                        {v.color}
                       </div>
                     ))}
                   </div>
                 )}
-
-                <button
-                  type="button"
-                  onClick={addVariant}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                  Add Variant
-                </button>
+                {description && (
+                  <p className="text-sm text-gray-600 mt-3 line-clamp-3">
+                    {description}
+                  </p>
+                )}
               </div>
-            )}
+            </div>
 
-            {variants.length > 0 && (
+            {/* Quick Stats */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h3>
               <div className="space-y-3">
-                {variants.map((variant, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">{variant.color}</p>
-                      <p className="text-sm text-gray-600">
-                        SKU: {variant.sku} • ${(variant.priceCents / 100).toFixed(2)} • Stock: {variant.stock}
-                      </p>
-                      {variant.images && variant.images.length > 0 && (
-                        <p className="text-xs text-gray-500">{variant.images.length} images</p>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeVariant(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Images</span>
+                  <span className="font-medium text-gray-900">{images.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Variants</span>
+                  <span className="font-medium text-gray-900">{variants.length}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Total Stock</span>
+                  <span className="font-medium text-gray-900">
+                    {parseInt(stock || '0') + variants.reduce((acc, v) => acc + v.stock, 0)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">SKU</span>
+                  <span className="font-medium text-gray-900">{sku || 'N/A'}</span>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Submit Button */}
-          <div className="flex space-x-4">
-            <button
-              type="submit"
-              disabled={saving || uploadingImages}
-              className="flex-1 bg-black text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-            >
-              {saving ? 'Saving Changes...' : 'Save Changes'}
-            </button>
-            <Link
-              href="/admin/products"
-              className="px-6 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </Link>
+            {/* Help Text */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="text-sm font-semibold text-blue-900 mb-2">💡 Tips</h4>
+              <ul className="text-xs text-blue-800 space-y-1">
+                <li>• First image is the primary image</li>
+                <li>• Use high-quality images (min 800px)</li>
+                <li>• Add variants for different colors</li>
+                <li>• Fill all required fields (*)</li>
+              </ul>
+            </div>
           </div>
-        </form>
-      </main>
+        </div>
+      </div>
+    </main>
     </div>
   )
 }
