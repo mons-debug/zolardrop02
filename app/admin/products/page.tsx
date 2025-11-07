@@ -20,6 +20,7 @@ interface Product {
   images: string
   priceCents: number
   stock: number
+  category?: string
   variants: Variant[]
   createdAt: string
 }

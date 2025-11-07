@@ -15,6 +15,7 @@ interface Product {
   salePriceCents?: number
   currency: string
   stock: number
+  category?: string
   variants: Array<{
     id: string
     color: string

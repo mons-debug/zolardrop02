@@ -12,6 +12,7 @@ interface Product {
   sku: string
   priceCents: number
   images: string
+  category?: string
   variants: any[]
 }
 

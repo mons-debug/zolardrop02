@@ -18,6 +18,7 @@ interface Product {
   title: string
   stock: number
   priceCents: number
+  category?: string
 }
 
 interface DashboardStats {
