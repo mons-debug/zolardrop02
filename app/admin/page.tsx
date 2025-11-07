@@ -50,11 +50,7 @@ export default function AdminDashboard() {
       setLoading(true)
       
       // Fetch orders
-      const ordersResponse = await fetch('/api/admin/orders', {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const ordersResponse = await fetch('/api/admin/orders')
       if (ordersResponse.ok) {
         const ordersData = await ordersResponse.json()
         setOrders(ordersData.orders || [])

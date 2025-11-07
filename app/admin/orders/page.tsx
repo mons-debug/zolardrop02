@@ -51,11 +51,7 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/orders', {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const response = await fetch('/api/admin/orders')
       
       if (response.ok) {
         const data = await response.json()

@@ -24,11 +24,7 @@ export default function ArchiveManagementPage() {
 
   const fetchArchive = async () => {
     try {
-      const response = await fetch('/api/admin/archive-collection', {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const response = await fetch('/api/admin/archive-collection')
 
       if (response.ok) {
         const data = await response.json()
@@ -70,7 +66,6 @@ export default function ArchiveManagementPage() {
       const response = await fetch('/api/admin/archive-collection', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer admin-token-123',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -83,7 +78,8 @@ export default function ArchiveManagementPage() {
       if (response.ok) {
         alert('Archive collection updated successfully!')
       } else {
-        alert('Failed to update archive collection')
+        const error = await response.json()
+        alert(error.message || 'Failed to update archive collection')
       }
     } catch (error) {
       console.error('Error saving archive:', error)

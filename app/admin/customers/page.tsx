@@ -39,11 +39,7 @@ export default function CustomersPage() {
   const fetchCustomers = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin/customers', {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const response = await fetch('/api/admin/customers')
       
       if (response.ok) {
         const data = await response.json()

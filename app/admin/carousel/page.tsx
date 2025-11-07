@@ -24,11 +24,7 @@ export default function FashionCarouselManagementPage() {
 
   const fetchImages = async () => {
     try {
-      const response = await fetch('/api/admin/fashion-carousel', {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const response = await fetch('/api/admin/fashion-carousel')
 
       if (response.ok) {
         const data = await response.json()
@@ -71,7 +67,6 @@ export default function FashionCarouselManagementPage() {
       const response = await fetch('/api/admin/fashion-carousel', {
         method,
         headers: {
-          'Authorization': 'Bearer admin-token-123',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(image)
@@ -110,10 +105,7 @@ export default function FashionCarouselManagementPage() {
     try {
       setSaving(true)
       const response = await fetch(`/api/admin/fashion-carousel?id=${image.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
+        method: 'DELETE'
       })
 
       if (response.ok) {
