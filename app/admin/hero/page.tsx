@@ -11,6 +11,9 @@ interface HeroSlide {
   mediaUrl: string
   mediaType: 'image' | 'video'
   linkUrl: string | null
+  backgroundColor: string
+  textColor: string
+  accentColor: string
   order: number
   isActive: boolean
 }
@@ -28,6 +31,9 @@ export default function HeroManagementPage() {
     mediaUrl: '',
     mediaType: 'image' as 'image' | 'video',
     linkUrl: '',
+    backgroundColor: '#000000',
+    textColor: '#FFFFFF',
+    accentColor: '#ff5b00',
     order: 0,
     isActive: true
   })
@@ -128,6 +134,9 @@ export default function HeroManagementPage() {
       mediaUrl: slide.mediaUrl,
       mediaType: slide.mediaType,
       linkUrl: slide.linkUrl || '',
+      backgroundColor: slide.backgroundColor || '#000000',
+      textColor: slide.textColor || '#FFFFFF',
+      accentColor: slide.accentColor || '#ff5b00',
       order: slide.order,
       isActive: slide.isActive
     })
@@ -174,6 +183,9 @@ export default function HeroManagementPage() {
       mediaUrl: '',
       mediaType: 'image',
       linkUrl: '',
+      backgroundColor: '#000000',
+      textColor: '#FFFFFF',
+      accentColor: '#ff5b00',
       order: 0,
       isActive: true
     })
@@ -351,6 +363,87 @@ export default function HeroManagementPage() {
             />
           </div>
 
+          {/* Theme Colors Section */}
+          <div className="border-t pt-4">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Theme Colors</h3>
+            <p className="text-sm text-gray-600 mb-4">Set the background and text colors for the left side of the hero section when this slide is active.</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Background Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={formData.backgroundColor}
+                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                    className="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.backgroundColor}
+                    onChange={(e) => setFormData({ ...formData, backgroundColor: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                    placeholder="#000000"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Text Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={formData.textColor}
+                    onChange={(e) => setFormData({ ...formData, textColor: e.target.value })}
+                    className="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.textColor}
+                    onChange={(e) => setFormData({ ...formData, textColor: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                    placeholder="#FFFFFF"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Accent Color
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={formData.accentColor}
+                    onChange={(e) => setFormData({ ...formData, accentColor: e.target.value })}
+                    className="w-16 h-10 border border-gray-300 rounded cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={formData.accentColor}
+                    onChange={(e) => setFormData({ ...formData, accentColor: e.target.value })}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent font-mono text-sm"
+                    placeholder="#ff5b00"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Color Preview */}
+            <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: formData.backgroundColor }}>
+              <p className="text-sm font-medium mb-1" style={{ color: formData.textColor }}>
+                Preview: This is how the hero section will look
+              </p>
+              <p className="text-xs" style={{ color: formData.accentColor }}>
+                Accent color appears in gradients and highlights
+              </p>
+            </div>
+          </div>
+
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
@@ -451,6 +544,34 @@ export default function HeroManagementPage() {
                       🔗 {slide.linkUrl}
                     </p>
                   )}
+
+                  {/* Color Theme Preview */}
+                  <div className="flex gap-2 mb-3">
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">BG:</span>
+                      <div 
+                        className="w-6 h-6 rounded border border-gray-300" 
+                        style={{ backgroundColor: slide.backgroundColor }}
+                        title={slide.backgroundColor}
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">Text:</span>
+                      <div 
+                        className="w-6 h-6 rounded border border-gray-300" 
+                        style={{ backgroundColor: slide.textColor }}
+                        title={slide.textColor}
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-xs text-gray-500">Accent:</span>
+                      <div 
+                        className="w-6 h-6 rounded border border-gray-300" 
+                        style={{ backgroundColor: slide.accentColor }}
+                        title={slide.accentColor}
+                      />
+                    </div>
+                  </div>
 
                   <div className="flex gap-2">
                     <button

@@ -49,7 +49,10 @@ export default function Home() {
             subtitle: slide.subtitle || '',
             image: slide.mediaUrl,
             mediaType: slide.mediaType,
-            linkUrl: slide.linkUrl
+            linkUrl: slide.linkUrl,
+            backgroundColor: slide.backgroundColor || '#000000',
+            textColor: slide.textColor || '#FFFFFF',
+            accentColor: slide.accentColor || '#ff5b00'
           }))
           setHeroSlides(slides)
         }
@@ -62,7 +65,10 @@ export default function Home() {
             title: 'ESSENTIAL TEE',
             subtitle: 'DROP 02',
             image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
-            mediaType: 'image'
+            mediaType: 'image',
+            backgroundColor: '#000000',
+            textColor: '#FFFFFF',
+            accentColor: '#ff5b00'
           }
         ])
       } finally {
@@ -147,17 +153,28 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden bg-black"
       >
         <div className="flex flex-col lg:flex-row h-screen">
-          {/* Top/Left Side - Bold Statement */}
+          {/* Top/Left Side - Bold Statement - Dynamic Colors */}
           <motion.div 
-            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 bg-black text-white overflow-hidden h-1/2 lg:h-full lg:w-1/2"
+            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2 transition-colors duration-800"
+            style={{
+              backgroundColor: heroSlides[currentSlide]?.backgroundColor || '#000000',
+              color: heroSlides[currentSlide]?.textColor || '#FFFFFF'
+            }}
           >
-            {/* Simplified Gradient Background - No animation for performance */}
-            <div 
-              className="absolute inset-0 opacity-20"
-              style={{
-                background: 'radial-gradient(circle at 40% 50%, rgba(255,91,0,0.25) 0%, transparent 60%)'
-              }}
-            />
+            {/* Simplified Gradient Background - Dynamic accent color */}
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={`bg-${currentSlide}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.20 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(circle at 40% 50%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 60%)`
+                }}
+              />
+            </AnimatePresence>
 
             {/* Year Badge */}
             <motion.div
@@ -168,26 +185,41 @@ export default function Home() {
             >
               <div className="inline-flex items-center space-x-2 lg:space-x-3 border border-white/20 rounded-full px-4 lg:px-6 py-2 lg:py-3 backdrop-blur-sm">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-500 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500" />
+                  <span 
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                    style={{ backgroundColor: heroSlides[currentSlide]?.accentColor || '#ff5b00' }}
+                  />
+                  <span 
+                    className="relative inline-flex rounded-full h-2 w-2"
+                    style={{ backgroundColor: heroSlides[currentSlide]?.accentColor || '#ff5b00' }}
+                  />
                 </span>
                 <span className="text-[10px] lg:text-xs font-medium tracking-[0.2em] uppercase">Winter 2025</span>
               </div>
             </motion.div>
 
             {/* Main Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95]"
-            >
-              <span className="block font-light">Redefining</span>
-              <span className="block font-serif italic bg-gradient-to-r from-white via-orange-200 to-white bg-clip-text text-transparent" 
-                    style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
-                Elegance
-              </span>
-            </motion.h1>
+            <AnimatePresence mode="wait">
+              <motion.h1
+                key={`headline-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95]"
+              >
+                <span className="block font-light">Redefining</span>
+                <span 
+                  className="block font-serif italic bg-clip-text text-transparent transition-all duration-800" 
+                  style={{ 
+                    fontFamily: 'Playfair Display, Georgia, serif',
+                    backgroundImage: `linear-gradient(to right, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'}, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}80, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'})`
+                  }}
+                >
+                  Elegance
+                </span>
+              </motion.h1>
+            </AnimatePresence>
 
             {/* Subtitle */}
             <motion.p
@@ -209,14 +241,26 @@ export default function Home() {
             >
               <Link
                 href="/products"
-                className="group relative px-6 lg:px-10 py-2.5 lg:py-4 bg-white text-black overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(255,91,0,0.3)]"
+                className="group relative px-6 lg:px-10 py-2.5 lg:py-4 bg-white text-black overflow-hidden transition-all duration-300"
+                style={{
+                  boxShadow: `0 0 0 rgba(0,0,0,0)`
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 10px 40px ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50`
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 0 rgba(0,0,0,0)'
+                }}
               >
                 <span className="relative z-10 text-[10px] lg:text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
                   Explore Collection
                   <span>→</span>
                 </span>
                 <div
-                  className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}CC)`
+                  }}
                 />
               </Link>
 
