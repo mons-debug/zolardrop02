@@ -58,38 +58,6 @@ export default function SweatshirtsPage() {
     fetchProducts()
   }, [])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  }
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        delay: i * 0.1,
-        ease: [0.4, 0, 0.2, 1],
-      },
-    }),
-  }
-
-  const headerVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-    },
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -114,19 +82,26 @@ export default function SweatshirtsPage() {
       <section className="pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={headerVariants}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <motion.div variants={headerVariants} className="mb-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="mb-6"
+            >
               <span className="text-xs font-normal uppercase tracking-widest text-gray-500">
                 Drop 02 Collection
               </span>
             </motion.div>
 
             <motion.h1
-              variants={headerVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
               className="text-4xl md:text-6xl font-light tracking-tight text-black mb-6"
               style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
             >
@@ -134,7 +109,9 @@ export default function SweatshirtsPage() {
             </motion.h1>
 
             <motion.p
-              variants={headerVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
               className="text-sm md:text-base text-gray-600 leading-relaxed font-light"
             >
               Premium sweatshirts crafted for comfort and style. Discover our exclusive collection.
@@ -194,24 +171,22 @@ export default function SweatshirtsPage() {
               </Link>
             </motion.div>
           ) : (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {products.map((product, index) => (
                 <motion.div
                   key={product.id}
-                  custom={index}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: [0.4, 0, 0.2, 1]
+                  }}
                 >
                   <ProductCard product={product} />
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
