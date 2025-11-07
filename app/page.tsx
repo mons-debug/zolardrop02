@@ -14,6 +14,7 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [products, setProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   // Fetch real products from database
   useEffect(() => {
@@ -456,13 +457,28 @@ export default function Home() {
                         <div className="bg-white overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
                           {/* Product Image */}
                           <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-gray-900">
-                            <Image
-                              src={mainImage}
-                              alt={product.title}
-                              fill
-                              className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                            />
+                            {imageErrors[product.id] ? (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                <div className="text-center p-4">
+                                  <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
+                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                  </div>
+                                  <span className="text-gray-400 text-xs">{product.title}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <Image
+                                src={mainImage}
+                                alt={product.title}
+                                fill
+                                className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                                onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
+                                unoptimized
+                              />
+                            )}
                             {/* Gradient Overlay on Hover */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                             
@@ -591,13 +607,28 @@ export default function Home() {
                           <Link href={`/product/${product.sku}`}>
                             <div className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer">
                               <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-                                <Image
-                                  src={mainImage}
-                                  alt={product.title}
-                                  fill
-                                  className="object-cover transition-all duration-500 group-hover:scale-105"
-                                  sizes="300px"
-                                />
+                                {imageErrors[product.id] ? (
+                                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <div className="text-center p-4">
+                                      <div className="w-12 h-12 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                      </div>
+                                      <span className="text-gray-400 text-xs">{product.title}</span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <Image
+                                    src={mainImage}
+                                    alt={product.title}
+                                    fill
+                                    className="object-cover transition-all duration-500 group-hover:scale-105"
+                                    sizes="300px"
+                                    onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
+                                    unoptimized
+                                  />
+                                )}
                                 {/* Glass Shine Effect */}
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                   <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
