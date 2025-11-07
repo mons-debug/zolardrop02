@@ -40,7 +40,10 @@ export default function Home() {
   useEffect(() => {
     const fetchHeroSlides = async () => {
       try {
-        const res = await fetch('/api/hero-slides')
+        // Add cache busting to get fresh data
+        const res = await fetch(`/api/hero-slides?t=${Date.now()}`, {
+          cache: 'no-store'
+        })
         if (res.ok) {
           const data = await res.json()
           const slides = (data.slides || []).map((slide: any) => ({
@@ -54,6 +57,7 @@ export default function Home() {
             textColor: slide.textColor || '#FFFFFF',
             accentColor: slide.accentColor || '#ff5b00'
           }))
+          console.log('Loaded hero slides:', slides) // Debug log
           setHeroSlides(slides)
         }
       } catch (error) {
@@ -161,19 +165,70 @@ export default function Home() {
               color: heroSlides[currentSlide]?.textColor || '#FFFFFF'
             }}
           >
-            {/* Simplified Gradient Background - Dynamic accent color */}
+            {/* Multi-layered Background Effects */}
             <AnimatePresence mode="wait">
               <motion.div 
                 key={`bg-${currentSlide}`}
                 initial={{ opacity: 0 }}
-                animate={{ opacity: 0.20 }}
+                animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8 }}
                 className="absolute inset-0"
-                style={{
-                  background: `radial-gradient(circle at 40% 50%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 60%)`
-                }}
-              />
+              >
+                {/* Radial gradient orb */}
+                <div 
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    background: `radial-gradient(circle at 30% 40%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}60 0%, transparent 50%)`
+                  }}
+                />
+                
+                {/* Diagonal gradient overlay */}
+                <div 
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: `linear-gradient(135deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 60%)`
+                  }}
+                />
+                
+                {/* Noise texture overlay */}
+                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: '200px 200px'
+                  }}
+                />
+                
+                {/* Animated mesh gradient */}
+                <motion.div 
+                  className="absolute inset-0 opacity-10"
+                  animate={{
+                    backgroundPosition: ['0% 0%', '100% 100%']
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                    ease: 'linear'
+                  }}
+                  style={{
+                    background: `radial-gradient(at 80% 20%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 50%),
+                                radial-gradient(at 20% 80%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}30 0%, transparent 50%)`,
+                    backgroundSize: '400% 400%'
+                  }}
+                />
+                
+                {/* Subtle grid pattern */}
+                <div 
+                  className="absolute inset-0 opacity-[0.02]"
+                  style={{
+                    backgroundImage: `linear-gradient(${heroSlides[currentSlide]?.accentColor || '#ff5b00'} 1px, transparent 1px),
+                                     linear-gradient(90deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'} 1px, transparent 1px)`,
+                    backgroundSize: '80px 80px'
+                  }}
+                />
+              </motion.div>
             </AnimatePresence>
 
             {/* Year Badge */}
@@ -198,7 +253,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Main Headline */}
+            {/* Main Headline - Dynamic Product Name */}
             <AnimatePresence mode="wait">
               <motion.h1
                 key={`headline-${currentSlide}`}
@@ -208,7 +263,9 @@ export default function Home() {
                 transition={{ duration: 0.6 }}
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95]"
               >
-                <span className="block font-light">Redefining</span>
+                <span className="block font-light text-sm lg:text-base mb-2 lg:mb-3 uppercase tracking-widest opacity-80">
+                  {heroSlides[currentSlide]?.subtitle || 'DROP 02'}
+                </span>
                 <span 
                   className="block font-serif italic bg-clip-text text-transparent transition-all duration-800" 
                   style={{ 
@@ -216,21 +273,29 @@ export default function Home() {
                     backgroundImage: `linear-gradient(to right, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'}, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}80, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'})`
                   }}
                 >
-                  Elegance
+                  {heroSlides[currentSlide]?.title || 'Elegance'}
                 </span>
               </motion.h1>
             </AnimatePresence>
 
-            {/* Subtitle */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-sm sm:text-base lg:text-xl text-gray-400 mb-4 lg:mb-10 max-w-lg leading-relaxed font-light"
-            >
-              Where timeless craftsmanship meets contemporary design. 
-              Discover the collection that defines modern luxury.
-            </motion.p>
+            {/* Subtitle - Dynamic Description */}
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={`desc-${currentSlide}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.6 }}
+                className="text-sm sm:text-base lg:text-xl mb-4 lg:mb-10 max-w-lg leading-relaxed font-light opacity-90"
+              >
+                {heroSlides[currentSlide]?.title === 'Eclipse Black' && 'Pure darkness meets premium comfort. Where sophistication lives in shadow.'}
+                {heroSlides[currentSlide]?.title === 'Forest Dusk' && 'Nature-inspired tranquility woven into every thread. Embrace the calm.'}
+                {heroSlides[currentSlide]?.title === 'Ocean Deep' && 'Depths of sophisticated style. Dive into timeless elegance.'}
+                {heroSlides[currentSlide]?.title === 'Cloud Mist' && 'Ethereal softness redefined. Float through your day in comfort.'}
+                {!['Eclipse Black', 'Forest Dusk', 'Ocean Deep', 'Cloud Mist'].includes(heroSlides[currentSlide]?.title || '') && 
+                  'Where timeless craftsmanship meets contemporary design. Discover modern luxury.'}
+              </motion.p>
+            </AnimatePresence>
 
             {/* CTA Buttons */}
             <motion.div
