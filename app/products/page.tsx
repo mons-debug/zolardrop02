@@ -80,48 +80,6 @@ export default function ProductsPage() {
     setFilteredProducts(result)
   }, [products, filter, sortBy])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
-      },
-    },
-  }
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] },
-    },
-  }
-
-  const headerVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-    },
-  }
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        delay: i * 0.1,
-        ease: [0.4, 0, 0.2, 1],
-      },
-    }),
-  }
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -270,24 +228,22 @@ export default function ProductsPage() {
               </button>
             </motion.div>
           ) : (
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={containerVariants}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {filteredProducts.map((product, index) => (
                 <motion.div
                   key={product.id}
-                  custom={index}
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.5,
+                    delay: index * 0.1,
+                    ease: [0.4, 0, 0.2, 1]
+                  }}
                 >
                   <ProductCard product={product} />
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
