@@ -20,6 +20,7 @@ async function main() {
       backgroundColor: '#000000',  // Pure black
       textColor: '#FFFFFF',        // White text
       accentColor: '#666666',      // Gray accent
+      duration: 5000,              // 5 seconds
       order: 0,
       isActive: true
     },
@@ -32,6 +33,7 @@ async function main() {
       backgroundColor: '#1a4d2e',  // Deep forest green
       textColor: '#FFFFFF',        // White text
       accentColor: '#10b981',      // Emerald accent
+      duration: 6000,              // 6 seconds
       order: 1,
       isActive: true
     },
@@ -44,6 +46,7 @@ async function main() {
       backgroundColor: '#1e3a8a',  // Deep ocean blue
       textColor: '#FFFFFF',        // White text
       accentColor: '#3b82f6',      // Blue accent
+      duration: 5500,              // 5.5 seconds
       order: 2,
       isActive: true
     },
@@ -56,6 +59,7 @@ async function main() {
       backgroundColor: '#6b7280',  // Gray mist
       textColor: '#FFFFFF',        // White text
       accentColor: '#9ca3af',      // Light gray accent
+      duration: 4500,              // 4.5 seconds
       order: 3,
       isActive: true
     }

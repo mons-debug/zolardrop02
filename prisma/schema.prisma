@@ -125,6 +125,7 @@ model HeroSlide {
   backgroundColor String   @default("#000000") // Hex color for left side background
   textColor       String   @default("#FFFFFF") // Text color for contrast
   accentColor     String   @default("#ff5b00") // Accent color for gradients
+  duration        Int      @default(5000) // Duration in milliseconds (5000 = 5 seconds)
   order           Int      // Display order
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())

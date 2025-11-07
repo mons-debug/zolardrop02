@@ -55,7 +55,8 @@ export default function Home() {
             linkUrl: slide.linkUrl,
             backgroundColor: slide.backgroundColor || '#000000',
             textColor: slide.textColor || '#FFFFFF',
-            accentColor: slide.accentColor || '#ff5b00'
+            accentColor: slide.accentColor || '#ff5b00',
+            duration: slide.duration || 5000
           }))
           console.log('Loaded hero slides:', slides) // Debug log
           setHeroSlides(slides)
@@ -72,7 +73,8 @@ export default function Home() {
             mediaType: 'image',
             backgroundColor: '#000000',
             textColor: '#FFFFFF',
-            accentColor: '#ff5b00'
+            accentColor: '#ff5b00',
+            duration: 5000
           }
         ])
       } finally {
@@ -82,16 +84,19 @@ export default function Home() {
     fetchHeroSlides()
   }, [])
 
-  // Auto-rotate carousel
+  // Auto-rotate carousel with dynamic duration
   useEffect(() => {
     if (heroSlides.length === 0) return
     
-    const timer = setInterval(() => {
+    // Use the current slide's duration
+    const currentDuration = heroSlides[currentSlide]?.duration || 5000
+    
+    const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
-    }, 4000) // Change slide every 4 seconds
+    }, currentDuration)
 
-    return () => clearInterval(timer)
-  }, [heroSlides.length])
+    return () => clearTimeout(timer)
+  }, [heroSlides, currentSlide])
 
   // Color map for variant display
   const colorMap: Record<string, string> = {
@@ -157,18 +162,51 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden bg-black"
       >
         <div className="flex flex-col lg:flex-row h-screen">
-          {/* Top/Left Side - Bold Statement - Dynamic Colors */}
+          {/* Top/Left Side - Bold Statement - Dynamic Background */}
           <motion.div 
-            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2 transition-colors duration-800"
+            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
             style={{
-              backgroundColor: heroSlides[currentSlide]?.backgroundColor || '#000000',
               color: heroSlides[currentSlide]?.textColor || '#FFFFFF'
             }}
           >
-            {/* Multi-layered Background Effects */}
+            {/* Blurred product image background */}
             <AnimatePresence mode="wait">
               <motion.div 
-                key={`bg-${currentSlide}`}
+                key={`bg-img-${currentSlide}`}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1.05 }}
+                exit={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0"
+              >
+                {heroSlides[currentSlide]?.image && (
+                  <Image
+                    src={heroSlides[currentSlide].image}
+                    alt="Background"
+                    fill
+                    className="object-cover"
+                    style={{
+                      filter: 'blur(60px) brightness(0.4)',
+                      transform: 'scale(1.2)'
+                    }}
+                    unoptimized
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Color overlay for tinting */}
+            <div 
+              className="absolute inset-0 opacity-80 transition-colors duration-800"
+              style={{
+                backgroundColor: heroSlides[currentSlide]?.backgroundColor || '#000000'
+              }}
+            />
+
+            {/* Multi-layered Visual Effects */}
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={`effects-${currentSlide}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -177,7 +215,7 @@ export default function Home() {
               >
                 {/* Radial gradient orb */}
                 <div 
-                  className="absolute inset-0 opacity-30"
+                  className="absolute inset-0 opacity-40"
                   style={{
                     background: `radial-gradient(circle at 30% 40%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}60 0%, transparent 50%)`
                   }}
@@ -185,24 +223,15 @@ export default function Home() {
                 
                 {/* Diagonal gradient overlay */}
                 <div 
-                  className="absolute inset-0 opacity-20"
+                  className="absolute inset-0 opacity-25"
                   style={{
-                    background: `linear-gradient(135deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 60%)`
-                  }}
-                />
-                
-                {/* Noise texture overlay */}
-                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'repeat',
-                    backgroundSize: '200px 200px'
+                    background: `linear-gradient(135deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 60%)`
                   }}
                 />
                 
                 {/* Animated mesh gradient */}
                 <motion.div 
-                  className="absolute inset-0 opacity-10"
+                  className="absolute inset-0 opacity-15"
                   animate={{
                     backgroundPosition: ['0% 0%', '100% 100%']
                   }}
@@ -213,19 +242,18 @@ export default function Home() {
                     ease: 'linear'
                   }}
                   style={{
-                    background: `radial-gradient(at 80% 20%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 50%),
-                                radial-gradient(at 20% 80%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}30 0%, transparent 50%)`,
+                    background: `radial-gradient(at 80% 20%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 50%),
+                                radial-gradient(at 20% 80%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 50%)`,
                     backgroundSize: '400% 400%'
                   }}
                 />
                 
-                {/* Subtle grid pattern */}
-                <div 
-                  className="absolute inset-0 opacity-[0.02]"
+                {/* Noise texture overlay */}
+                <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
                   style={{
-                    backgroundImage: `linear-gradient(${heroSlides[currentSlide]?.accentColor || '#ff5b00'} 1px, transparent 1px),
-                                     linear-gradient(90deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'} 1px, transparent 1px)`,
-                    backgroundSize: '80px 80px'
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: '200px 200px'
                   }}
                 />
               </motion.div>
@@ -298,7 +326,7 @@ export default function Home() {
             </AnimatePresence>
 
             {/* CTA Buttons */}
-            <motion.div
+        <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.7 }}
@@ -363,9 +391,9 @@ export default function Home() {
           <div className="relative bg-gray-900 h-1/2 lg:h-full lg:w-1/2">
             {/* Main Feature Image */}
             <div className="absolute inset-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentSlide}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -418,27 +446,27 @@ export default function Home() {
                         <span className="border-b border-black pb-0.5">View Details</span>
                         <span>→</span>
                       </Link>
-          </motion.div>
-        </AnimatePresence>
-                </motion.div>
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
               </AnimatePresence>
             </div>
 
             {/* Slide Navigation - Vertical Right Side */}
             <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-4">
-              {heroSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
                   className={`w-1 h-12 transition-all duration-500 ${
                     index === currentSlide 
                       ? 'bg-white scale-y-150' 
                       : 'bg-white/30 hover:bg-white/50'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
 
         {/* Navigation Arrows */}
         <button
@@ -577,15 +605,15 @@ export default function Home() {
                   const mainImage = productImages[0] || '/placeholder.jpg'
                   
                   return (
-                    <motion.div
-                      key={product.id}
-                      custom={index}
-                      variants={cardVariants}
-                      initial="hidden"
-                      whileInView="visible"
-                      viewport={{ once: true, amount: 0.2 }}
-                      className="group"
-                    >
+                <motion.div
+                  key={product.id}
+                  custom={index}
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
+                  className="group"
+                >
                       <Link href={`/product/${product.sku}`} className="block">
                         <div className="bg-white overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
                           {/* Product Image */}
@@ -602,12 +630,12 @@ export default function Home() {
                                 </div>
                               </div>
                             ) : (
-                              <Image
+                      <Image
                                 src={mainImage}
-                                alt={product.title}
-                                fill
+                        alt={product.title}
+                        fill
                                 className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                                 onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
                                 unoptimized
                               />
@@ -624,10 +652,10 @@ export default function Home() {
                               New
                             </motion.div>
                             
-                            {/* Glass Shine Effect */}
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {/* Glass Shine Effect */}
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-                            </div>
+                      </div>
 
                             {/* Quick View Button */}
                             <motion.div
@@ -639,15 +667,15 @@ export default function Home() {
                                 Quick View
                               </div>
                             </motion.div>
-                          </div>
-                          
+                    </div>
+                    
                           {/* Product Info */}
                           <div className="p-5 sm:p-6 bg-white">
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex-1">
                                 <h3 className="text-base sm:text-lg font-medium text-black mb-1 tracking-wide group-hover:text-orange-500 transition-colors">
-                              {product.title}
-                            </h3>
+                        {product.title}
+                      </h3>
                                 <p className="text-sm text-gray-500 uppercase tracking-wider">Limited Edition</p>
                               </div>
                               <div className="text-right">
@@ -662,7 +690,7 @@ export default function Home() {
                               <div className="flex items-center space-x-2">
                               {product.variants && product.variants.slice(0, 4).map((variant: any, idx: number) => (
                                   <motion.div
-                                  key={idx}
+                            key={idx}
                                     whileHover={{ scale: 1.2 }}
                                     className="relative w-6 h-6 border-2 border-gray-200 transition-all duration-200 hover:border-orange-500 cursor-pointer shadow-sm"
                                   style={{ backgroundColor: colorMap[variant.color] || '#6B7280' }}
@@ -676,7 +704,7 @@ export default function Home() {
                                 {product.variants && product.variants.length > 4 && (
                                   <span className="text-xs text-gray-500">+{product.variants.length - 4}</span>
                                 )}
-                              </div>
+                      </div>
                               
                               <motion.svg
                                 className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors"
@@ -688,11 +716,11 @@ export default function Home() {
                               >
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                               </motion.svg>
-                            </div>
-                          </div>
+                    </div>
+                  </div>
                         </div>
                       </Link>
-                    </motion.div>
+                </motion.div>
                   )
                 })
               )}
@@ -729,17 +757,17 @@ export default function Home() {
                       const mainImage = productImages[0] || '/placeholder.jpg'
                       
                       return (
-                        <motion.div
-                          key={product.id}
-                          className="group min-w-[300px] max-w-[300px] flex-shrink-0 snap-center"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: index * 0.1 }}
-                        >
+                    <motion.div
+                      key={product.id}
+                      className="group min-w-[300px] max-w-[300px] flex-shrink-0 snap-center"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                    >
                           <Link href={`/product/${product.sku}`}>
                             <div className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer">
-                              <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
+                        <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
                                 {imageErrors[product.id] ? (
                                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
                                     <div className="text-center p-4">
@@ -752,44 +780,44 @@ export default function Home() {
                                     </div>
                                   </div>
                                 ) : (
-                                  <Image
+                          <Image
                                     src={mainImage}
-                                    alt={product.title}
-                                    fill
-                                    className="object-cover transition-all duration-500 group-hover:scale-105"
-                                    sizes="300px"
+                            alt={product.title}
+                            fill
+                            className="object-cover transition-all duration-500 group-hover:scale-105"
+                            sizes="300px"
                                     onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
                                     unoptimized
-                                  />
+                          />
                                 )}
-                                {/* Glass Shine Effect */}
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                  <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
-                                </div>
-                              </div>
-                              
-                              <div className="p-4">
-                                <h3 className="text-sm font-normal text-black mb-1 tracking-wide">
-                                  {product.title}
-                                </h3>
-                                <p className="text-sm font-normal text-gray-600 mb-3">
+                          {/* Glass Shine Effect */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+                          </div>
+                        </div>
+                        
+                        <div className="p-4">
+                          <h3 className="text-sm font-normal text-black mb-1 tracking-wide">
+                            {product.title}
+                          </h3>
+                          <p className="text-sm font-normal text-gray-600 mb-3">
                                   ${(product.priceCents / 100).toFixed(2)}
-                                </p>
-                                
-                                <div className="flex items-center space-x-1.5 mb-3">
+                          </p>
+                          
+                          <div className="flex items-center space-x-1.5 mb-3">
                                   {product.variants && product.variants.slice(0, 4).map((variant: any, idx: number) => (
-                                    <div
-                                      key={idx}
-                                      className="w-4 h-4 border border-gray-300 transition-all duration-200 hover:scale-110 cursor-pointer"
+                              <div
+                                key={idx}
+                                className="w-4 h-4 border border-gray-300 transition-all duration-200 hover:scale-110 cursor-pointer"
                                       style={{ backgroundColor: colorMap[variant.color] || '#6B7280' }}
                                       title={variant.color}
-                                    />
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                           </Link>
-                        </motion.div>
+                    </motion.div>
                       )
                     })
                   )}
@@ -798,14 +826,14 @@ export default function Home() {
 
               {/* Scroll Indicator Dots */}
               {!productsLoading && products.length > 0 && (
-                <div className="flex justify-center gap-2 mt-6">
+              <div className="flex justify-center gap-2 mt-6">
                   {products.map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300"
-                    />
-                  ))}
-                </div>
+                  <div
+                    key={idx}
+                    className="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300"
+                  />
+                ))}
+              </div>
               )}
             </motion.div>
           </div>

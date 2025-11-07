@@ -14,6 +14,7 @@ interface HeroSlide {
   backgroundColor: string
   textColor: string
   accentColor: string
+  duration: number
   order: number
   isActive: boolean
 }
@@ -34,6 +35,7 @@ export default function HeroManagementPage() {
     backgroundColor: '#000000',
     textColor: '#FFFFFF',
     accentColor: '#ff5b00',
+    duration: 5000,
     order: 0,
     isActive: true
   })
@@ -137,6 +139,7 @@ export default function HeroManagementPage() {
       backgroundColor: slide.backgroundColor || '#000000',
       textColor: slide.textColor || '#FFFFFF',
       accentColor: slide.accentColor || '#ff5b00',
+      duration: slide.duration || 5000,
       order: slide.order,
       isActive: slide.isActive
     })
@@ -186,6 +189,7 @@ export default function HeroManagementPage() {
       backgroundColor: '#000000',
       textColor: '#FFFFFF',
       accentColor: '#ff5b00',
+      duration: 5000,
       order: 0,
       isActive: true
     })
@@ -361,6 +365,37 @@ export default function HeroManagementPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               placeholder="https://example.com/product"
             />
+          </div>
+
+          {/* Slide Duration */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Slide Duration (seconds)
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="2"
+                max="15"
+                step="0.5"
+                value={formData.duration / 1000}
+                onChange={(e) => setFormData({ ...formData, duration: parseFloat(e.target.value) * 1000 })}
+                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+              />
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  min="2"
+                  max="15"
+                  step="0.5"
+                  value={formData.duration / 1000}
+                  onChange={(e) => setFormData({ ...formData, duration: parseFloat(e.target.value) * 1000 })}
+                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center font-medium"
+                />
+                <span className="text-sm text-gray-600">sec</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">How long this slide displays before transitioning to the next (2-15 seconds)</p>
           </div>
 
           {/* Theme Colors Section */}
@@ -545,31 +580,41 @@ export default function HeroManagementPage() {
                     </p>
                   )}
 
-                  {/* Color Theme Preview */}
-                  <div className="flex gap-2 mb-3">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">BG:</span>
-                      <div 
-                        className="w-6 h-6 rounded border border-gray-300" 
-                        style={{ backgroundColor: slide.backgroundColor }}
-                        title={slide.backgroundColor}
-                      />
+                  {/* Duration and Color Theme Preview */}
+                  <div className="mb-3 space-y-2">
+                    <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 px-2 py-1 rounded">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-medium">{(slide.duration / 1000).toFixed(1)}s</span>
+                      <span className="text-gray-400">duration</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">Text:</span>
-                      <div 
-                        className="w-6 h-6 rounded border border-gray-300" 
-                        style={{ backgroundColor: slide.textColor }}
-                        title={slide.textColor}
-                      />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs text-gray-500">Accent:</span>
-                      <div 
-                        className="w-6 h-6 rounded border border-gray-300" 
-                        style={{ backgroundColor: slide.accentColor }}
-                        title={slide.accentColor}
-                      />
+                    
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">BG:</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300" 
+                          style={{ backgroundColor: slide.backgroundColor }}
+                          title={slide.backgroundColor}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">Text:</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300" 
+                          style={{ backgroundColor: slide.textColor }}
+                          title={slide.textColor}
+                        />
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs text-gray-500">Accent:</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-gray-300" 
+                          style={{ backgroundColor: slide.accentColor }}
+                          title={slide.accentColor}
+                        />
+                      </div>
                     </div>
                   </div>
 

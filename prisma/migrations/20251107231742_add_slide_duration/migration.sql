@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "HeroSlide" ADD COLUMN     "duration" INTEGER NOT NULL DEFAULT 5000;

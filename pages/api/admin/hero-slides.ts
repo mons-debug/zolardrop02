@@ -20,7 +20,7 @@ export default async function handler(
     }
 
     if (req.method === 'POST') {
-      const { title, subtitle, mediaUrl, mediaType, linkUrl, order, isActive, backgroundColor, textColor, accentColor } = req.body
+      const { title, subtitle, mediaUrl, mediaType, linkUrl, order, isActive, backgroundColor, textColor, accentColor, duration } = req.body
 
       if (!title || !mediaUrl) {
         return res.status(400).json({ message: 'Title and media URL are required' })
@@ -45,6 +45,7 @@ export default async function handler(
           backgroundColor: backgroundColor || '#000000',
           textColor: textColor || '#FFFFFF',
           accentColor: accentColor || '#ff5b00',
+          duration: duration || 5000,
           order: slideOrder,
           isActive: isActive !== undefined ? isActive : true
         }
@@ -54,7 +55,7 @@ export default async function handler(
     }
 
     if (req.method === 'PATCH') {
-      const { id, title, subtitle, mediaUrl, mediaType, linkUrl, order, isActive, backgroundColor, textColor, accentColor } = req.body
+      const { id, title, subtitle, mediaUrl, mediaType, linkUrl, order, isActive, backgroundColor, textColor, accentColor, duration } = req.body
 
       if (!id) {
         return res.status(400).json({ message: 'Slide ID is required' })
@@ -71,6 +72,7 @@ export default async function handler(
           ...(backgroundColor !== undefined && { backgroundColor }),
           ...(textColor !== undefined && { textColor }),
           ...(accentColor !== undefined && { accentColor }),
+          ...(duration !== undefined && { duration }),
           ...(order !== undefined && { order }),
           ...(isActive !== undefined && { isActive })
         }
