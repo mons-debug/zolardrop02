@@ -66,9 +66,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
       title: 'SHOP',
       links: [
         { href: '/products', label: 'ALL PRODUCTS' },
-        { href: '/category/woman', label: 'WOMAN' },
-        { href: '/category/man', label: 'MAN' },
-        { href: '/category/kids', label: 'KIDS' },
+        { href: '/category/sweatshirts', label: 'SWEATSHIRTS' },
       ],
     },
     {
@@ -177,7 +175,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
                 </span>
               </Link>
               <Link
-                href="/category/woman"
+                href="/category/sweatshirts"
                 className="group relative px-6 py-2.5"
               >
                 <span 
@@ -186,20 +184,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
                   }`}
                   style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
                 >
-                  WOMAN
-                </span>
-              </Link>
-              <Link
-                href="/category/man"
-                className="group relative px-6 py-2.5"
-              >
-                <span 
-                  className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
-                    isScrolled ? 'text-black' : 'text-white'
-                  }`}
-                  style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
-                >
-                  MAN
+                  SWEATSHIRTS
                 </span>
               </Link>
               <Link

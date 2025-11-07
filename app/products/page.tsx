@@ -26,20 +26,24 @@ interface Product {
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState<'all' | 'sweatshirts'>('all')
+  const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high' | 'name'>('default')
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true)
         const res = await fetch('/api/products', {
-    cache: 'no-store'
-  })
+          cache: 'no-store'
+        })
 
         if (res.ok) {
-  const data = await res.json()
+          const data = await res.json()
           setProducts(data.products || [])
-}
+          setFilteredProducts(data.products || [])
+        }
       } catch (error) {
         console.error('Error fetching products:', error)
       } finally {
@@ -49,6 +53,31 @@ export default function ProductsPage() {
 
     fetchProducts()
   }, [])
+
+  // Apply filters
+  useEffect(() => {
+    let result = [...products]
+
+    // Filter by category
+    if (filter === 'sweatshirts') {
+      result = result.filter(p => 
+        p.title.toLowerCase().includes('sweatshirt') ||
+        p.category?.toLowerCase() === 'sweatshirts' ||
+        p.category?.toLowerCase() === 'sweatshirt'
+      )
+    }
+
+    // Sort products
+    if (sortBy === 'price-low') {
+      result.sort((a, b) => a.priceCents - b.priceCents)
+    } else if (sortBy === 'price-high') {
+      result.sort((a, b) => b.priceCents - a.priceCents)
+    } else if (sortBy === 'name') {
+      result.sort((a, b) => a.title.localeCompare(b.title))
+    }
+
+    setFilteredProducts(result)
+  }, [products, filter, sortBy])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -123,6 +152,64 @@ export default function ProductsPage() {
             >
               Discover our exclusive collection, carefully curated for those who appreciate quality and unique design.
             </motion.p>
+
+            {/* Filter and Sort Controls */}
+            {!loading && (
+              <motion.div
+                variants={itemVariants}
+                className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
+              >
+                {/* Filter Buttons */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs uppercase tracking-wider text-gray-500 mr-2">Filter:</span>
+                  <button
+                    onClick={() => setFilter('all')}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
+                      filter === 'all'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setFilter('sweatshirts')}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
+                      filter === 'sweatshirts'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Sweatshirts
+                  </button>
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs uppercase tracking-wider text-gray-500">Sort:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className="px-4 py-2 text-xs uppercase tracking-wider bg-gray-100 text-gray-600 border-none focus:outline-none focus:ring-2 focus:ring-black cursor-pointer"
+                  >
+                    <option value="default">Default</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                    <option value="name">Name: A-Z</option>
+                  </select>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Results Count */}
+            {!loading && (
+              <motion.div
+                variants={itemVariants}
+                className="mt-6 text-sm text-gray-500"
+              >
+                Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -138,7 +225,7 @@ export default function ProductsPage() {
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
               <p className="text-gray-600">Loading products...</p>
             </div>
-          ) : products.length === 0 ? (
+          ) : filteredProducts.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -157,7 +244,16 @@ export default function ProductsPage() {
                   d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
                 />
               </svg>
-              <p className="text-gray-600 text-sm">No products available at the moment</p>
+              <p className="text-gray-600 text-sm mb-4">No products match your filters</p>
+              <button
+                onClick={() => {
+                  setFilter('all')
+                  setSortBy('default')
+                }}
+                className="inline-block px-6 py-3 bg-black text-white text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors"
+              >
+                Clear Filters
+              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -166,7 +262,7 @@ export default function ProductsPage() {
               variants={containerVariants}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
-              {products.map((product, index) => (
+              {filteredProducts.map((product, index) => (
                 <motion.div
                   key={product.id}
                   custom={index}
