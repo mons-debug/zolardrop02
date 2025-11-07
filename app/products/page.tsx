@@ -36,7 +36,7 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true)
-        const res = await fetch('/api/products', {
+        const res = await fetch('/api/products?limit=100', {
           cache: 'no-store'
         })
 

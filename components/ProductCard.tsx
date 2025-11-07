@@ -52,10 +52,24 @@ const colorMap: Record<string, string> = {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [selectedVariant, setSelectedVariant] = useState(product.variants[0])
+  const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageError, setImageError] = useState(false)
   const { addItem } = useCart()
+
+  // Safety check: ensure product has variants
+  if (!product.variants || product.variants.length === 0 || !selectedVariant) {
+    return (
+      <div className="group h-full flex flex-col">
+        <div className="bg-white border border-gray-200 p-8 text-center">
+          <div className="w-full h-full flex items-center justify-center bg-gray-100 aspect-[3/4] mb-4">
+            <span className="text-gray-400 text-sm">No variants available</span>
+          </div>
+          <p className="text-sm text-gray-600">{product.title}</p>
+        </div>
+      </div>
+    )
+  }
 
   // Safely parse images with error handling
   const parseImages = (imageString: string): string[] => {
