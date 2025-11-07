@@ -48,28 +48,6 @@ const colorMap: Record<string, string> = {
   'Forest Green': 'bg-green-800'
 }
 
-async function getProduct(slug: string): Promise<Product | null> {
-  try {
-    const baseUrl = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : process.env.NODE_ENV === 'production'
-      ? 'https://your-domain.com'
-      : 'http://localhost:3000'
-
-    const res = await fetch(`${baseUrl}/api/products/${slug}`)
-
-    if (!res.ok) {
-      return null
-    }
-
-    const data = await res.json()
-    return data.product
-  } catch (error) {
-    console.error('Error fetching product:', error)
-    return null
-  }
-}
-
 export default function ProductPage() {
   const params = useParams()
   const slug = params?.slug as string
@@ -82,13 +60,26 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (slug) {
-      getProduct(slug).then((data) => {
-        setProduct(data)
-        if (data && data.variants && data.variants.length > 0) {
-          setSelectedVariant(data.variants[0])
-        }
-        setLoading(false)
-      })
+      // Fetch product directly in the browser
+      fetch(`/api/products/${slug}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error('Product not found')
+          }
+          return res.json()
+        })
+        .then(data => {
+          setProduct(data.product)
+          if (data.product && data.product.variants && data.product.variants.length > 0) {
+            setSelectedVariant(data.product.variants[0])
+          }
+          setLoading(false)
+        })
+        .catch(error => {
+          console.error('Error fetching product:', error)
+          setProduct(null)
+          setLoading(false)
+        })
     }
   }, [slug])
 
@@ -113,9 +104,20 @@ export default function ProductPage() {
     )
   }
 
-  const productImages = JSON.parse(product.images) as string[]
-  const variantImages = selectedVariant ? JSON.parse(selectedVariant.images) as string[] : []
-  const allImages = [...variantImages, ...productImages] // Show variant images first
+  // Safely parse images with error handling
+  const parseImages = (imageString: string): string[] => {
+    try {
+      if (!imageString) return []
+      const parsed = JSON.parse(imageString)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+
+  const productImages = parseImages(product.images)
+  const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
+  const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
 
   // Change image when variant changes
   const handleVariantChange = (variant: any) => {
@@ -130,13 +132,17 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     if (!selectedVariant || !product) return
 
+    const variantImgs = parseImages(selectedVariant.images)
+    const productImgs = parseImages(product.images)
+    const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
+
     addItem({
       productId: product.id,
       variantId: selectedVariant.id,
       qty: 1,
       priceCents: selectedVariant.priceCents,
       title: product.title,
-      image: JSON.parse(selectedVariant.images)[0],
+      image: firstImage,
       variantName: selectedVariant.color
     })
   }
@@ -157,12 +163,18 @@ export default function ProductPage() {
           {/* Image Gallery */}
           <div className="space-y-3">
             <div className="aspect-[3/4] relative bg-gray-50 overflow-hidden">
-              <Image
-                src={allImages[currentImageIndex]}
-                alt={product.title}
-                fill
-                className="object-cover"
-              />
+              {allImages.length > 0 ? (
+                <Image
+                  src={allImages[currentImageIndex]}
+                  alt={product.title}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <span className="text-gray-400">No Image Available</span>
+                </div>
+              )}
 
               {/* Image indicators */}
               {allImages.length > 1 && (

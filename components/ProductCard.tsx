@@ -55,9 +55,20 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const { addItem } = useCart()
 
-  const productImages = JSON.parse(product.images) as string[]
-  const variantImages = selectedVariant ? JSON.parse(selectedVariant.images) as string[] : []
-  const allImages = [...variantImages, ...productImages] // Show variant images first
+  // Safely parse images with error handling
+  const parseImages = (imageString: string): string[] => {
+    try {
+      if (!imageString) return []
+      const parsed = JSON.parse(imageString)
+      return Array.isArray(parsed) ? parsed : []
+    } catch {
+      return []
+    }
+  }
+
+  const productImages = parseImages(product.images)
+  const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
+  const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
 
   // Change image when variant changes
   const handleVariantChange = (variant: typeof selectedVariant) => {
@@ -72,13 +83,17 @@ export default function ProductCard({ product }: ProductCardProps) {
   const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
 
   const handleAddToCart = () => {
+    const variantImgs = parseImages(selectedVariant.images)
+    const productImgs = parseImages(product.images)
+    const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
+    
     addItem({
       productId: product.id,
       variantId: selectedVariant.id,
       qty: 1,
       priceCents: selectedVariant.priceCents,
       title: product.title,
-      image: JSON.parse(selectedVariant.images)[0],
+      image: firstImage,
       variantName: selectedVariant.color
     })
   }
@@ -88,13 +103,19 @@ export default function ProductCard({ product }: ProductCardProps) {
       <Link href={`/product/${product.sku}`} className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
         {/* Image Section */}
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
-          <Image
-            src={allImages[currentImageIndex]}
-            alt={product.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
+          {allImages.length > 0 ? (
+            <Image
+              src={allImages[currentImageIndex]}
+              alt={product.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-gray-400 text-sm">No Image</span>
+            </div>
+          )}
 
           {/* Image Indicators */}
           {allImages.length > 1 && (
