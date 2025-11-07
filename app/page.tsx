@@ -155,6 +155,15 @@ export default function Home() {
     }),
   }
 
+  // Show loading if no slides yet
+  if (heroLoading || heroSlides.length === 0) {
+    return (
+      <div className="bg-black h-screen w-full flex items-center justify-center">
+        <div className="text-white text-2xl">Loading...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-white">
       {/* Hero Section - Award-Winning Split Design */}
