@@ -93,8 +93,7 @@ export default function NewProductPage() {
       const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           title,

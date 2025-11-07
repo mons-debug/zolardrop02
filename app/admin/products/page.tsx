@@ -58,10 +58,7 @@ export default function AdminProductsPage() {
       setDeleting(productId)
       
       const response = await fetch(`/api/admin/products/${productId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
-        }
+        method: 'DELETE'
       })
 
       if (response.ok) {

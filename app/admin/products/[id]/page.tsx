@@ -158,8 +158,7 @@ export default function EditProductPage() {
       const response = await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           title,

@@ -1,13 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
-
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admin-token-123'
-
-function isAdmin(req: NextApiRequest): boolean {
-  const token = req.headers.authorization?.replace('Bearer ', '') ||
-                req.headers['x-admin-token'] as string
-  return token === ADMIN_TOKEN
-}
+import { requireAdmin } from '@/lib/auth'
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,8 +10,10 @@ export default async function handler(
     return res.status(405).json({ message: 'Method not allowed' })
   }
 
-  if (!isAdmin(req)) {
-    return res.status(401).json({ message: 'Unauthorized' })
+  // Check authentication
+  const user = await requireAdmin(req, res)
+  if (!user) {
+    return // requireAdmin already sent the error response
   }
 
   try {

@@ -1,16 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Simple auth check
-  const authHeader = req.headers.authorization
-  const token = authHeader?.replace('Bearer ', '')
-  
-  if (token !== process.env.ADMIN_TOKEN && token !== 'admin-token-123') {
-    return res.status(401).json({ message: 'Unauthorized' })
+  // Check authentication
+  const user = await requireAdmin(req, res)
+  if (!user) {
+    return // requireAdmin already sent the error response
   }
 
   if (req.method === 'GET') {

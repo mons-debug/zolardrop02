@@ -46,11 +46,7 @@ export default function CustomerProfilePage() {
   const fetchCustomer = async (id: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/admin/customers/${id}`, {
-        headers: {
-          'Authorization': 'Bearer admin-token-123'
-        }
-      })
+      const response = await fetch(`/api/admin/customers/${id}`)
 
       if (response.ok) {
         const data = await response.json()
@@ -74,7 +70,6 @@ export default function CustomerProfilePage() {
       const response = await fetch(`/api/admin/customers/${customer.id}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': 'Bearer admin-token-123',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(updates)
