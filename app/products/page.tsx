@@ -157,7 +157,9 @@ export default function ProductsPage() {
             {/* Filter and Sort Controls */}
             {!loading && (
               <motion.div
-                variants={itemVariants}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
                 className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 {/* Filter Buttons */}
@@ -205,7 +207,9 @@ export default function ProductsPage() {
             {/* Results Count */}
             {!loading && (
               <motion.div
-                variants={itemVariants}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
                 className="mt-6 text-sm text-gray-500"
               >
                 Showing {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
