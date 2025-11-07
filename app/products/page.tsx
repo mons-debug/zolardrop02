@@ -128,19 +128,26 @@ export default function ProductsPage() {
       <section className="pt-24 pb-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={headerVariants}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto"
           >
-            <motion.div variants={itemVariants} className="mb-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="mb-6"
+            >
               <span className="text-xs font-normal uppercase tracking-widest text-gray-500">
                 Drop 02
               </span>
             </motion.div>
 
             <motion.h1
-              variants={itemVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
               className="text-4xl md:text-6xl font-light tracking-tight text-black mb-6"
               style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
             >
@@ -148,7 +155,9 @@ export default function ProductsPage() {
             </motion.h1>
 
             <motion.p
-              variants={itemVariants}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
               className="text-sm md:text-base text-gray-600 leading-relaxed font-light"
             >
               Discover our exclusive collection, carefully curated for those who appreciate quality and unique design.
