@@ -135,7 +135,34 @@ export default function EditProductPage() {
     setShowVariantForm(false)
   }
 
-  const removeVariant = (index: number) => {
+  const removeVariant = async (index: number) => {
+    const variant = variants[index]
+    
+    // If variant has an ID, it exists in database - delete it
+    if (variant.id) {
+      if (!confirm(`Are you sure you want to delete the ${variant.color} variant?`)) {
+        return
+      }
+      
+      try {
+        // Delete from database via API
+        const response = await fetch(`/api/admin/variants/${variant.id}`, {
+          method: 'DELETE'
+        })
+        
+        if (!response.ok) {
+          throw new Error('Failed to delete variant')
+        }
+        
+        alert('Variant deleted successfully')
+      } catch (error) {
+        console.error('Error deleting variant:', error)
+        alert('Failed to delete variant')
+        return
+      }
+    }
+    
+    // Remove from local state
     setVariants(variants.filter((_, i) => i !== index))
   }
 
