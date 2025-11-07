@@ -64,6 +64,21 @@ export default function HeroManagementPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      e.target.value = ''
+      return
+    }
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime']
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image (JPG, PNG, GIF, WebP) or video (MP4, MOV) file')
+      e.target.value = ''
+      return
+    }
+
     const formData = new FormData()
     formData.append('file', file)
 
@@ -75,8 +90,9 @@ export default function HeroManagementPage() {
         body: formData
       })
 
-      if (res.ok) {
-        const data = await res.json()
+      const data = await res.json()
+      
+      if (res.ok && data.url) {
         setFormData(prev => ({ ...prev, mediaUrl: data.url }))
         
         // Auto-detect media type from file
@@ -85,14 +101,19 @@ export default function HeroManagementPage() {
         } else {
           setFormData(prev => ({ ...prev, mediaType: 'image' }))
         }
+        
+        console.log('Upload successful:', data.url)
       } else {
-        alert('Upload failed')
+        const errorMsg = data.message || data.error || 'Upload failed'
+        alert(`Upload failed: ${errorMsg}`)
+        console.error('Upload failed:', data)
       }
     } catch (error) {
       console.error('Error uploading:', error)
-      alert('Upload error')
+      alert('Upload error: ' + (error instanceof Error ? error.message : 'Network error'))
     } finally {
       setUploading(false)
+      e.target.value = '' // Reset file input
     }
   }
 

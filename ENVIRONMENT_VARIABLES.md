@@ -39,6 +39,14 @@ NEXT_PUBLIC_VAPID_PUBLIC_KEY="your-vapid-public-key"
 - Generate with: `npx web-push generate-vapid-keys`
 - Not required for basic browser notifications (Web Notification API works without VAPID)
 
+### Vercel Blob Storage (Image/Video Upload)
+```env
+BLOB_READ_WRITE_TOKEN="your-vercel-blob-token"
+```
+- Required for image/video uploads (products, hero carousel, archive)
+- Get from [Vercel Dashboard](https://vercel.com/dashboard) → Your Project → Storage → Blob → Create Store
+- After creating a Blob store, copy the token to `.env` and Vercel environment variables
+
 ## Optional Variables
 
 ### Google Analytics 4

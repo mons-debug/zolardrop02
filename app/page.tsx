@@ -155,15 +155,6 @@ export default function Home() {
     }),
   }
 
-  // Show loading if no slides yet
-  if (heroLoading || heroSlides.length === 0) {
-    return (
-      <div className="bg-black h-screen w-full flex items-center justify-center">
-        <div className="text-white text-2xl">Loading...</div>
-      </div>
-    )
-  }
-
   return (
     <div className="bg-white">
       {/* Hero Section - Award-Winning Split Design */}
@@ -171,85 +162,102 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden bg-black"
       >
         <div className="flex flex-col lg:flex-row h-screen">
-          {/* Top/Left Side - Consistent Elegant Background */}
+          {/* Top/Left Side - Bold Statement - Dynamic Background */}
           <motion.div 
-            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2 bg-black text-white"
+            className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
+            style={{
+              color: heroSlides[currentSlide]?.textColor || '#FFFFFF'
+            }}
           >
-            {/* Smooth Gradient Background Base */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-950" />
-
-            {/* Subtle Animated Gradient Overlay - Smoothly transitions based on slide order */}
+            {/* Blurred product image background */}
             <AnimatePresence mode="wait">
               <motion.div 
-                key={`gradient-${currentSlide}`}
+                key={`bg-img-${currentSlide}`}
+                initial={{ opacity: 0, scale: 1.1 }}
+                animate={{ opacity: 1, scale: 1.05 }}
+                exit={{ opacity: 0, scale: 1 }}
+                transition={{ duration: 0.8 }}
+                className="absolute inset-0"
+              >
+                {heroSlides[currentSlide]?.image && (
+                  <Image
+                    src={heroSlides[currentSlide].image}
+                    alt="Background"
+                    fill
+                    className="object-cover"
+                    style={{
+                      filter: 'blur(60px) brightness(0.4)',
+                      transform: 'scale(1.2)'
+                    }}
+                    unoptimized
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Color overlay for tinting */}
+            <div 
+              className="absolute inset-0 opacity-80 transition-colors duration-800"
+              style={{
+                backgroundColor: heroSlides[currentSlide]?.backgroundColor || '#000000'
+              }}
+            />
+
+            {/* Multi-layered Visual Effects */}
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={`effects-${currentSlide}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1.5, ease: "easeInOut" }}
+                transition={{ duration: 0.8 }}
                 className="absolute inset-0"
               >
-                {/* Soft radial gradient that subtly changes - no harsh color jumps */}
+                {/* Radial gradient orb */}
                 <div 
-                  className="absolute inset-0"
+                  className="absolute inset-0 opacity-40"
                   style={{
-                    background: currentSlide === 0 
-                      ? 'radial-gradient(circle at 30% 40%, rgba(80, 80, 90, 0.15) 0%, transparent 60%)'
-                      : currentSlide === 1
-                      ? 'radial-gradient(circle at 30% 40%, rgba(60, 90, 80, 0.18) 0%, transparent 60%)'
-                      : currentSlide === 2
-                      ? 'radial-gradient(circle at 30% 40%, rgba(70, 85, 110, 0.18) 0%, transparent 60%)'
-                      : 'radial-gradient(circle at 30% 40%, rgba(90, 90, 95, 0.15) 0%, transparent 60%)'
+                    background: `radial-gradient(circle at 30% 40%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}60 0%, transparent 50%)`
                   }}
                 />
                 
-                {/* Soft diagonal gradient for depth */}
+                {/* Diagonal gradient overlay */}
                 <div 
-                  className="absolute inset-0"
+                  className="absolute inset-0 opacity-25"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 50%)'
+                    background: `linear-gradient(135deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 60%)`
+                  }}
+                />
+                
+                {/* Animated mesh gradient */}
+                <motion.div 
+                  className="absolute inset-0 opacity-15"
+                  animate={{
+                    backgroundPosition: ['0% 0%', '100% 100%']
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                    ease: 'linear'
+                  }}
+                  style={{
+                    background: `radial-gradient(at 80% 20%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 50%),
+                                radial-gradient(at 20% 80%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 50%)`,
+                    backgroundSize: '400% 400%'
+                  }}
+                />
+                
+                {/* Noise texture overlay */}
+                <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: '200px 200px'
                   }}
                 />
               </motion.div>
             </AnimatePresence>
-
-            {/* Static Elegant Visual Effects */}
-            <div className="absolute inset-0">
-              {/* Animated subtle mesh gradient */}
-              <motion.div 
-                className="absolute inset-0 opacity-[0.08]"
-                animate={{
-                  backgroundPosition: ['0% 0%', '100% 100%']
-                }}
-                transition={{
-                  duration: 30,
-                  repeat: Infinity,
-                  repeatType: 'reverse',
-                  ease: 'linear'
-                }}
-                style={{
-                  background: 'radial-gradient(at 80% 20%, rgba(120, 120, 130, 0.3) 0%, transparent 50%), radial-gradient(at 20% 80%, rgba(100, 100, 110, 0.25) 0%, transparent 50%)',
-                  backgroundSize: '400% 400%'
-                }}
-              />
-              
-              {/* Fine noise texture for premium feel */}
-              <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'repeat',
-                  backgroundSize: '200px 200px'
-                }}
-              />
-              
-              {/* Ultra subtle grid for structure */}
-              <div 
-                className="absolute inset-0 opacity-[0.01]"
-                style={{
-                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-                  backgroundSize: '100px 100px'
-                }}
-              />
-            </div>
 
             {/* Year Badge */}
             <motion.div

@@ -76,14 +76,33 @@ export default async function handler(
   }
 
   try {
+    // Check if BLOB_READ_WRITE_TOKEN is set
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error('BLOB_READ_WRITE_TOKEN not set in environment variables')
+      return res.status(500).json({ 
+        message: 'Upload configuration error',
+        error: 'Storage credentials not configured. Please set BLOB_READ_WRITE_TOKEN in environment variables.'
+      })
+    }
+
     // Parse the multipart form data
     const { file, filename, contentType } = await parseMultipartForm(req)
+
+    // Validate file size (max 10MB)
+    if (file.length > 10 * 1024 * 1024) {
+      return res.status(400).json({ 
+        message: 'File too large',
+        error: 'File size must be less than 10MB'
+      })
+    }
 
     // Generate unique filename
     const timestamp = Date.now()
     const randomId = Math.random().toString(36).substring(7)
     const extension = filename.split('.').pop() || 'jpg'
-    const uniqueFilename = `${timestamp}-${randomId}.${extension}`
+    const uniqueFilename = `hero/${timestamp}-${randomId}.${extension}`
+
+    console.log(`Uploading ${uniqueFilename} (${file.length} bytes, ${contentType})`)
 
     // Upload to Vercel Blob
     const blob = await put(uniqueFilename, file, {
@@ -91,10 +110,12 @@ export default async function handler(
       contentType,
     })
 
+    console.log('Upload successful:', blob.url)
+
     res.status(200).json({
       success: true,
       url: blob.url,
-      message: 'Image uploaded successfully'
+      message: 'File uploaded successfully'
     })
   } catch (error) {
     console.error('Upload error:', error)
