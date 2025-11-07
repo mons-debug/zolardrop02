@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
@@ -20,6 +20,7 @@ export default function HeroManagementPage() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [editingSlide, setEditingSlide] = useState<HeroSlide | null>(null)
+  const formRef = useRef<HTMLDivElement>(null)
   
   const [formData, setFormData] = useState({
     title: '',
@@ -130,7 +131,18 @@ export default function HeroManagementPage() {
       order: slide.order,
       isActive: slide.isActive
     })
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    
+    // Scroll to form with a slight delay to ensure state is updated
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        // Add a highlight effect
+        formRef.current.classList.add('ring-4', 'ring-orange-300')
+        setTimeout(() => {
+          formRef.current?.classList.remove('ring-4', 'ring-orange-300')
+        }, 2000)
+      }
+    }, 100)
   }
 
   const handleDelete = async (id: string) => {
@@ -189,13 +201,34 @@ export default function HeroManagementPage() {
 
       {/* Add/Edit Form */}
       <motion.div
+        ref={formRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8"
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8 transition-all duration-300"
       >
-        <h2 className="text-xl font-semibold mb-4">
-          {editingSlide ? 'Edit Slide' : 'Add New Slide'}
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">
+            {editingSlide ? (
+              <span className="flex items-center gap-2">
+                <span>✏️ Editing Slide</span>
+                <span className="text-sm font-normal text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
+                  {editingSlide.title}
+                </span>
+              </span>
+            ) : (
+              '➕ Add New Slide'
+            )}
+          </h2>
+          {editingSlide && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-sm text-gray-500 hover:text-gray-700 underline"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -356,7 +389,11 @@ export default function HeroManagementPage() {
                 key={slide.id}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                className={`border rounded-lg overflow-hidden hover:shadow-lg transition-all ${
+                  editingSlide?.id === slide.id 
+                    ? 'border-orange-500 border-2 shadow-lg ring-2 ring-orange-200' 
+                    : 'border-gray-200'
+                }`}
               >
                 <div className="relative aspect-video bg-gray-100">
                   {slide.mediaType === 'video' ? (
@@ -418,13 +455,23 @@ export default function HeroManagementPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(slide)}
-                      className="flex-1 px-3 py-2 text-sm bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors"
+                      disabled={editingSlide?.id === slide.id}
+                      className={`flex-1 px-3 py-2 text-sm rounded transition-colors ${
+                        editingSlide?.id === slide.id
+                          ? 'bg-orange-500 text-white cursor-not-allowed'
+                          : 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                      }`}
                     >
-                      Edit
+                      {editingSlide?.id === slide.id ? '✏️ Editing...' : 'Edit'}
                     </button>
                     <button
                       onClick={() => handleDelete(slide.id)}
-                      className="flex-1 px-3 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                      disabled={editingSlide?.id === slide.id}
+                      className={`flex-1 px-3 py-2 text-sm rounded transition-colors ${
+                        editingSlide?.id === slide.id
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-red-100 text-red-700 hover:bg-red-200'
+                      }`}
                     >
                       Delete
                     </button>
