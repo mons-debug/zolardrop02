@@ -114,3 +114,16 @@ model FashionCarousel {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model HeroSlide {
+  id        String   @id @default(uuid())
+  title     String
+  subtitle  String?
+  mediaUrl  String   // URL to image or video
+  mediaType String   @default("image") // 'image' or 'video'
+  linkUrl   String?  // Optional link when user clicks the slide
+  order     Int      // Display order
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

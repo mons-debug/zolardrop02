@@ -14,6 +14,8 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0)
   const [products, setProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
+  const [heroSlides, setHeroSlides] = useState<any[]>([])
+  const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   // Fetch real products from database
@@ -34,36 +36,46 @@ export default function Home() {
     fetchProducts()
   }, [])
 
-  // Hero carousel slides
-  const heroSlides = [
-    {
-      id: 1,
-      title: 'ESSENTIAL TEE',
-      subtitle: 'DROP 02',
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80'
-    },
-    {
-      id: 2,
-      title: 'CLASSIC HOODIE',
-      subtitle: 'DROP 02',
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=1920&q=80'
-    },
-    {
-      id: 3,
-      title: 'CREW SWEATSHIRT',
-      subtitle: 'DROP 02',
-      image: 'https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=1920&q=80'
-    },
-    {
-      id: 4,
-      title: 'PREMIUM JACKET',
-      subtitle: 'DROP 02',
-      image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=1920&q=80'
+  // Fetch hero slides from database
+  useEffect(() => {
+    const fetchHeroSlides = async () => {
+      try {
+        const res = await fetch('/api/hero-slides')
+        if (res.ok) {
+          const data = await res.json()
+          const slides = (data.slides || []).map((slide: any) => ({
+            id: slide.id,
+            title: slide.title,
+            subtitle: slide.subtitle || '',
+            image: slide.mediaUrl,
+            mediaType: slide.mediaType,
+            linkUrl: slide.linkUrl
+          }))
+          setHeroSlides(slides)
+        }
+      } catch (error) {
+        console.error('Error fetching hero slides:', error)
+        // Fallback to default slides
+        setHeroSlides([
+          {
+            id: '1',
+            title: 'ESSENTIAL TEE',
+            subtitle: 'DROP 02',
+            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
+            mediaType: 'image'
+          }
+        ])
+      } finally {
+        setHeroLoading(false)
+      }
     }
-  ]
+    fetchHeroSlides()
+  }, [])
 
   // Auto-rotate carousel
   useEffect(() => {
+    if (heroSlides.length === 0) return
+    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
     }, 4000) // Change slide every 4 seconds
@@ -251,13 +263,25 @@ export default function Home() {
                   transition={{ duration: 0.8, ease: "easeInOut" }}
                   className="relative h-full"
           >
-            <Image
-              src={heroSlides[currentSlide].image}
-              alt={heroSlides[currentSlide].title}
-              fill
-              className="object-cover object-center"
-              priority
-            />
+            {heroSlides[currentSlide]?.mediaType === 'video' ? (
+              <video
+                src={heroSlides[currentSlide].image}
+                className="absolute inset-0 w-full h-full object-cover object-center"
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <Image
+                src={heroSlides[currentSlide]?.image || ''}
+                alt={heroSlides[currentSlide]?.title || ''}
+                fill
+                className="object-cover object-center"
+                priority
+                unoptimized
+              />
+            )}
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
                   
@@ -272,14 +296,14 @@ export default function Home() {
                       className="absolute bottom-12 left-12 bg-white/95 backdrop-blur-md p-8 max-w-sm"
                     >
                       <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
-                        {heroSlides[currentSlide].subtitle}
+                        {heroSlides[currentSlide]?.subtitle}
                       </div>
                       <h3 className="text-2xl font-serif italic mb-4 text-black"
                           style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
-                        {heroSlides[currentSlide].title}
+                        {heroSlides[currentSlide]?.title}
                       </h3>
                       <Link 
-                        href="/products"
+                        href={heroSlides[currentSlide]?.linkUrl || '/products'}
                         className="inline-flex items-center gap-2 text-sm font-medium text-black group"
                       >
                         <span className="border-b border-black pb-0.5">View Details</span>
