@@ -9,8 +9,8 @@ const seedProducts = [
     title: 'Classic Cotton T-Shirt',
     description: 'Premium 100% cotton t-shirt with a comfortable fit. Perfect for everyday wear.',
     images: JSON.stringify([
-      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500',
-      'https://images.unsplash.com/photo-1583743814966-8936f2f9523?w=500'
+      'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80',
+      'https://images.unsplash.com/photo-1583743814966-8936f2f95230?w=800&q=80'
     ]),
     priceCents: 2999, // $29.99
     stock: 100,
@@ -20,28 +20,28 @@ const seedProducts = [
         sku: 'TS-BASIC-001-BLK',
         priceCents: 2999,
         stock: 25,
-        images: JSON.stringify(['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500']),
+        images: JSON.stringify(['https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80']),
       },
       {
         color: 'White',
         sku: 'TS-BASIC-001-WHT',
         priceCents: 2999,
         stock: 30,
-        images: JSON.stringify(['https://images.unsplash.com/photo-1583743814966-8936f2f9523?w=500'])
+        images: JSON.stringify(['https://images.unsplash.com/photo-1583743814966-8936f2f95230?w=800&q=80'])
       },
       {
         color: 'Navy',
         sku: 'TS-BASIC-001-NVY',
         priceCents: 2999,
         stock: 20,
-        images: JSON.stringify(['https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500'])
+        images: JSON.stringify(['https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80'])
       },
       {
         color: 'Gray',
         sku: 'TS-BASIC-001-GRY',
         priceCents: 2999,
         stock: 25,
-        images: JSON.stringify(['https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500'])
+        images: JSON.stringify(['https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=800&q=80'])
       }
     ]
   },

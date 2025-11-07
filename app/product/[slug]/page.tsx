@@ -57,6 +57,7 @@ export default function ProductPage() {
   const [selectedVariant, setSelectedVariant] = useState<any>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     if (slug) {
@@ -163,16 +164,25 @@ export default function ProductPage() {
           {/* Image Gallery */}
           <div className="space-y-3">
             <div className="aspect-[3/4] relative bg-gray-50 overflow-hidden">
-              {allImages.length > 0 ? (
+              {allImages.length > 0 && !imageError ? (
                 <Image
                   src={allImages[currentImageIndex]}
                   alt={product.title}
                   fill
                   className="object-cover"
+                  onError={() => setImageError(true)}
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <span className="text-gray-400">No Image Available</span>
+                  <div className="text-center p-8">
+                    <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded flex items-center justify-center">
+                      <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <span className="text-gray-400">Image Not Available</span>
+                  </div>
                 </div>
               )}
 
@@ -193,7 +203,7 @@ export default function ProductPage() {
             </div>
 
             {/* Thumbnail strip */}
-            {allImages.length > 1 && (
+            {allImages.length > 1 && !imageError && (
               <div className="grid grid-cols-4 gap-2">
                 {allImages.map((image, index) => (
                   <button
@@ -208,6 +218,7 @@ export default function ProductPage() {
                       alt={`${product.title} ${index + 1}`}
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                   </button>
                 ))}

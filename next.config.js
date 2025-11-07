@@ -5,19 +5,24 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
-        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'example.com',
-        pathname: '/**',
+        hostname: '**.unsplash.com',
       },
       {
         protocol: 'https',
-        hostname: '**.vercel.app',
-        pathname: '/**',
+        hostname: 'via.placeholder.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
       },
     ],
+    // Add these for better image handling
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Enable React strict mode for better development practices
   reactStrictMode: true,
