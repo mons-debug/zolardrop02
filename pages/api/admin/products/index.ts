@@ -17,7 +17,7 @@ export default async function handler(
   }
 
   try {
-    const { sku, title, description, images, priceCents, salePriceCents, currency, stock, variants } = req.body
+    const { sku, title, description, images, priceCents, salePriceCents, currency, stock, category, variants } = req.body
 
     // Validation
     if (!sku || !title || !priceCents) {
@@ -58,6 +58,7 @@ export default async function handler(
         salePriceCents,
         currency: currency || 'USD',
         stock,
+        category,
         variants: variants ? {
           create: variants.map((variant: any) => ({
             color: variant.color,

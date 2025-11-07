@@ -42,6 +42,7 @@ export default function EditProductPage() {
   const [sku, setSku] = useState('')
   const [priceCents, setPriceCents] = useState('')
   const [stock, setStock] = useState('')
+  const [category, setCategory] = useState('')
   const [images, setImages] = useState<string[]>([])
   
   // Variants
@@ -72,6 +73,7 @@ export default function EditProductPage() {
         setSku(product.sku)
         setPriceCents((product.priceCents / 100).toFixed(2))
         setStock(product.stock.toString())
+        setCategory(product.category || '')
         
         // Parse images
         try {
@@ -193,6 +195,7 @@ export default function EditProductPage() {
           sku,
           priceCents: Math.round(parseFloat(priceCents) * 100),
           stock: parseInt(stock),
+          category,
           images,
           variants: variants.length > 0 ? variants : undefined
         })
@@ -271,6 +274,23 @@ export default function EditProductPage() {
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="sweatshirts">Sweatshirts</option>
+                  <option value="hoodies">Hoodies</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

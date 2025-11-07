@@ -26,6 +26,7 @@ export default function NewProductPage() {
   const [sku, setSku] = useState('')
   const [priceCents, setPriceCents] = useState('')
   const [stock, setStock] = useState('')
+  const [category, setCategory] = useState('sweatshirts')
   const [images, setImages] = useState<string[]>([])
   
   // Variants
@@ -101,6 +102,7 @@ export default function NewProductPage() {
           sku,
           priceCents: Math.round(parseFloat(priceCents) * 100),
           stock: parseInt(stock),
+          category,
           images,
           variants: variants.length > 0 ? variants : undefined
         })
@@ -170,6 +172,23 @@ export default function NewProductPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   placeholder="Describe your product..."
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  <option value="sweatshirts">Sweatshirts</option>
+                  <option value="hoodies">Hoodies</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
