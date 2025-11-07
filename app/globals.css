@@ -49,10 +49,21 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Cursor - Hide default cursor on desktop */
+/* Custom Cursor - Hide default cursor on desktop (only for non-admin pages) */
 @media (min-width: 1024px) {
-  body, a, button {
+  body:not(.admin-page), 
+  body:not(.admin-page) a, 
+  body:not(.admin-page) button,
+  body:not(.admin-page) input,
+  body:not(.admin-page) textarea,
+  body:not(.admin-page) select {
     cursor: none !important;
+  }
+  
+  /* Ensure admin pages have normal cursor */
+  body.admin-page,
+  body.admin-page * {
+    cursor: auto !important;
   }
 }
 

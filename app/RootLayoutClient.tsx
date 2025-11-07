@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { CartProvider } from '@/components/CartContext'
 import CartDrawer from '@/components/CartDrawer'
@@ -17,6 +18,19 @@ export default function RootLayoutClient({
   
   // Check if current path is an admin page
   const isAdminPage = pathname?.startsWith('/admin')
+
+  // Add/remove admin-page class to body based on current page
+  useEffect(() => {
+    if (isAdminPage) {
+      document.body.classList.add('admin-page')
+    } else {
+      document.body.classList.remove('admin-page')
+    }
+    
+    return () => {
+      document.body.classList.remove('admin-page')
+    }
+  }, [isAdminPage])
 
   // For admin pages, render without Navbar and Footer
   if (isAdminPage) {
