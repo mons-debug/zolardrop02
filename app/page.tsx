@@ -17,6 +17,82 @@ export default function Home() {
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+  const [dominantColors, setDominantColors] = useState<Record<string, string>>({})
+
+  // Extract dominant color from image
+  const extractDominantColor = async (imageUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = document.createElement('img')
+      img.crossOrigin = 'Anonymous'
+      img.src = imageUrl
+      
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve('rgba(0, 0, 0, 0.3)') // Default fallback
+          return
+        }
+        
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+        
+        try {
+          // Sample center region for dominant color
+          const imageData = ctx.getImageData(
+            Math.floor(img.width * 0.3),
+            Math.floor(img.height * 0.3),
+            Math.floor(img.width * 0.4),
+            Math.floor(img.height * 0.4)
+          )
+          
+          let r = 0, g = 0, b = 0, count = 0
+          
+          // Average color values
+          for (let i = 0; i < imageData.data.length; i += 4) {
+            r += imageData.data[i]
+            g += imageData.data[i + 1]
+            b += imageData.data[i + 2]
+            count++
+          }
+          
+          r = Math.floor(r / count)
+          g = Math.floor(g / count)
+          b = Math.floor(b / count)
+          
+          resolve(`rgba(${r}, ${g}, ${b}, 0.3)`)
+        } catch (e) {
+          // CORS error or other issue - use fallback
+          resolve('rgba(0, 0, 0, 0.3)')
+        }
+      }
+      
+      img.onerror = () => {
+        resolve('rgba(0, 0, 0, 0.3)')
+      }
+    })
+  }
+
+  // Extract colors from hero slides
+  useEffect(() => {
+    if (heroSlides.length === 0) return
+    
+    const extractColors = async () => {
+      const colors: Record<string, string> = {}
+      for (const slide of heroSlides) {
+        if (slide.image && !dominantColors[slide.id]) {
+          const color = await extractDominantColor(slide.image)
+          colors[slide.id] = color
+        }
+      }
+      if (Object.keys(colors).length > 0) {
+        setDominantColors(prev => ({ ...prev, ...colors }))
+      }
+    }
+    
+    extractColors()
+  }, [heroSlides])
 
   // Fetch real products from database
   useEffect(() => {
@@ -67,8 +143,8 @@ export default function Home() {
         setHeroSlides([
           {
             id: '1',
-            title: 'ESSENTIAL TEE',
-            subtitle: 'DROP 02',
+      title: 'ESSENTIAL TEE',
+      subtitle: 'DROP 02',
             image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
             mediaType: 'image',
             backgroundColor: '#000000',
@@ -167,18 +243,18 @@ export default function Home() {
             className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
           >
             {/* Blurred product image background */}
-            <AnimatePresence mode="wait">
-              <motion.div 
+        <AnimatePresence mode="wait">
+          <motion.div
                 key={`bg-img-${currentSlide}`}
                 initial={{ opacity: 0, scale: 1.1 }}
                 animate={{ opacity: 1, scale: 1.05 }}
                 exit={{ opacity: 0, scale: 1 }}
                 transition={{ duration: 0.8 }}
-                className="absolute inset-0"
-              >
+            className="absolute inset-0"
+          >
                 {heroSlides[currentSlide]?.image && (
-                  <Image
-                    src={heroSlides[currentSlide].image}
+            <Image
+              src={heroSlides[currentSlide].image}
                     alt="Background"
                     fill
                     className="object-cover"
@@ -189,78 +265,146 @@ export default function Home() {
                     unoptimized
                   />
                 )}
-              </motion.div>
-            </AnimatePresence>
+          </motion.div>
+        </AnimatePresence>
 
-            {/* Dark gradient overlay for better text contrast */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70" />
+            {/* Dark gradient base for text contrast */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80" />
 
-            {/* Multi-layered Visual Effects */}
+            {/* 3D Glass Morphism Layers */}
             <AnimatePresence mode="wait">
               <motion.div 
-                key={`effects-${currentSlide}`}
+                key={`glass-effects-${currentSlide}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8 }}
                 className="absolute inset-0"
+                style={{ perspective: '1000px' }}
               >
-                {/* Radial gradient orb - Orange/Gold accent */}
-                <div 
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background: 'radial-gradient(circle at 30% 40%, rgba(255, 91, 0, 0.4) 0%, transparent 50%)'
+                {/* Glass Panel 1 - Farthest back */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    y: [0, -10, 0],
+                    x: [0, 5, 0]
                   }}
-                />
-                
-                {/* Diagonal gradient sweep */}
-                <div 
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: 'easeInOut'
+                  }}
+                  style={{
+                    transform: 'translateZ(-100px) rotateY(-5deg)',
+                    transformStyle: 'preserve-3d'
+                  }}
+                >
+                  <div
+                    className="absolute top-[10%] left-[5%] w-[70%] h-[60%] rounded-3xl"
+                    style={{
+                      backdropFilter: 'blur(20px)',
+                      background: dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.3)',
+                      boxShadow: `0 20px 60px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.4)') || 'rgba(0, 0, 0, 0.4)'}`,
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  />
+                </motion.div>
+
+                {/* Glass Panel 2 - Middle layer */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    y: [0, 15, 0],
+                    x: [0, -8, 0]
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 0.5
+                  }}
+                  style={{
+                    transform: 'translateZ(-50px) rotateY(3deg)',
+                    transformStyle: 'preserve-3d'
+                  }}
+                >
+                  <div
+                    className="absolute top-[20%] right-[8%] w-[60%] h-[50%] rounded-3xl"
+                    style={{
+                      backdropFilter: 'blur(25px)',
+                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.25)') || 'rgba(0, 0, 0, 0.25)',
+                      boxShadow: `0 15px 45px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(0, 0, 0, 0.5)'}`,
+                      border: '1px solid rgba(255, 255, 255, 0.15)'
+                    }}
+                  />
+                </motion.div>
+
+                {/* Glass Panel 3 - Close layer */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    y: [0, -8, 0],
+                    x: [0, 10, 0]
+                  }}
+                  transition={{
+                    duration: 7,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 1
+                  }}
+                  style={{
+                    transform: 'translateZ(-20px) rotateY(-2deg)',
+                    transformStyle: 'preserve-3d'
+                  }}
+                >
+                  <div
+                    className="absolute bottom-[15%] left-[10%] w-[55%] h-[45%] rounded-3xl"
+                    style={{
+                      backdropFilter: 'blur(30px)',
+                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.2)') || 'rgba(0, 0, 0, 0.2)',
+                      boxShadow: `0 10px 40px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(0, 0, 0, 0.6)'}`,
+                      border: '1px solid rgba(255, 255, 255, 0.2)'
+                    }}
+                  />
+                </motion.div>
+
+                {/* Glass Panel 4 - Foreground accent */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    y: [0, 12, 0],
+                    x: [0, -5, 0],
+                    rotate: [0, 2, 0]
+                  }}
+                  transition={{
+                    duration: 9,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                    delay: 1.5
+                  }}
+                  style={{
+                    transform: 'translateZ(10px) rotateY(4deg)',
+                    transformStyle: 'preserve-3d'
+                  }}
+                >
+                  <div
+                    className="absolute top-[40%] right-[15%] w-[40%] h-[35%] rounded-3xl"
+                    style={{
+                      backdropFilter: 'blur(35px)',
+                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.15)') || 'rgba(0, 0, 0, 0.15)',
+                      boxShadow: `0 8px 32px ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.4)'}, inset 0 1px 2px rgba(255, 255, 255, 0.1)`,
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      borderTop: '1px solid rgba(255, 255, 255, 0.4)',
+                      borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
+                    }}
+                  />
+                </motion.div>
+
+                {/* Subtle ambient glow using dominant color */}
+                <div
                   className="absolute inset-0 opacity-20"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(255, 91, 0, 0.3) 0%, transparent 60%)'
-                  }}
-                />
-                
-                {/* Animated mesh gradient */}
-                <motion.div 
-                  className="absolute inset-0 opacity-15"
-                  animate={{
-                    backgroundPosition: ['0% 0%', '100% 100%']
-                  }}
-                  transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    repeatType: 'reverse',
-                    ease: 'linear'
-                  }}
-                  style={{
-                    background: 'radial-gradient(at 80% 20%, rgba(255, 91, 0, 0.3) 0%, transparent 50%), radial-gradient(at 20% 80%, rgba(255, 140, 0, 0.25) 0%, transparent 50%)',
-                    backgroundSize: '400% 400%'
-                  }}
-                />
-                
-                {/* Subtle light rays effect */}
-                <motion.div
-                  className="absolute inset-0 opacity-10"
-                  animate={{
-                    rotate: [0, 360]
-                  }}
-                  transition={{
-                    duration: 40,
-                    repeat: Infinity,
-                    ease: 'linear'
-                  }}
-                  style={{
-                    background: 'conic-gradient(from 0deg, transparent 0%, rgba(255, 255, 255, 0.1) 10%, transparent 20%, rgba(255, 255, 255, 0.1) 30%, transparent 40%)'
-                  }}
-                />
-                
-                {/* Noise texture overlay */}
-                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                    backgroundRepeat: 'repeat',
-                    backgroundSize: '200px 200px'
+                    background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(255, 255, 255, 0.6)'} 0%, transparent 60%)`
                   }}
                 />
               </motion.div>
@@ -277,11 +421,11 @@ export default function Home() {
                 <span className="relative flex h-2 w-2">
                   <span 
                     className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                    style={{ backgroundColor: heroSlides[currentSlide]?.accentColor || '#ff5b00' }}
+                    style={{ backgroundColor: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '1)') || 'rgba(255, 255, 255, 1)' }}
                   />
                   <span 
                     className="relative inline-flex rounded-full h-2 w-2"
-                    style={{ backgroundColor: heroSlides[currentSlide]?.accentColor || '#ff5b00' }}
+                    style={{ backgroundColor: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '1)') || 'rgba(255, 255, 255, 1)' }}
                   />
                 </span>
                 <span className="text-[10px] lg:text-xs font-medium tracking-[0.2em] uppercase">Winter 2025</span>
@@ -310,7 +454,7 @@ export default function Home() {
                   className="block font-serif italic text-white transition-all duration-800" 
                   style={{ 
                     fontFamily: 'Playfair Display, Georgia, serif',
-                    textShadow: '0 0 40px rgba(255, 91, 0, 0.6), 0 0 20px rgba(255, 91, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8)'
+                    textShadow: `0 0 40px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(255, 255, 255, 0.6)'}, 0 0 20px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.4)') || 'rgba(255, 255, 255, 0.4)'}, 0 4px 12px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8)`
                   }}
                 >
                   {heroSlides[currentSlide]?.title || 'Elegance'}
@@ -354,7 +498,8 @@ export default function Home() {
                   boxShadow: `0 0 0 rgba(0,0,0,0)`
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = `0 10px 40px ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50`
+                  const color = dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(255, 255, 255, 0.5)'
+                  e.currentTarget.style.boxShadow = `0 10px 40px ${color}`
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.boxShadow = '0 0 0 rgba(0,0,0,0)'
@@ -365,10 +510,7 @@ export default function Home() {
                   <span>→</span>
                 </span>
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    backgroundImage: `linear-gradient(to right, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}CC)`
-                  }}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-white/10 to-white/5"
                 />
               </Link>
 
@@ -1248,4 +1390,6 @@ export default function Home() {
       </section>
     </div>
   )
+}
+
 }
