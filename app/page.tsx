@@ -340,7 +340,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* Glass Panel 3 - Close layer */}
-                <motion.div
+        <motion.div
                   className="absolute inset-0"
                   animate={{
                     y: [0, -8, 0],
@@ -1390,6 +1390,4 @@ export default function Home() {
       </section>
     </div>
   )
-}
-
 }
