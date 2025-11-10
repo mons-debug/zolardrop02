@@ -279,146 +279,91 @@ export default function Home() {
               }}
             />
 
-            {/* Themed Visual Effects based on product */}
+            {/* Abstract Geometric Patterns */}
             <div className="absolute inset-0 overflow-hidden">
-              {/* Eclipse Black - Circular eclipse with rim light */}
+              {/* Eclipse Black - Concentric circles and orbital rings */}
               {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
                 <>
-                  {/* Eclipse circle */}
+                  {/* Orbital ring 1 */}
                   <motion.div
                     className="absolute"
                     style={{
                       top: '50%',
                       left: '50%',
-                      width: '600px',
-                      height: '600px',
-                      marginLeft: '-300px',
-                      marginTop: '-300px',
+                      width: '500px',
+                      height: '500px',
+                      marginLeft: '-250px',
+                      marginTop: '-250px',
                       borderRadius: '50%',
-                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.8) 60%, transparent 70%)',
-                      boxShadow: '0 0 100px 40px rgba(255, 255, 255, 0.1), inset 0 0 60px rgba(0, 0, 0, 0.9)'
-                    }}
-                    animate={{
-                      scale: [1, 1.05, 1]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Rim light effect */}
-                  <motion.div
-                    className="absolute"
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      width: '650px',
-                      height: '650px',
-                      marginLeft: '-325px',
-                      marginTop: '-325px',
-                      borderRadius: '50%',
-                      border: '2px solid rgba(255, 255, 255, 0.15)',
-                      boxShadow: '0 0 80px 20px rgba(255, 255, 255, 0.08)'
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                     }}
                     animate={{
                       rotate: [0, 360]
                     }}
                     transition={{
-                      duration: 40,
+                      duration: 30,
                       repeat: Infinity,
                       ease: 'linear'
                     }}
                   />
+                  {/* Orbital ring 2 */}
+                  <motion.div
+                    className="absolute"
+                    style={{
+                      top: '50%',
+                      left: '50%',
+                      width: '700px',
+                      height: '700px',
+                      marginLeft: '-350px',
+                      marginTop: '-350px',
+                      borderRadius: '50%',
+                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                    animate={{
+                      rotate: [360, 0]
+                    }}
+                    transition={{
+                      duration: 45,
+                      repeat: Infinity,
+                      ease: 'linear'
+                    }}
+                  />
+                  {/* Concentric circles */}
+                  {[300, 400, 600].map((size, i) => (
+                    <div
+                      key={i}
+                      className="absolute"
+                      style={{
+                        top: '50%',
+                        left: '50%',
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        marginLeft: `-${size/2}px`,
+                        marginTop: `-${size/2}px`,
+                        borderRadius: '50%',
+                        border: `1px solid rgba(255, 255, 255, ${0.06 - i * 0.02})`,
+                      }}
+                    />
+                  ))}
                 </>
               )}
 
-              {/* Forest Dusk - Misty fog layers */}
+              {/* Forest Dusk - Organic branch/leaf silhouettes */}
               {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
                 <>
-                  {/* Fog layer 1 */}
+                  {/* Branch pattern 1 */}
                   <motion.div
-                    className="absolute inset-0 opacity-30"
+                    className="absolute opacity-15"
                     style={{
-                      background: 'linear-gradient(90deg, rgba(34, 139, 87, 0.3) 0%, transparent 50%, rgba(34, 139, 87, 0.2) 100%)'
+                      top: '10%',
+                      left: '5%',
+                      width: '200px',
+                      height: '400px',
+                      background: 'linear-gradient(45deg, rgba(34, 139, 87, 0.3) 0%, transparent 50%)',
+                      clipPath: 'polygon(50% 0%, 55% 100%, 45% 100%)',
                     }}
                     animate={{
-                      x: ['-10%', '10%', '-10%']
-                    }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Fog layer 2 */}
-                  <motion.div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(46, 125, 50, 0.25) 50%, transparent 100%)'
-                    }}
-                    animate={{
-                      x: ['10%', '-10%', '10%']
-                    }}
-                    transition={{
-                      duration: 15,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Organic gradient transitions */}
-                  <div
-                    className="absolute inset-0 opacity-25"
-                    style={{
-                      background: 'radial-gradient(ellipse at 30% 50%, rgba(34, 139, 87, 0.4) 0%, transparent 60%)'
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Ocean Deep - Flowing wave patterns */}
-              {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
-                <>
-                  {/* Wave gradient 1 */}
-                  <motion.div
-                    className="absolute inset-0 opacity-25"
-                    style={{
-                      background: 'linear-gradient(180deg, rgba(30, 58, 138, 0.4) 0%, transparent 40%, rgba(30, 58, 138, 0.3) 100%)'
-                    }}
-                    animate={{
-                      y: ['-5%', '5%', '-5%']
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Wave gradient 2 */}
-                  <motion.div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.3) 50%, transparent 100%)'
-                    }}
-                    animate={{
-                      y: ['5%', '-5%', '5%']
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 1
-                    }}
-                  />
-                  {/* Ripple effect */}
-                  <motion.div
-                    className="absolute inset-0 opacity-15"
-                    style={{
-                      background: 'radial-gradient(circle at 50% 40%, rgba(59, 130, 246, 0.4) 0%, transparent 50%)'
-                    }}
-                    animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.15, 0.25, 0.15]
+                      rotate: [-2, 2, -2]
                     }}
                     transition={{
                       duration: 8,
@@ -426,28 +371,142 @@ export default function Home() {
                       ease: 'easeInOut'
                     }}
                   />
+                  {/* Branch pattern 2 */}
+                  <motion.div
+                    className="absolute opacity-12"
+                    style={{
+                      bottom: '15%',
+                      right: '10%',
+                      width: '250px',
+                      height: '350px',
+                      background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.25) 0%, transparent 60%)',
+                      clipPath: 'polygon(45% 0%, 50% 100%, 40% 100%)',
+                    }}
+                    animate={{
+                      rotate: [2, -2, 2]
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
+                    }}
+                  />
+                  {/* Leaf shapes */}
+                  {[
+                    { top: '25%', left: '15%', size: 80, delay: 0 },
+                    { top: '60%', left: '8%', size: 60, delay: 1 },
+                    { top: '40%', right: '20%', size: 70, delay: 2 }
+                  ].map((leaf, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute opacity-10"
+                      style={{
+                        ...leaf,
+                        width: `${leaf.size}px`,
+                        height: `${leaf.size}px`,
+                        background: 'rgba(34, 139, 87, 0.2)',
+                        borderRadius: '0 100% 0 100%',
+                        transform: 'rotate(45deg)'
+                      }}
+                      animate={{
+                        y: [0, -10, 0],
+                        rotate: [45, 50, 45]
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: leaf.delay
+                      }}
+                    />
+                  ))}
                 </>
               )}
 
-              {/* Cloud Mist - Soft billowing clouds */}
-              {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
+              {/* Ocean Deep - Flowing wave curves */}
+              {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
                 <>
-                  {/* Cloud shape 1 */}
+                  {/* Wave curve 1 */}
                   <motion.div
-                    className="absolute"
+                    className="absolute inset-x-0 opacity-15"
                     style={{
                       top: '20%',
-                      left: '10%',
-                      width: '500px',
-                      height: '300px',
-                      borderRadius: '50%',
-                      background: 'radial-gradient(ellipse, rgba(156, 163, 175, 0.25) 0%, transparent 70%)',
-                      filter: 'blur(40px)'
+                      height: '200px',
+                      background: 'linear-gradient(180deg, transparent 0%, rgba(30, 58, 138, 0.3) 50%, transparent 100%)',
+                      clipPath: 'path("M 0 50 Q 150 0, 300 50 T 600 50 T 900 50 T 1200 50 L 1200 200 L 0 200 Z")',
                     }}
                     animate={{
-                      y: [0, -20, 0],
-                      x: [0, 15, 0],
-                      scale: [1, 1.05, 1]
+                      x: [0, -300, 0]
+                    }}
+                    transition={{
+                      duration: 15,
+                      repeat: Infinity,
+                      ease: 'linear'
+                    }}
+                  />
+                  {/* Wave curve 2 */}
+                  <motion.div
+                    className="absolute inset-x-0 opacity-12"
+                    style={{
+                      bottom: '25%',
+                      height: '180px',
+                      background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, transparent 100%)',
+                      clipPath: 'path("M 0 30 Q 200 80, 400 30 T 800 30 T 1200 30 L 1200 180 L 0 180 Z")',
+                    }}
+                    animate={{
+                      x: [-300, 0, -300]
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: 'linear'
+                    }}
+                  />
+                  {/* Curved lines */}
+                  {[30, 50, 70].map((top, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute inset-x-0 opacity-8"
+                      style={{
+                        top: `${top}%`,
+                        height: '2px',
+                        background: `linear-gradient(90deg, transparent, rgba(59, 130, 246, ${0.2 - i * 0.05}), transparent)`,
+                      }}
+                      animate={{
+                        scaleX: [1, 1.1, 1]
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.8
+                      }}
+                    />
+                  ))}
+                </>
+              )}
+
+              {/* Cloud Mist - Soft rounded shapes */}
+              {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
+                <>
+                  {/* Large rounded shape 1 */}
+                  <motion.div
+                    className="absolute opacity-12"
+                    style={{
+                      top: '15%',
+                      left: '8%',
+                      width: '400px',
+                      height: '400px',
+                      borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
+                      background: 'rgba(156, 163, 175, 0.15)',
+                    }}
+                    animate={{
+                      borderRadius: [
+                        '40% 60% 70% 30% / 40% 50% 60% 50%',
+                        '60% 40% 30% 70% / 50% 60% 40% 60%',
+                        '40% 60% 70% 30% / 40% 50% 60% 50%'
+                      ],
+                      y: [0, -15, 0]
                     }}
                     transition={{
                       duration: 12,
@@ -455,46 +514,69 @@ export default function Home() {
                       ease: 'easeInOut'
                     }}
                   />
-                  {/* Cloud shape 2 */}
+                  {/* Medium rounded shape */}
                   <motion.div
-                    className="absolute"
+                    className="absolute opacity-10"
                     style={{
-                      bottom: '25%',
-                      right: '15%',
-                      width: '450px',
-                      height: '250px',
-                      borderRadius: '50%',
-                      background: 'radial-gradient(ellipse, rgba(156, 163, 175, 0.2) 0%, transparent 70%)',
-                      filter: 'blur(35px)'
+                      top: '45%',
+                      right: '12%',
+                      width: '300px',
+                      height: '300px',
+                      borderRadius: '60% 40% 50% 50% / 50% 60% 40% 50%',
+                      background: 'rgba(156, 163, 175, 0.12)',
                     }}
                     animate={{
-                      y: [0, 15, 0],
-                      x: [0, -10, 0],
-                      scale: [1, 1.08, 1]
+                      borderRadius: [
+                        '60% 40% 50% 50% / 50% 60% 40% 50%',
+                        '40% 60% 50% 50% / 60% 40% 60% 40%',
+                        '60% 40% 50% 50% / 50% 60% 40% 50%'
+                      ],
+                      y: [0, 20, 0]
                     }}
                     transition={{
                       duration: 10,
                       repeat: Infinity,
                       ease: 'easeInOut',
-                      delay: 1.5
+                      delay: 1
                     }}
                   />
-                  {/* Ethereal glow */}
-                  <div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.3) 0%, transparent 60%)'
-                    }}
-                  />
+                  {/* Small circles */}
+                  {[
+                    { top: '25%', right: '25%', size: 120 },
+                    { bottom: '30%', left: '18%', size: 100 },
+                    { top: '55%', left: '35%', size: 80 }
+                  ].map((circle, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute opacity-8"
+                      style={{
+                        ...circle,
+                        width: `${circle.size}px`,
+                        height: `${circle.size}px`,
+                        borderRadius: '50%',
+                        background: 'rgba(156, 163, 175, 0.1)',
+                      }}
+                      animate={{
+                        scale: [1, 1.1, 1],
+                        opacity: [0.08, 0.12, 0.08]
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 1.5
+                      }}
+                    />
+                  ))}
                 </>
               )}
 
-              {/* Fallback - Subtle ambient effect for other slides */}
+              {/* Fallback - Minimal geometric pattern */}
               {!['Eclipse Black', 'Forest Dusk', 'Ocean Deep', 'Cloud Mist'].includes(heroSlides[currentSlide]?.title || '') && (
                 <div
-                  className="absolute inset-0 opacity-25 transition-all duration-1000 ease-in-out"
+                  className="absolute inset-0 opacity-10 transition-all duration-1000 ease-in-out"
                   style={{
-                    background: `radial-gradient(circle at 40% 50%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(255, 255, 255, 0.5)'} 0%, transparent 70%)`
+                    background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(255, 255, 255, 0.2)'} 0%, transparent 60%)`
                   }}
                 />
               )}
