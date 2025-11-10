@@ -165,9 +165,6 @@ export default function Home() {
           {/* Top/Left Side - Bold Statement - Dynamic Background */}
           <motion.div 
             className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
-            style={{
-              color: heroSlides[currentSlide]?.textColor || '#FFFFFF'
-            }}
           >
             {/* Blurred product image background */}
             <AnimatePresence mode="wait">
@@ -186,8 +183,8 @@ export default function Home() {
                     fill
                     className="object-cover"
                     style={{
-                      filter: 'blur(60px) brightness(0.4)',
-                      transform: 'scale(1.2)'
+                      filter: 'blur(80px) brightness(0.3) saturate(1.2)',
+                      transform: 'scale(1.3)'
                     }}
                     unoptimized
                   />
@@ -195,13 +192,8 @@ export default function Home() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Color overlay for tinting */}
-            <div 
-              className="absolute inset-0 opacity-80 transition-colors duration-800"
-              style={{
-                backgroundColor: heroSlides[currentSlide]?.backgroundColor || '#000000'
-              }}
-            />
+            {/* Dark gradient overlay for better text contrast */}
+            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70" />
 
             {/* Multi-layered Visual Effects */}
             <AnimatePresence mode="wait">
@@ -213,19 +205,19 @@ export default function Home() {
                 transition={{ duration: 0.8 }}
                 className="absolute inset-0"
               >
-                {/* Radial gradient orb */}
+                {/* Radial gradient orb - Orange/Gold accent */}
                 <div 
-                  className="absolute inset-0 opacity-40"
+                  className="absolute inset-0 opacity-30"
                   style={{
-                    background: `radial-gradient(circle at 30% 40%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}60 0%, transparent 50%)`
+                    background: 'radial-gradient(circle at 30% 40%, rgba(255, 91, 0, 0.4) 0%, transparent 50%)'
                   }}
                 />
                 
-                {/* Diagonal gradient overlay */}
+                {/* Diagonal gradient sweep */}
                 <div 
-                  className="absolute inset-0 opacity-25"
+                  className="absolute inset-0 opacity-20"
                   style={{
-                    background: `linear-gradient(135deg, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 60%)`
+                    background: 'linear-gradient(135deg, rgba(255, 91, 0, 0.3) 0%, transparent 60%)'
                   }}
                 />
                 
@@ -242,14 +234,29 @@ export default function Home() {
                     ease: 'linear'
                   }}
                   style={{
-                    background: `radial-gradient(at 80% 20%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}50 0%, transparent 50%),
-                                radial-gradient(at 20% 80%, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}40 0%, transparent 50%)`,
+                    background: 'radial-gradient(at 80% 20%, rgba(255, 91, 0, 0.3) 0%, transparent 50%), radial-gradient(at 20% 80%, rgba(255, 140, 0, 0.25) 0%, transparent 50%)',
                     backgroundSize: '400% 400%'
                   }}
                 />
                 
+                {/* Subtle light rays effect */}
+                <motion.div
+                  className="absolute inset-0 opacity-10"
+                  animate={{
+                    rotate: [0, 360]
+                  }}
+                  transition={{
+                    duration: 40,
+                    repeat: Infinity,
+                    ease: 'linear'
+                  }}
+                  style={{
+                    background: 'conic-gradient(from 0deg, transparent 0%, rgba(255, 255, 255, 0.1) 10%, transparent 20%, rgba(255, 255, 255, 0.1) 30%, transparent 40%)'
+                  }}
+                />
+                
                 {/* Noise texture overlay */}
-                <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay"
+                <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay"
                   style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                     backgroundRepeat: 'repeat',
@@ -289,16 +296,21 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6 }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95]"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95] relative z-10"
               >
-                <span className="block font-light text-sm lg:text-base mb-2 lg:mb-3 uppercase tracking-widest opacity-80">
+                <span 
+                  className="block font-light text-sm lg:text-base mb-2 lg:mb-3 uppercase tracking-widest text-white/80"
+                  style={{
+                    textShadow: '0 0 20px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5)'
+                  }}
+                >
                   {heroSlides[currentSlide]?.subtitle || 'DROP 02'}
                 </span>
                 <span 
-                  className="block font-serif italic bg-clip-text text-transparent transition-all duration-800" 
+                  className="block font-serif italic text-white transition-all duration-800" 
                   style={{ 
                     fontFamily: 'Playfair Display, Georgia, serif',
-                    backgroundImage: `linear-gradient(to right, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'}, ${heroSlides[currentSlide]?.accentColor || '#ff5b00'}80, ${heroSlides[currentSlide]?.textColor || '#FFFFFF'})`
+                    textShadow: '0 0 40px rgba(255, 91, 0, 0.6), 0 0 20px rgba(255, 91, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8)'
                   }}
                 >
                   {heroSlides[currentSlide]?.title || 'Elegance'}
@@ -314,7 +326,10 @@ export default function Home() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.6 }}
-                className="text-sm sm:text-base lg:text-xl mb-4 lg:mb-10 max-w-lg leading-relaxed font-light opacity-90"
+                className="text-sm sm:text-base lg:text-xl mb-4 lg:mb-10 max-w-lg leading-relaxed font-light text-white/90 relative z-10"
+                style={{
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7)'
+                }}
               >
                 {heroSlides[currentSlide]?.title === 'Eclipse Black' && 'Pure darkness meets premium comfort. Where sophistication lives in shadow.'}
                 {heroSlides[currentSlide]?.title === 'Forest Dusk' && 'Nature-inspired tranquility woven into every thread. Embrace the calm.'}
