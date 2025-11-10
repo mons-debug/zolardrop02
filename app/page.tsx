@@ -271,136 +271,66 @@ export default function Home() {
             {/* Dark gradient base for text contrast */}
             <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80" />
 
-            {/* 3D Glass Morphism Layers */}
-            <div 
-              className="absolute inset-0"
-              style={{ perspective: '1000px' }}
-            >
-                {/* Glass Panel 1 - Farthest back */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    y: [0, -10, 0],
-                    x: [0, 5, 0]
-                  }}
-                  transition={{
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: 'easeInOut'
-                  }}
-                  style={{
-                    transform: 'translateZ(-100px) rotateY(-5deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div
-                    className="absolute top-[10%] left-[5%] w-[70%] h-[60%] rounded-3xl transition-all duration-1000 ease-in-out"
-                    style={{
-                      backdropFilter: 'blur(20px)',
-                      background: dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.3)',
-                      boxShadow: `0 20px 60px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.4)') || 'rgba(0, 0, 0, 0.4)'}`,
-                      border: '1px solid rgba(255, 255, 255, 0.1)'
-                    }}
-                  />
-                </motion.div>
+            {/* Multiple Gradient Depth Layers */}
+            <div className="absolute inset-0">
+              {/* Layer 1 - Deep Background Gradient (Bottom-Left) */}
+              <div
+                className="absolute inset-0 opacity-40 transition-all duration-1000 ease-in-out"
+                style={{
+                  background: `radial-gradient(circle at 20% 80%, ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.5)'} 0%, transparent 60%)`
+                }}
+              />
 
-                {/* Glass Panel 2 - Middle layer */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    y: [0, 15, 0],
-                    x: [0, -8, 0]
-                  }}
-                  transition={{
-                    duration: 6,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: 0.5
-                  }}
-                  style={{
-                    transform: 'translateZ(-50px) rotateY(3deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div
-                    className="absolute top-[20%] right-[8%] w-[60%] h-[50%] rounded-3xl transition-all duration-1000 ease-in-out"
-                    style={{
-                      backdropFilter: 'blur(25px)',
-                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.25)') || 'rgba(0, 0, 0, 0.25)',
-                      boxShadow: `0 15px 45px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(0, 0, 0, 0.5)'}`,
-                      border: '1px solid rgba(255, 255, 255, 0.15)'
-                    }}
-                  />
-                </motion.div>
+              {/* Layer 2 - Middle Atmospheric Layer (Diagonal Sweep) */}
+              <div
+                className="absolute inset-0 opacity-30 transition-all duration-1000 ease-in-out"
+                style={{
+                  background: `linear-gradient(135deg, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.4)') || 'rgba(0, 0, 0, 0.4)'} 0%, transparent 50%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.2)') || 'rgba(0, 0, 0, 0.2)'} 100%)`
+                }}
+              />
 
-                {/* Glass Panel 3 - Close layer */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    y: [0, -8, 0],
-                    x: [0, 10, 0]
-                  }}
-                  transition={{
-                    duration: 7,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: 1
-                  }}
-                  style={{
-                    transform: 'translateZ(-20px) rotateY(-2deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div
-                    className="absolute bottom-[15%] left-[10%] w-[55%] h-[45%] rounded-3xl transition-all duration-1000 ease-in-out"
-                    style={{
-                      backdropFilter: 'blur(30px)',
-                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.2)') || 'rgba(0, 0, 0, 0.2)',
-                      boxShadow: `0 10px 40px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(0, 0, 0, 0.6)'}`,
-                      border: '1px solid rgba(255, 255, 255, 0.2)'
-                    }}
-                  />
-                </motion.div>
+              {/* Layer 3 - Foreground Color Wash (Top-Right) */}
+              <div
+                className="absolute inset-0 opacity-35 transition-all duration-1000 ease-in-out"
+                style={{
+                  background: `radial-gradient(circle at 80% 20%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(0, 0, 0, 0.5)'} 0%, transparent 55%)`
+                }}
+              />
 
-                {/* Glass Panel 4 - Foreground accent */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    y: [0, 12, 0],
-                    x: [0, -5, 0],
-                    rotate: [0, 2, 0]
-                  }}
-                  transition={{
-                    duration: 9,
-                    repeat: Infinity,
-                    ease: 'easeInOut',
-                    delay: 1.5
-                  }}
-                  style={{
-                    transform: 'translateZ(10px) rotateY(4deg)',
-                    transformStyle: 'preserve-3d'
-                  }}
-                >
-                  <div
-                    className="absolute top-[40%] right-[15%] w-[40%] h-[35%] rounded-3xl transition-all duration-1000 ease-in-out"
-                    style={{
-                      backdropFilter: 'blur(35px)',
-                      background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.15)') || 'rgba(0, 0, 0, 0.15)',
-                      boxShadow: `0 8px 32px ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.4)'}, inset 0 1px 2px rgba(255, 255, 255, 0.1)`,
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                      borderTop: '1px solid rgba(255, 255, 255, 0.4)',
-                      borderLeft: '1px solid rgba(255, 255, 255, 0.3)'
-                    }}
-                  />
-                </motion.div>
+              {/* Layer 4 - Light Accent Gradient (Center Emanation) */}
+              <div
+                className="absolute inset-0 opacity-20 transition-all duration-1000 ease-in-out"
+                style={{
+                  background: `linear-gradient(180deg, transparent 0%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.15)') || 'rgba(0, 0, 0, 0.15)'} 50%, transparent 100%)`
+                }}
+              />
 
-                {/* Subtle ambient glow using dominant color */}
-                <div
-                  className="absolute inset-0 opacity-20 transition-all duration-1000 ease-in-out"
-                  style={{
-                    background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(255, 255, 255, 0.6)'} 0%, transparent 60%)`
-                  }}
-                />
+              {/* Layer 5 - Edge Vignette (Dark Edges) */}
+              <div
+                className="absolute inset-0 opacity-50 transition-all duration-1000 ease-in-out"
+                style={{
+                  background: `radial-gradient(ellipse at center, transparent 0%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(0, 0, 0, 0.6)'} 100%)`
+                }}
+              />
+
+              {/* Subtle animated atmospheric movement */}
+              <motion.div
+                className="absolute inset-0 opacity-25"
+                animate={{
+                  backgroundPosition: ['0% 0%', '100% 100%']
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  repeatType: 'reverse',
+                  ease: 'linear'
+                }}
+                style={{
+                  background: `radial-gradient(at 70% 30%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.3)') || 'rgba(255, 255, 255, 0.3)'} 0%, transparent 50%), radial-gradient(at 30% 70%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.2)') || 'rgba(255, 255, 255, 0.2)'} 0%, transparent 50%)`,
+                  backgroundSize: '200% 200%',
+                  transition: 'background 1000ms ease-in-out'
+                }}
+              />
             </div>
 
             {/* Year Badge */}
