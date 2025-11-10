@@ -272,16 +272,10 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/70 to-black/80" />
 
             {/* 3D Glass Morphism Layers */}
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={`glass-effects-${currentSlide}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.8 }}
-                className="absolute inset-0"
-                style={{ perspective: '1000px' }}
-              >
+            <div 
+              className="absolute inset-0"
+              style={{ perspective: '1000px' }}
+            >
                 {/* Glass Panel 1 - Farthest back */}
                 <motion.div
                   className="absolute inset-0"
@@ -300,7 +294,7 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="absolute top-[10%] left-[5%] w-[70%] h-[60%] rounded-3xl"
+                    className="absolute top-[10%] left-[5%] w-[70%] h-[60%] rounded-3xl transition-all duration-1000 ease-in-out"
                     style={{
                       backdropFilter: 'blur(20px)',
                       background: dominantColors[heroSlides[currentSlide]?.id] || 'rgba(0, 0, 0, 0.3)',
@@ -329,7 +323,7 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="absolute top-[20%] right-[8%] w-[60%] h-[50%] rounded-3xl"
+                    className="absolute top-[20%] right-[8%] w-[60%] h-[50%] rounded-3xl transition-all duration-1000 ease-in-out"
                     style={{
                       backdropFilter: 'blur(25px)',
                       background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.25)') || 'rgba(0, 0, 0, 0.25)',
@@ -340,7 +334,7 @@ export default function Home() {
                 </motion.div>
 
                 {/* Glass Panel 3 - Close layer */}
-        <motion.div
+                <motion.div
                   className="absolute inset-0"
                   animate={{
                     y: [0, -8, 0],
@@ -358,7 +352,7 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="absolute bottom-[15%] left-[10%] w-[55%] h-[45%] rounded-3xl"
+                    className="absolute bottom-[15%] left-[10%] w-[55%] h-[45%] rounded-3xl transition-all duration-1000 ease-in-out"
                     style={{
                       backdropFilter: 'blur(30px)',
                       background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.2)') || 'rgba(0, 0, 0, 0.2)',
@@ -388,7 +382,7 @@ export default function Home() {
                   }}
                 >
                   <div
-                    className="absolute top-[40%] right-[15%] w-[40%] h-[35%] rounded-3xl"
+                    className="absolute top-[40%] right-[15%] w-[40%] h-[35%] rounded-3xl transition-all duration-1000 ease-in-out"
                     style={{
                       backdropFilter: 'blur(35px)',
                       background: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.15)') || 'rgba(0, 0, 0, 0.15)',
@@ -402,13 +396,12 @@ export default function Home() {
 
                 {/* Subtle ambient glow using dominant color */}
                 <div
-                  className="absolute inset-0 opacity-20"
+                  className="absolute inset-0 opacity-20 transition-all duration-1000 ease-in-out"
                   style={{
                     background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(255, 255, 255, 0.6)'} 0%, transparent 60%)`
                   }}
                 />
-              </motion.div>
-            </AnimatePresence>
+            </div>
 
             {/* Year Badge */}
             <motion.div
