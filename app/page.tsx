@@ -284,6 +284,21 @@ export default function Home() {
               {/* Eclipse Black - Concentric circles and orbital rings */}
               {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
                 <>
+                  {/* Central dark focus */}
+                  <div
+                    className="absolute"
+                    style={{
+                      top: '50%',
+                      left: '50%',
+                      width: '400px',
+                      height: '400px',
+                      marginLeft: '-200px',
+                      marginTop: '-200px',
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, transparent 70%)',
+                      boxShadow: '0 0 80px 30px rgba(255, 255, 255, 0.08)'
+                    }}
+                  />
                   {/* Orbital ring 1 */}
                   <motion.div
                     className="absolute"
@@ -295,7 +310,8 @@ export default function Home() {
                       marginLeft: '-250px',
                       marginTop: '-250px',
                       borderRadius: '50%',
-                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.1)'
                     }}
                     animate={{
                       rotate: [0, 360]
@@ -317,7 +333,8 @@ export default function Home() {
                       marginLeft: '-350px',
                       marginTop: '-350px',
                       borderRadius: '50%',
-                      border: '1px solid rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 0 15px rgba(255, 255, 255, 0.08)'
                     }}
                     animate={{
                       rotate: [360, 0]
@@ -328,7 +345,7 @@ export default function Home() {
                       ease: 'linear'
                     }}
                   />
-                  {/* Concentric circles */}
+                  {/* Concentric circles - Enhanced */}
                   {[300, 400, 600].map((size, i) => (
                     <div
                       key={i}
@@ -341,7 +358,7 @@ export default function Home() {
                         marginLeft: `-${size/2}px`,
                         marginTop: `-${size/2}px`,
                         borderRadius: '50%',
-                        border: `1px solid rgba(255, 255, 255, ${0.06 - i * 0.02})`,
+                        border: `1px solid rgba(255, 255, 255, ${0.12 - i * 0.03})`,
                       }}
                     />
                   ))}
@@ -351,15 +368,22 @@ export default function Home() {
               {/* Forest Dusk - Organic branch/leaf silhouettes */}
               {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
                 <>
+                  {/* Enhanced green glow */}
+                  <div
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      background: 'radial-gradient(circle at 40% 50%, rgba(34, 139, 87, 0.4) 0%, transparent 60%)'
+                    }}
+                  />
                   {/* Branch pattern 1 */}
                   <motion.div
-                    className="absolute opacity-15"
+                    className="absolute opacity-35"
                     style={{
                       top: '10%',
                       left: '5%',
                       width: '200px',
                       height: '400px',
-                      background: 'linear-gradient(45deg, rgba(34, 139, 87, 0.3) 0%, transparent 50%)',
+                      background: 'linear-gradient(45deg, rgba(34, 139, 87, 0.6) 0%, rgba(46, 125, 50, 0.3) 50%, transparent 70%)',
                       clipPath: 'polygon(50% 0%, 55% 100%, 45% 100%)',
                     }}
                     animate={{
@@ -373,13 +397,13 @@ export default function Home() {
                   />
                   {/* Branch pattern 2 */}
                   <motion.div
-                    className="absolute opacity-12"
+                    className="absolute opacity-30"
                     style={{
                       bottom: '15%',
                       right: '10%',
                       width: '250px',
                       height: '350px',
-                      background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.25) 0%, transparent 60%)',
+                      background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.5) 0%, rgba(34, 139, 87, 0.25) 60%, transparent 80%)',
                       clipPath: 'polygon(45% 0%, 50% 100%, 40% 100%)',
                     }}
                     animate={{
@@ -391,22 +415,23 @@ export default function Home() {
                       ease: 'easeInOut'
                     }}
                   />
-                  {/* Leaf shapes */}
+                  {/* Leaf shapes - Enhanced */}
                   {[
-                    { top: '25%', left: '15%', size: 80, delay: 0 },
-                    { top: '60%', left: '8%', size: 60, delay: 1 },
-                    { top: '40%', right: '20%', size: 70, delay: 2 }
+                    { top: '25%', left: '15%', size: 100, delay: 0 },
+                    { top: '60%', left: '8%', size: 80, delay: 1 },
+                    { top: '40%', right: '20%', size: 90, delay: 2 }
                   ].map((leaf, i) => (
                     <motion.div
                       key={i}
-                      className="absolute opacity-10"
+                      className="absolute opacity-25"
                       style={{
                         ...leaf,
                         width: `${leaf.size}px`,
                         height: `${leaf.size}px`,
-                        background: 'rgba(34, 139, 87, 0.2)',
+                        background: 'rgba(34, 139, 87, 0.4)',
                         borderRadius: '0 100% 0 100%',
-                        transform: 'rotate(45deg)'
+                        transform: 'rotate(45deg)',
+                        boxShadow: '0 0 30px rgba(34, 139, 87, 0.3)'
                       }}
                       animate={{
                         y: [0, -10, 0],
@@ -420,19 +445,41 @@ export default function Home() {
                       }}
                     />
                   ))}
+                  {/* Additional green ambient layers */}
+                  <motion.div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, rgba(34, 139, 87, 0.3) 0%, transparent 50%, rgba(46, 125, 50, 0.2) 100%)'
+                    }}
+                    animate={{
+                      x: ['-5%', '5%', '-5%']
+                    }}
+                    transition={{
+                      duration: 15,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
+                    }}
+                  />
                 </>
               )}
 
               {/* Ocean Deep - Flowing wave curves */}
               {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
                 <>
-                  {/* Wave curve 1 */}
+                  {/* Enhanced blue glow */}
+                  <div
+                    className="absolute inset-0 opacity-35"
+                    style={{
+                      background: 'radial-gradient(ellipse at 50% 50%, rgba(30, 58, 138, 0.5) 0%, transparent 65%)'
+                    }}
+                  />
+                  {/* Wave curve 1 - Enhanced */}
                   <motion.div
-                    className="absolute inset-x-0 opacity-15"
+                    className="absolute inset-x-0 opacity-35"
                     style={{
                       top: '20%',
                       height: '200px',
-                      background: 'linear-gradient(180deg, transparent 0%, rgba(30, 58, 138, 0.3) 50%, transparent 100%)',
+                      background: 'linear-gradient(180deg, rgba(30, 58, 138, 0.3) 0%, rgba(30, 58, 138, 0.5) 50%, transparent 100%)',
                       clipPath: 'path("M 0 50 Q 150 0, 300 50 T 600 50 T 900 50 T 1200 50 L 1200 200 L 0 200 Z")',
                     }}
                     animate={{
@@ -444,13 +491,13 @@ export default function Home() {
                       ease: 'linear'
                     }}
                   />
-                  {/* Wave curve 2 */}
+                  {/* Wave curve 2 - Enhanced */}
                   <motion.div
-                    className="absolute inset-x-0 opacity-12"
+                    className="absolute inset-x-0 opacity-30"
                     style={{
                       bottom: '25%',
                       height: '180px',
-                      background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, transparent 100%)',
+                      background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.45) 0%, rgba(30, 58, 138, 0.25) 50%, transparent 100%)',
                       clipPath: 'path("M 0 30 Q 200 80, 400 30 T 800 30 T 1200 30 L 1200 180 L 0 180 Z")',
                     }}
                     animate={{
@@ -462,15 +509,16 @@ export default function Home() {
                       ease: 'linear'
                     }}
                   />
-                  {/* Curved lines */}
+                  {/* Curved lines - Enhanced */}
                   {[30, 50, 70].map((top, i) => (
                     <motion.div
                       key={i}
-                      className="absolute inset-x-0 opacity-8"
+                      className="absolute inset-x-0 opacity-20"
                       style={{
                         top: `${top}%`,
-                        height: '2px',
-                        background: `linear-gradient(90deg, transparent, rgba(59, 130, 246, ${0.2 - i * 0.05}), transparent)`,
+                        height: '3px',
+                        background: `linear-gradient(90deg, transparent, rgba(59, 130, 246, ${0.4 - i * 0.08}), transparent)`,
+                        boxShadow: `0 0 15px rgba(59, 130, 246, ${0.3 - i * 0.05})`
                       }}
                       animate={{
                         scaleX: [1, 1.1, 1]
@@ -483,22 +531,45 @@ export default function Home() {
                       }}
                     />
                   ))}
+                  {/* Additional blue ambient flow */}
+                  <motion.div
+                    className="absolute inset-0 opacity-25"
+                    style={{
+                      background: 'linear-gradient(180deg, transparent 0%, rgba(30, 58, 138, 0.3) 40%, transparent 80%)'
+                    }}
+                    animate={{
+                      y: ['-5%', '5%', '-5%']
+                    }}
+                    transition={{
+                      duration: 12,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
+                    }}
+                  />
                 </>
               )}
 
               {/* Cloud Mist - Soft rounded shapes */}
               {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
                 <>
-                  {/* Large rounded shape 1 */}
+                  {/* Enhanced grey/mist ambient glow */}
+                  <div
+                    className="absolute inset-0 opacity-25"
+                    style={{
+                      background: 'radial-gradient(ellipse at 40% 40%, rgba(156, 163, 175, 0.4) 0%, transparent 70%)'
+                    }}
+                  />
+                  {/* Large rounded shape 1 - Enhanced */}
                   <motion.div
-                    className="absolute opacity-12"
+                    className="absolute opacity-25"
                     style={{
                       top: '15%',
                       left: '8%',
                       width: '400px',
                       height: '400px',
                       borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-                      background: 'rgba(156, 163, 175, 0.15)',
+                      background: 'rgba(156, 163, 175, 0.3)',
+                      boxShadow: '0 0 40px rgba(156, 163, 175, 0.2)'
                     }}
                     animate={{
                       borderRadius: [
@@ -514,16 +585,17 @@ export default function Home() {
                       ease: 'easeInOut'
                     }}
                   />
-                  {/* Medium rounded shape */}
+                  {/* Medium rounded shape - Enhanced */}
                   <motion.div
-                    className="absolute opacity-10"
+                    className="absolute opacity-20"
                     style={{
                       top: '45%',
                       right: '12%',
                       width: '300px',
                       height: '300px',
                       borderRadius: '60% 40% 50% 50% / 50% 60% 40% 50%',
-                      background: 'rgba(156, 163, 175, 0.12)',
+                      background: 'rgba(156, 163, 175, 0.25)',
+                      boxShadow: '0 0 30px rgba(156, 163, 175, 0.15)'
                     }}
                     animate={{
                       borderRadius: [
@@ -540,7 +612,7 @@ export default function Home() {
                       delay: 1
                     }}
                   />
-                  {/* Small circles */}
+                  {/* Small circles - Enhanced */}
                   {[
                     { top: '25%', right: '25%', size: 120 },
                     { bottom: '30%', left: '18%', size: 100 },
@@ -548,17 +620,18 @@ export default function Home() {
                   ].map((circle, i) => (
                     <motion.div
                       key={i}
-                      className="absolute opacity-8"
+                      className="absolute opacity-18"
                       style={{
                         ...circle,
                         width: `${circle.size}px`,
                         height: `${circle.size}px`,
                         borderRadius: '50%',
-                        background: 'rgba(156, 163, 175, 0.1)',
+                        background: 'rgba(156, 163, 175, 0.2)',
+                        boxShadow: '0 0 20px rgba(156, 163, 175, 0.15)'
                       }}
                       animate={{
                         scale: [1, 1.1, 1],
-                        opacity: [0.08, 0.12, 0.08]
+                        opacity: [0.18, 0.25, 0.18]
                       }}
                       transition={{
                         duration: 8,
@@ -568,6 +641,21 @@ export default function Home() {
                       }}
                     />
                   ))}
+                  {/* Additional misty layer */}
+                  <motion.div
+                    className="absolute inset-0 opacity-15"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.25) 0%, transparent 60%)'
+                    }}
+                    animate={{
+                      opacity: [0.15, 0.25, 0.15]
+                    }}
+                    transition={{
+                      duration: 10,
+                      repeat: Infinity,
+                      ease: 'easeInOut'
+                    }}
+                  />
                 </>
               )}
 
