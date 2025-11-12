@@ -243,13 +243,13 @@ export default function Home() {
             className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
           >
             {/* Blurred product image background */}
-        <AnimatePresence mode="wait">
-          <motion.div
+            <AnimatePresence mode="wait">
+              <motion.div 
                 key={`bg-img-${currentSlide}`}
-                initial={{ opacity: 0, scale: 1.1 }}
-                animate={{ opacity: 1, scale: 1.05 }}
-                exit={{ opacity: 0, scale: 1 }}
-                transition={{ duration: 0.8 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
             className="absolute inset-0"
           >
                 {heroSlides[currentSlide]?.image && (
@@ -269,18 +269,33 @@ export default function Home() {
         </AnimatePresence>
 
             {/* Dynamic gradient base that transitions with dominant color */}
-            <div 
-              className="absolute inset-0 transition-all duration-1000 ease-in-out"
-              style={{
-                background: `linear-gradient(135deg, 
-                  ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.9)') || 'rgba(0, 0, 0, 0.9)'} 0%, 
-                  ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.7)') || 'rgba(0, 0, 0, 0.7)'} 50%, 
-                  ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.85)') || 'rgba(0, 0, 0, 0.85)'} 100%)`
-              }}
-            />
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={`bg-gradient-${currentSlide}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(135deg, 
+                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.9)') || 'rgba(0, 0, 0, 0.9)'} 0%, 
+                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.7)') || 'rgba(0, 0, 0, 0.7)'} 50%, 
+                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.85)') || 'rgba(0, 0, 0, 0.85)'} 100%)`
+                }}
+              />
+            </AnimatePresence>
 
             {/* Abstract Geometric Patterns */}
-            <div className="absolute inset-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={`patterns-${currentSlide}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
+                className="absolute inset-0 overflow-hidden"
+              >
               {/* Eclipse Black - Concentric circles and orbital rings */}
               {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
                 <>
@@ -662,13 +677,14 @@ export default function Home() {
               {/* Fallback - Minimal geometric pattern */}
               {!['Eclipse Black', 'Forest Dusk', 'Ocean Deep', 'Cloud Mist'].includes(heroSlides[currentSlide]?.title || '') && (
                 <div
-                  className="absolute inset-0 opacity-10 transition-all duration-1000 ease-in-out"
+                  className="absolute inset-0 opacity-10"
                   style={{
                     background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(255, 255, 255, 0.2)'} 0%, transparent 60%)`
                   }}
                 />
               )}
-            </div>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Year Badge */}
             <motion.div
@@ -696,10 +712,10 @@ export default function Home() {
             <AnimatePresence mode="wait">
               <motion.h1
                 key={`headline-${currentSlide}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95] relative z-10"
               >
                 <span 
@@ -726,10 +742,10 @@ export default function Home() {
             <AnimatePresence mode="wait">
               <motion.p
                 key={`desc-${currentSlide}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1, ease: 'easeInOut' }}
                 className="text-sm sm:text-base lg:text-xl mb-4 lg:mb-10 max-w-lg leading-relaxed font-light text-white/90 relative z-10"
                 style={{
                   textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7)'
@@ -814,7 +830,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  transition={{ duration: 1, ease: "easeInOut" }}
                   className="relative h-full"
           >
             {heroSlides[currentSlide]?.mediaType === 'video' ? (
