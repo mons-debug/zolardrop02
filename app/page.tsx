@@ -276,6 +276,81 @@ export default function Home() {
                       : 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)'
                   }}
                 />
+
+                {/* Atmospheric Effects - Smoke/Mist for non-black backgrounds */}
+                {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
+                  <>
+                    {/* Cloud Mist - Prominent smoke effect */}
+                    <motion.div
+                      className="absolute inset-0 opacity-30"
+                      animate={{
+                        opacity: [0.2, 0.35, 0.2],
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                    >
+                      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gray-400/20 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gray-300/15 rounded-full blur-3xl" />
+                    </motion.div>
+                    <motion.div
+                      className="absolute inset-0 opacity-20"
+                      animate={{
+                        x: ['-10%', '10%', '-10%'],
+                      }}
+                      transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: 'linear'
+                      }}
+                    >
+                      <div className="absolute top-1/2 left-0 w-full h-64 bg-gradient-to-r from-transparent via-gray-400/10 to-transparent blur-2xl" />
+                    </motion.div>
+                  </>
+                )}
+
+                {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
+                  <>
+                    {/* Forest Dusk - Subtle misty fog effect */}
+                    <motion.div
+                      className="absolute inset-0 opacity-20"
+                      animate={{
+                        opacity: [0.15, 0.25, 0.15],
+                      }}
+                      transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                    >
+                      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-green-900/15 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-emerald-900/10 rounded-full blur-3xl" />
+                    </motion.div>
+                  </>
+                )}
+
+                {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
+                  <>
+                    {/* Ocean Deep - Flowing mist effect */}
+                    <motion.div
+                      className="absolute inset-0 opacity-20"
+                      animate={{
+                        opacity: [0.15, 0.28, 0.15],
+                        y: ['-5%', '5%', '-5%']
+                      }}
+                      transition={{
+                        duration: 12,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                    >
+                      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-blue-900/20 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-cyan-900/15 rounded-full blur-3xl" />
+                    </motion.div>
+                  </>
+                )}
               </motion.div>
             </AnimatePresence>
 
@@ -307,7 +382,7 @@ export default function Home() {
                   transition={{ duration: 1, ease: 'easeInOut' }}
                   className="text-base lg:text-lg mb-8 lg:mb-12 max-w-md leading-relaxed font-light text-white/70"
                 >
-                  More Charming
+                  {heroSlides[currentSlide]?.title || 'More Charming'}
                 </motion.p>
               </AnimatePresence>
 
