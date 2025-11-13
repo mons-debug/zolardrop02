@@ -311,11 +311,12 @@ export default function Home() {
                 </motion.p>
               </AnimatePresence>
 
-              {/* Outlined Button */}
+              {/* Button and Navigation */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.4 }}
+                className="flex items-center gap-6"
               >
                 <Link
                   href="/products"
@@ -325,59 +326,47 @@ export default function Home() {
                     Explore
                   </span>
                 </Link>
-              </motion.div>
 
-              {/* Arrow Navigation */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="absolute bottom-8 lg:bottom-12 left-6 sm:left-8 md:left-12 lg:left-20 flex items-center gap-4"
-              >
-                <button
-                  onClick={prevSlide}
-                  className="w-10 h-10 lg:w-12 lg:h-12 border border-white/40 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300 group"
-                  aria-label="Previous slide"
-                >
-                  <svg
-                    className="w-4 h-4 lg:w-5 lg:h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {/* Navigation Arrows */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={prevSlide}
+                    className="w-10 h-10 lg:w-12 lg:h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
+                    aria-label="Previous slide"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="w-10 h-10 lg:w-12 lg:h-12 border border-white/40 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300 group"
-                  aria-label="Next slide"
-                >
-                  <svg
-                    className="w-4 h-4 lg:w-5 lg:h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    <svg
+                      className="w-4 h-4 lg:w-5 lg:h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 19l-7-7 7-7"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="w-10 h-10 lg:w-12 lg:h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
+                    aria-label="Next slide"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-
-                {/* Scroll Down Indicator */}
-                <div className="ml-8 hidden lg:flex flex-col items-center gap-2">
-                  <span className="text-xs text-white/50 tracking-widest uppercase rotate-90 origin-center translate-x-6">
-                    Scroll down
-                  </span>
+                    <svg
+                      className="w-4 h-4 lg:w-5 lg:h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </button>
                 </div>
               </motion.div>
             </div>
