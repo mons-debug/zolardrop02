@@ -238,586 +238,140 @@ export default function Home() {
         className="relative h-screen w-full overflow-hidden bg-black"
       >
         <div className="flex flex-col lg:flex-row h-screen">
-          {/* Top/Left Side - Bold Statement - Dynamic Background */}
+          {/* Left Side - Clean Minimal Design */}
           <motion.div 
             className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
           >
-            {/* Blurred product image background */}
+            {/* Simple Gradient Background with Subtle Color Theme */}
             <AnimatePresence mode="wait">
               <motion.div 
-                key={`bg-img-${currentSlide}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-            className="absolute inset-0"
-          >
-                {heroSlides[currentSlide]?.image && (
-            <Image
-              src={heroSlides[currentSlide].image}
-                    alt="Background"
-                    fill
-                    className="object-cover"
-                    style={{
-                      filter: 'blur(80px) brightness(0.3) saturate(1.2)',
-                      transform: 'scale(1.3)'
-                    }}
-                    unoptimized
-                  />
-                )}
-          </motion.div>
-        </AnimatePresence>
-
-            {/* Dynamic gradient base that transitions with dominant color */}
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={`bg-gradient-${currentSlide}`}
+                key={`bg-${currentSlide}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
                 className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(135deg, 
-                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.9)') || 'rgba(0, 0, 0, 0.9)'} 0%, 
-                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.7)') || 'rgba(0, 0, 0, 0.7)'} 50%, 
-                    ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.85)') || 'rgba(0, 0, 0, 0.85)'} 100%)`
-                }}
-              />
-            </AnimatePresence>
-
-            {/* Abstract Geometric Patterns */}
-            <AnimatePresence mode="wait">
-              <motion.div 
-                key={`patterns-${currentSlide}`}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-                className="absolute inset-0 overflow-hidden"
               >
-              {/* Eclipse Black - Concentric circles and orbital rings */}
-              {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
-                <>
-                  {/* Central dark focus */}
-                  <div
-                    className="absolute"
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      width: '400px',
-                      height: '400px',
-                      marginLeft: '-200px',
-                      marginTop: '-200px',
-                      borderRadius: '50%',
-                      background: 'radial-gradient(circle, rgba(0, 0, 0, 0.6) 0%, transparent 70%)',
-                      boxShadow: '0 0 80px 30px rgba(255, 255, 255, 0.08)'
-                    }}
-                  />
-                  {/* Orbital ring 1 */}
-                  <motion.div
-                    className="absolute"
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      width: '500px',
-                      height: '500px',
-                      marginLeft: '-250px',
-                      marginTop: '-250px',
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255, 255, 255, 0.15)',
-                      boxShadow: '0 0 20px rgba(255, 255, 255, 0.1)'
-                    }}
-                    animate={{
-                      rotate: [0, 360]
-                    }}
-                    transition={{
-                      duration: 30,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
-                  {/* Orbital ring 2 */}
-                  <motion.div
-                    className="absolute"
-                    style={{
-                      top: '50%',
-                      left: '50%',
-                      width: '700px',
-                      height: '700px',
-                      marginLeft: '-350px',
-                      marginTop: '-350px',
-                      borderRadius: '50%',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      boxShadow: '0 0 15px rgba(255, 255, 255, 0.08)'
-                    }}
-                    animate={{
-                      rotate: [360, 0]
-                    }}
-                    transition={{
-                      duration: 45,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
-                  {/* Concentric circles - Enhanced */}
-                  {[300, 400, 600].map((size, i) => (
-                    <div
-                      key={i}
-                      className="absolute"
-                      style={{
-                        top: '50%',
-                        left: '50%',
-                        width: `${size}px`,
-                        height: `${size}px`,
-                        marginLeft: `-${size/2}px`,
-                        marginTop: `-${size/2}px`,
-                        borderRadius: '50%',
-                        border: `1px solid rgba(255, 255, 255, ${0.12 - i * 0.03})`,
-                      }}
-                    />
-                  ))}
-                </>
-              )}
-
-              {/* Forest Dusk - Organic branch/leaf silhouettes */}
-              {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
-                <>
-                  {/* Enhanced green glow */}
-                  <div
-                    className="absolute inset-0 opacity-30"
-                    style={{
-                      background: 'radial-gradient(circle at 40% 50%, rgba(34, 139, 87, 0.4) 0%, transparent 60%)'
-                    }}
-                  />
-                  {/* Branch pattern 1 */}
-                  <motion.div
-                    className="absolute opacity-35"
-                    style={{
-                      top: '10%',
-                      left: '5%',
-                      width: '200px',
-                      height: '400px',
-                      background: 'linear-gradient(45deg, rgba(34, 139, 87, 0.6) 0%, rgba(46, 125, 50, 0.3) 50%, transparent 70%)',
-                      clipPath: 'polygon(50% 0%, 55% 100%, 45% 100%)',
-                    }}
-                    animate={{
-                      rotate: [-2, 2, -2]
-                    }}
-                    transition={{
-                      duration: 8,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Branch pattern 2 */}
-                  <motion.div
-                    className="absolute opacity-30"
-                    style={{
-                      bottom: '15%',
-                      right: '10%',
-                      width: '250px',
-                      height: '350px',
-                      background: 'linear-gradient(135deg, rgba(46, 125, 50, 0.5) 0%, rgba(34, 139, 87, 0.25) 60%, transparent 80%)',
-                      clipPath: 'polygon(45% 0%, 50% 100%, 40% 100%)',
-                    }}
-                    animate={{
-                      rotate: [2, -2, 2]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Leaf shapes - Enhanced */}
-                  {[
-                    { top: '25%', left: '15%', size: 100, delay: 0 },
-                    { top: '60%', left: '8%', size: 80, delay: 1 },
-                    { top: '40%', right: '20%', size: 90, delay: 2 }
-                  ].map((leaf, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute opacity-25"
-                      style={{
-                        ...leaf,
-                        width: `${leaf.size}px`,
-                        height: `${leaf.size}px`,
-                        background: 'rgba(34, 139, 87, 0.4)',
-                        borderRadius: '0 100% 0 100%',
-                        transform: 'rotate(45deg)',
-                        boxShadow: '0 0 30px rgba(34, 139, 87, 0.3)'
-                      }}
-                      animate={{
-                        y: [0, -10, 0],
-                        rotate: [45, 50, 45]
-                      }}
-                      transition={{
-                        duration: 6,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                        delay: leaf.delay
-                      }}
-                    />
-                  ))}
-                  {/* Additional green ambient layers */}
-                  <motion.div
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, rgba(34, 139, 87, 0.3) 0%, transparent 50%, rgba(46, 125, 50, 0.2) 100%)'
-                    }}
-                    animate={{
-                      x: ['-5%', '5%', '-5%']
-                    }}
-                    transition={{
-                      duration: 15,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Ocean Deep - Flowing wave curves */}
-              {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
-                <>
-                  {/* Enhanced blue glow */}
-                  <div
-                    className="absolute inset-0 opacity-35"
-                    style={{
-                      background: 'radial-gradient(ellipse at 50% 50%, rgba(30, 58, 138, 0.5) 0%, transparent 65%)'
-                    }}
-                  />
-                  {/* Wave curve 1 - Enhanced */}
-                  <motion.div
-                    className="absolute inset-x-0 opacity-35"
-                    style={{
-                      top: '20%',
-                      height: '200px',
-                      background: 'linear-gradient(180deg, rgba(30, 58, 138, 0.3) 0%, rgba(30, 58, 138, 0.5) 50%, transparent 100%)',
-                      clipPath: 'path("M 0 50 Q 150 0, 300 50 T 600 50 T 900 50 T 1200 50 L 1200 200 L 0 200 Z")',
-                    }}
-                    animate={{
-                      x: [0, -300, 0]
-                    }}
-                    transition={{
-                      duration: 15,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
-                  {/* Wave curve 2 - Enhanced */}
-                  <motion.div
-                    className="absolute inset-x-0 opacity-30"
-                    style={{
-                      bottom: '25%',
-                      height: '180px',
-                      background: 'linear-gradient(180deg, rgba(59, 130, 246, 0.45) 0%, rgba(30, 58, 138, 0.25) 50%, transparent 100%)',
-                      clipPath: 'path("M 0 30 Q 200 80, 400 30 T 800 30 T 1200 30 L 1200 180 L 0 180 Z")',
-                    }}
-                    animate={{
-                      x: [-300, 0, -300]
-                    }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: 'linear'
-                    }}
-                  />
-                  {/* Curved lines - Enhanced */}
-                  {[30, 50, 70].map((top, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute inset-x-0 opacity-20"
-                      style={{
-                        top: `${top}%`,
-                        height: '3px',
-                        background: `linear-gradient(90deg, transparent, rgba(59, 130, 246, ${0.4 - i * 0.08}), transparent)`,
-                        boxShadow: `0 0 15px rgba(59, 130, 246, ${0.3 - i * 0.05})`
-                      }}
-                      animate={{
-                        scaleX: [1, 1.1, 1]
-                      }}
-                      transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                        delay: i * 0.8
-                      }}
-                    />
-                  ))}
-                  {/* Additional blue ambient flow */}
-                  <motion.div
-                    className="absolute inset-0 opacity-25"
-                    style={{
-                      background: 'linear-gradient(180deg, transparent 0%, rgba(30, 58, 138, 0.3) 40%, transparent 80%)'
-                    }}
-                    animate={{
-                      y: ['-5%', '5%', '-5%']
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Cloud Mist - Soft rounded shapes */}
-              {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
-                <>
-                  {/* Enhanced grey/mist ambient glow */}
-                  <div
-                    className="absolute inset-0 opacity-25"
-                    style={{
-                      background: 'radial-gradient(ellipse at 40% 40%, rgba(156, 163, 175, 0.4) 0%, transparent 70%)'
-                    }}
-                  />
-                  {/* Large rounded shape 1 - Enhanced */}
-                  <motion.div
-                    className="absolute opacity-25"
-                    style={{
-                      top: '15%',
-                      left: '8%',
-                      width: '400px',
-                      height: '400px',
-                      borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-                      background: 'rgba(156, 163, 175, 0.3)',
-                      boxShadow: '0 0 40px rgba(156, 163, 175, 0.2)'
-                    }}
-                    animate={{
-                      borderRadius: [
-                        '40% 60% 70% 30% / 40% 50% 60% 50%',
-                        '60% 40% 30% 70% / 50% 60% 40% 60%',
-                        '40% 60% 70% 30% / 40% 50% 60% 50%'
-                      ],
-                      y: [0, -15, 0]
-                    }}
-                    transition={{
-                      duration: 12,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                  {/* Medium rounded shape - Enhanced */}
-                  <motion.div
-                    className="absolute opacity-20"
-                    style={{
-                      top: '45%',
-                      right: '12%',
-                      width: '300px',
-                      height: '300px',
-                      borderRadius: '60% 40% 50% 50% / 50% 60% 40% 50%',
-                      background: 'rgba(156, 163, 175, 0.25)',
-                      boxShadow: '0 0 30px rgba(156, 163, 175, 0.15)'
-                    }}
-                    animate={{
-                      borderRadius: [
-                        '60% 40% 50% 50% / 50% 60% 40% 50%',
-                        '40% 60% 50% 50% / 60% 40% 60% 40%',
-                        '60% 40% 50% 50% / 50% 60% 40% 50%'
-                      ],
-                      y: [0, 20, 0]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 1
-                    }}
-                  />
-                  {/* Small circles - Enhanced */}
-                  {[
-                    { top: '25%', right: '25%', size: 120 },
-                    { bottom: '30%', left: '18%', size: 100 },
-                    { top: '55%', left: '35%', size: 80 }
-                  ].map((circle, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute opacity-18"
-                      style={{
-                        ...circle,
-                        width: `${circle.size}px`,
-                        height: `${circle.size}px`,
-                        borderRadius: '50%',
-                        background: 'rgba(156, 163, 175, 0.2)',
-                        boxShadow: '0 0 20px rgba(156, 163, 175, 0.15)'
-                      }}
-                      animate={{
-                        scale: [1, 1.1, 1],
-                        opacity: [0.18, 0.25, 0.18]
-                      }}
-                      transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: 'easeInOut',
-                        delay: i * 1.5
-                      }}
-                    />
-                  ))}
-                  {/* Additional misty layer */}
-                  <motion.div
-                    className="absolute inset-0 opacity-15"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(156, 163, 175, 0.25) 0%, transparent 60%)'
-                    }}
-                    animate={{
-                      opacity: [0.15, 0.25, 0.15]
-                    }}
-                    transition={{
-                      duration: 10,
-                      repeat: Infinity,
-                      ease: 'easeInOut'
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Fallback - Minimal geometric pattern */}
-              {!['Eclipse Black', 'Forest Dusk', 'Ocean Deep', 'Cloud Mist'].includes(heroSlides[currentSlide]?.title || '') && (
-                <div
-                  className="absolute inset-0 opacity-10"
+                {/* Product-specific subtle gradient */}
+                <div 
+                  className="absolute inset-0"
                   style={{
-                    background: `radial-gradient(circle at 50% 50%, ${dominantColors[heroSlides[currentSlide]?.id] || 'rgba(255, 255, 255, 0.2)'} 0%, transparent 60%)`
+                    background: heroSlides[currentSlide]?.title === 'Eclipse Black' 
+                      ? 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)'
+                      : heroSlides[currentSlide]?.title === 'Forest Dusk'
+                      ? 'linear-gradient(135deg, #0a1810 0%, #000000 100%)'
+                      : heroSlides[currentSlide]?.title === 'Ocean Deep'
+                      ? 'linear-gradient(135deg, #0a1628 0%, #000000 100%)'
+                      : heroSlides[currentSlide]?.title === 'Cloud Mist'
+                      ? 'linear-gradient(135deg, #1a1c1e 0%, #000000 100%)'
+                      : 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)'
                   }}
                 />
-              )}
               </motion.div>
             </AnimatePresence>
 
-            {/* Year Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="mb-3 lg:mb-6"
-            >
-              <div className="inline-flex items-center space-x-2 lg:space-x-3 border border-white/20 rounded-full px-4 lg:px-6 py-2 lg:py-3 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span 
-                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                    style={{ backgroundColor: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '1)') || 'rgba(255, 255, 255, 1)' }}
-                  />
-                  <span 
-                    className="relative inline-flex rounded-full h-2 w-2"
-                    style={{ backgroundColor: dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '1)') || 'rgba(255, 255, 255, 1)' }}
-                  />
-                </span>
-                <span className="text-[10px] lg:text-xs font-medium tracking-[0.2em] uppercase">Winter 2025</span>
-              </div>
-            </motion.div>
-
-            {/* Main Headline - Dynamic Product Name */}
-            <AnimatePresence mode="wait">
-              <motion.h1
-                key={`headline-${currentSlide}`}
+            {/* Main Content - Clean Typography */}
+            <div className="relative z-10">
+              {/* Generic Tagline */}
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-light tracking-tighter mb-3 lg:mb-6 leading-[0.95] relative z-10"
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="mb-6 lg:mb-8"
               >
-                <span 
-                  className="block font-light text-sm lg:text-base mb-2 lg:mb-3 uppercase tracking-widest text-white/80"
-                  style={{
-                    textShadow: '0 0 20px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.5)'
-                  }}
-                >
-                  {heroSlides[currentSlide]?.subtitle || 'DROP 02'}
-                </span>
-                <span 
-                  className="block font-serif italic text-white transition-all duration-800" 
-                  style={{ 
-                    fontFamily: 'Playfair Display, Georgia, serif',
-                    textShadow: `0 0 40px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.6)') || 'rgba(255, 255, 255, 0.6)'}, 0 0 20px ${dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.4)') || 'rgba(255, 255, 255, 0.4)'}, 0 4px 12px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8)`
-                  }}
-                >
-                  {heroSlides[currentSlide]?.title || 'Elegance'}
-                </span>
-              </motion.h1>
-            </AnimatePresence>
+                <h2 className="text-sm lg:text-base font-light tracking-[0.3em] uppercase text-white/60 mb-2">
+                  Zolar
+                </h2>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight leading-[0.9] text-white mb-4">
+                  Make your<br />
+                  fashion look
+                </h1>
+              </motion.div>
 
-            {/* Subtitle - Dynamic Description */}
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={`desc-${currentSlide}`}
+              {/* Subtitle with dynamic product name */}
+              <AnimatePresence mode="wait">
+                <motion.p
+                  key={`desc-${currentSlide}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 1, ease: 'easeInOut' }}
+                  className="text-base lg:text-lg mb-8 lg:mb-12 max-w-md leading-relaxed font-light text-white/70"
+                >
+                  More Charming
+                </motion.p>
+              </AnimatePresence>
+
+              {/* Outlined Button */}
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
-                className="text-sm sm:text-base lg:text-xl mb-4 lg:mb-10 max-w-lg leading-relaxed font-light text-white/90 relative z-10"
-                style={{
-                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.9), 0 1px 3px rgba(0, 0, 0, 0.7)'
-                }}
+                transition={{ duration: 0.8, delay: 0.4 }}
               >
-                {heroSlides[currentSlide]?.title === 'Eclipse Black' && 'Pure darkness meets premium comfort. Where sophistication lives in shadow.'}
-                {heroSlides[currentSlide]?.title === 'Forest Dusk' && 'Nature-inspired tranquility woven into every thread. Embrace the calm.'}
-                {heroSlides[currentSlide]?.title === 'Ocean Deep' && 'Depths of sophisticated style. Dive into timeless elegance.'}
-                {heroSlides[currentSlide]?.title === 'Cloud Mist' && 'Ethereal softness redefined. Float through your day in comfort.'}
-                {!['Eclipse Black', 'Forest Dusk', 'Ocean Deep', 'Cloud Mist'].includes(heroSlides[currentSlide]?.title || '') && 
-                  'Where timeless craftsmanship meets contemporary design. Discover modern luxury.'}
-              </motion.p>
-            </AnimatePresence>
+                <Link
+                  href="/products"
+                  className="inline-block px-8 lg:px-12 py-3 lg:py-4 border-2 border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 group"
+                >
+                  <span className="text-xs lg:text-sm font-medium tracking-widest uppercase">
+                    Explore
+                  </span>
+                </Link>
+              </motion.div>
 
-            {/* CTA Buttons */}
-        <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="flex flex-wrap gap-2 lg:gap-4"
-            >
-              <Link
-                href="/products"
-                className="group relative px-6 lg:px-10 py-2.5 lg:py-4 bg-white text-black overflow-hidden transition-all duration-300"
-                style={{
-                  boxShadow: `0 0 0 rgba(0,0,0,0)`
-                }}
-                onMouseEnter={(e) => {
-                  const color = dominantColors[heroSlides[currentSlide]?.id]?.replace('0.3)', '0.5)') || 'rgba(255, 255, 255, 0.5)'
-                  e.currentTarget.style.boxShadow = `0 10px 40px ${color}`
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 0 0 rgba(0,0,0,0)'
-                }}
+              {/* Arrow Navigation */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="absolute bottom-8 lg:bottom-12 left-6 sm:left-8 md:left-12 lg:left-20 flex items-center gap-4"
               >
-                <span className="relative z-10 text-[10px] lg:text-sm font-semibold tracking-widest uppercase flex items-center gap-2">
-                  Explore Collection
-                  <span>→</span>
-                </span>
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-r from-white/10 to-white/5"
-                />
-              </Link>
+                <button
+                  onClick={prevSlide}
+                  className="w-10 h-10 lg:w-12 lg:h-12 border border-white/40 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300 group"
+                  aria-label="Previous slide"
+                >
+                  <svg
+                    className="w-4 h-4 lg:w-5 lg:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="w-10 h-10 lg:w-12 lg:h-12 border border-white/40 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300 group"
+                  aria-label="Next slide"
+                >
+                  <svg
+                    className="w-4 h-4 lg:w-5 lg:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
 
-              <Link
-                href="/about"
-                className="group px-6 lg:px-10 py-2.5 lg:py-4 border border-white/30 text-white hover:bg-white/10 transition-all duration-300"
-              >
-                <span className="text-[10px] lg:text-sm font-medium tracking-widest uppercase">Our Story</span>
-              </Link>
-            </motion.div>
-
-            {/* Stats - Hidden on mobile to save space */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              className="hidden lg:grid mt-12 pt-12 border-t border-white/10 grid-cols-3 gap-6"
-            >
-              <div>
-                <div className="text-4xl font-light mb-2">15+</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Years Excellence</div>
-              </div>
-              <div>
-                <div className="text-4xl font-light mb-2">50K+</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Global Clients</div>
-              </div>
-              <div>
-                <div className="text-4xl font-light mb-2">100%</div>
-                <div className="text-xs text-gray-500 uppercase tracking-wider">Sustainable</div>
-              </div>
-            </motion.div>
+                {/* Scroll Down Indicator */}
+                <div className="ml-8 hidden lg:flex flex-col items-center gap-2">
+                  <span className="text-xs text-white/50 tracking-widest uppercase rotate-90 origin-center translate-x-6">
+                    Scroll down
+                  </span>
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
 
           {/* Bottom/Right Side - Dynamic Image Grid */}
@@ -852,75 +406,10 @@ export default function Home() {
                 unoptimized
               />
             )}
-                  {/* Gradient Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                  
-                  {/* Floating Product Badge */}
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`badge-${currentSlide}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.5 }}
-                      className="absolute bottom-12 left-12 bg-white/95 backdrop-blur-md p-8 max-w-sm"
-                    >
-                      <div className="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">
-                        {heroSlides[currentSlide]?.subtitle}
-                      </div>
-                      <h3 className="text-2xl font-serif italic mb-4 text-black"
-                          style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
-                        {heroSlides[currentSlide]?.title}
-                      </h3>
-                      <Link 
-                        href={heroSlides[currentSlide]?.linkUrl || '/products'}
-                        className="inline-flex items-center gap-2 text-sm font-medium text-black group"
-                      >
-                        <span className="border-b border-black pb-0.5">View Details</span>
-                        <span>→</span>
-                      </Link>
-            </motion.div>
-          </AnimatePresence>
         </motion.div>
               </AnimatePresence>
             </div>
 
-            {/* Slide Navigation - Vertical Right Side */}
-            <div className="absolute right-8 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-4">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-                  className={`w-1 h-12 transition-all duration-500 ${
-                    index === currentSlide 
-                      ? 'bg-white scale-y-150' 
-                      : 'bg-white/30 hover:bg-white/50'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Navigation Arrows */}
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
-              className="absolute bottom-8 right-24 z-20 w-14 h-14 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white hover:text-black text-white transition-all duration-300 group"
-          aria-label="Previous slide"
-        >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length)}
-              className="absolute bottom-8 right-8 z-20 w-14 h-14 flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white hover:text-black text-white transition-all duration-300 group"
-          aria-label="Next slide"
-        >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
           </div>
 
         </div>
