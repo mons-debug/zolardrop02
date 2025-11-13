@@ -74,6 +74,15 @@ export default function Home() {
     })
   }
 
+  // Navigation functions
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+  }
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
+  }
+
   // Extract colors from hero slides
   useEffect(() => {
     if (heroSlides.length === 0) return
