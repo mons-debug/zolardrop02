@@ -277,14 +277,14 @@ export default function Home() {
                   }}
                 />
 
-                {/* Atmospheric Effects - Smoke/Mist for non-black backgrounds */}
-                {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
+                {/* Atmospheric Effects - Smoke/Mist */}
+                {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
                   <>
-                    {/* Cloud Mist - Prominent smoke effect */}
+                    {/* Eclipse Black - Dark smoke effect */}
                     <motion.div
-                      className="absolute inset-0 opacity-30"
+                      className="absolute inset-0 opacity-40"
                       animate={{
-                        opacity: [0.2, 0.35, 0.2],
+                        opacity: [0.3, 0.5, 0.3],
                       }}
                       transition={{
                         duration: 8,
@@ -292,11 +292,45 @@ export default function Home() {
                         ease: 'easeInOut'
                       }}
                     >
-                      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gray-400/20 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gray-300/15 rounded-full blur-3xl" />
+                      <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-gray-800/10 rounded-full blur-3xl" />
                     </motion.div>
                     <motion.div
-                      className="absolute inset-0 opacity-20"
+                      className="absolute inset-0 opacity-25"
+                      animate={{
+                        x: ['0%', '15%', '0%'],
+                      }}
+                      transition={{
+                        duration: 25,
+                        repeat: Infinity,
+                        ease: 'linear'
+                      }}
+                    >
+                      <div className="absolute top-1/2 left-0 w-full h-80 bg-gradient-to-r from-transparent via-white/5 to-transparent blur-3xl" />
+                    </motion.div>
+                  </>
+                )}
+
+                {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
+                  <>
+                    {/* Cloud Mist - Prominent smoke effect */}
+                    <motion.div
+                      className="absolute inset-0 opacity-50"
+                      animate={{
+                        opacity: [0.4, 0.6, 0.4],
+                      }}
+                      transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                    >
+                      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gray-400/30 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/3 right-1/4 w-[450px] h-[450px] bg-gray-300/25 rounded-full blur-3xl" />
+                      <div className="absolute top-1/2 left-1/2 w-[350px] h-[350px] bg-white/10 rounded-full blur-3xl" />
+                    </motion.div>
+                    <motion.div
+                      className="absolute inset-0 opacity-35"
                       animate={{
                         x: ['-10%', '10%', '-10%'],
                       }}
@@ -306,18 +340,18 @@ export default function Home() {
                         ease: 'linear'
                       }}
                     >
-                      <div className="absolute top-1/2 left-0 w-full h-64 bg-gradient-to-r from-transparent via-gray-400/10 to-transparent blur-2xl" />
+                      <div className="absolute top-1/2 left-0 w-full h-96 bg-gradient-to-r from-transparent via-gray-300/20 to-transparent blur-3xl" />
                     </motion.div>
                   </>
                 )}
 
                 {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
                   <>
-                    {/* Forest Dusk - Subtle misty fog effect */}
+                    {/* Forest Dusk - Green misty fog effect */}
                     <motion.div
-                      className="absolute inset-0 opacity-20"
+                      className="absolute inset-0 opacity-40"
                       animate={{
-                        opacity: [0.15, 0.25, 0.15],
+                        opacity: [0.3, 0.5, 0.3],
                       }}
                       transition={{
                         duration: 10,
@@ -325,19 +359,33 @@ export default function Home() {
                         ease: 'easeInOut'
                       }}
                     >
-                      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-green-900/15 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-emerald-900/10 rounded-full blur-3xl" />
+                      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-green-600/25 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] bg-emerald-600/20 rounded-full blur-3xl" />
+                      <div className="absolute top-1/2 left-1/4 w-[380px] h-[380px] bg-green-500/15 rounded-full blur-3xl" />
+                    </motion.div>
+                    <motion.div
+                      className="absolute inset-0 opacity-30"
+                      animate={{
+                        y: ['0%', '10%', '0%'],
+                      }}
+                      transition={{
+                        duration: 18,
+                        repeat: Infinity,
+                        ease: 'easeInOut'
+                      }}
+                    >
+                      <div className="absolute top-1/3 left-0 w-full h-80 bg-gradient-to-b from-transparent via-green-700/15 to-transparent blur-3xl" />
                     </motion.div>
                   </>
                 )}
 
                 {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
                   <>
-                    {/* Ocean Deep - Flowing mist effect */}
+                    {/* Ocean Deep - Blue flowing mist effect */}
                     <motion.div
-                      className="absolute inset-0 opacity-20"
+                      className="absolute inset-0 opacity-45"
                       animate={{
-                        opacity: [0.15, 0.28, 0.15],
+                        opacity: [0.35, 0.55, 0.35],
                         y: ['-5%', '5%', '-5%']
                       }}
                       transition={{
@@ -346,8 +394,22 @@ export default function Home() {
                         ease: 'easeInOut'
                       }}
                     >
-                      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-blue-900/20 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-cyan-900/15 rounded-full blur-3xl" />
+                      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-3xl" />
+                      <div className="absolute bottom-1/3 right-1/4 w-[450px] h-[450px] bg-cyan-600/25 rounded-full blur-3xl" />
+                      <div className="absolute top-1/2 right-1/3 w-[380px] h-[380px] bg-blue-500/20 rounded-full blur-3xl" />
+                    </motion.div>
+                    <motion.div
+                      className="absolute inset-0 opacity-30"
+                      animate={{
+                        x: ['0%', '-15%', '0%'],
+                      }}
+                      transition={{
+                        duration: 22,
+                        repeat: Infinity,
+                        ease: 'linear'
+                      }}
+                    >
+                      <div className="absolute bottom-1/3 left-0 w-full h-96 bg-gradient-to-r from-transparent via-cyan-600/20 to-transparent blur-3xl" />
                     </motion.div>
                   </>
                 )}
