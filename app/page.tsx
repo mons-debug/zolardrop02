@@ -15,6 +15,8 @@ const ArchiveCollection = dynamic(() => import('@/components/ArchiveCollection')
 export default function Home() {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
+  const [subscribing, setSubscribing] = useState(false)
+  const [subscribeMessage, setSubscribeMessage] = useState('')
   const [currentSlide, setCurrentSlide] = useState(0)
   const [essenceImages, setEssenceImages] = useState<string[]>([])
   const [fragmentImages, setFragmentImages] = useState<string[]>([])
@@ -174,14 +176,46 @@ export default function Home() {
     'Heather Gray': '#9CA3AF'
   }
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      setSubscribed(true)
-      setTimeout(() => {
+    
+    if (!email) return
+
+    setSubscribing(true)
+    setSubscribeMessage('')
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          email,
+          source: 'homepage' 
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setSubscribed(true)
+        setSubscribeMessage(data.message)
         setEmail('')
-        setSubscribed(false)
-      }, 3000)
+        
+        // Reset success state after 5 seconds
+        setTimeout(() => {
+          setSubscribed(false)
+          setSubscribeMessage('')
+        }, 5000)
+      } else {
+        setSubscribeMessage(data.message || 'Something went wrong. Please try again.')
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error)
+      setSubscribeMessage('Network error. Please check your connection and try again.')
+    } finally {
+      setSubscribing(false)
     }
   }
 
@@ -1235,26 +1269,39 @@ export default function Home() {
                 onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-8 py-5 bg-gray-50 border-2 border-gray-200 focus:border-orange-500 focus:outline-none transition-all duration-300 text-base text-black placeholder-gray-400 group-hover:bg-gray-100"
                 required
+                    disabled={subscribing || subscribed}
               />
                 </div>
                 <motion.button
                 type="submit"
                   className="relative px-12 py-5 bg-black text-white text-sm font-semibold uppercase tracking-[0.2em] overflow-hidden group disabled:opacity-50"
-                disabled={subscribed}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  disabled={subscribing || subscribed}
+                  whileHover={{ scale: subscribing || subscribed ? 1 : 1.02 }}
+                  whileTap={{ scale: subscribing || subscribed ? 1 : 0.98 }}
                 >
                   <span className="relative z-10">
-                    {subscribed ? '✓ Subscribed' : 'Subscribe'}
+                    {subscribing ? 'Subscribing...' : subscribed ? '✓ Subscribed' : 'Subscribe'}
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500"
                     initial={{ x: '-100%' }}
-                    whileHover={{ x: 0 }}
+                    whileHover={{ x: subscribing || subscribed ? '-100%' : 0 }}
                     transition={{ duration: 0.3 }}
                   />
                 </motion.button>
               </div>
+              
+              {subscribeMessage && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`text-sm mt-4 text-center font-medium ${
+                    subscribed ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
+                  {subscribeMessage}
+                </motion.p>
+              )}
               
               <p className="text-xs text-gray-500 mt-4 text-center">
                 By subscribing, you agree to our Privacy Policy and consent to receive updates.
