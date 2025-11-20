@@ -16,6 +16,8 @@ export default function Home() {
   const [products, setProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [collectionsLoading, setCollectionsLoading] = useState(true)
+  const [essenceIndex, setEssenceIndex] = useState(0)
+  const [fragmentIndex, setFragmentIndex] = useState(0)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -421,98 +423,55 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      const stack = document.getElementById('essence-stack');
-                      if (stack) {
-                        const firstCard = stack.firstElementChild;
-                        if (firstCard) {
-                          firstCard.classList.add('swipe-out');
-                          setTimeout(() => {
-                            stack.appendChild(firstCard);
-                            firstCard.classList.remove('swipe-out');
-                          }, 600);
-                        }
+                      if (essenceImages.length > 0) {
+                        setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
                       }
                     }}
                   >
-                    <div id="essence-stack" className="relative w-full h-full">
-                      {/* Card 1 - Front with animated hint */}
-                      <motion.div 
-                        className="card-stack absolute inset-0 transition-all duration-500 z-40" 
-                        style={{ transform: 'translateX(0) translateY(0) rotate(0deg)' }}
-                        animate={{ 
-                          x: [0, 20, 0],
-                          rotate: [0, 3, 0]
-                        }}
-                        transition={{ 
-                          duration: 2.5, 
-                          repeat: Infinity, 
-                          repeatDelay: 3,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
-                          {essenceImages[0] && (
-                            <Image
-                              src={essenceImages[0]}
-                              alt="Essence 1"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                          <div className="absolute bottom-4 left-4 text-white text-sm font-medium">1 / {essenceImages.length}</div>
-                        </div>
-                      </motion.div>
-                      
-                      {/* Card 2 */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-30" style={{ transform: 'translateX(8px) translateY(8px) rotate(2deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-xl opacity-80">
-                          {essenceImages[1] && (
-                            <Image
-                              src={essenceImages[1]}
-                              alt="Essence 2"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Card 3 */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-20" style={{ transform: 'translateX(16px) translateY(16px) rotate(4deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-lg opacity-60">
-                          {essenceImages[2] && (
-                            <Image
-                              src={essenceImages[2]}
-                              alt="Essence 3"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Card 4 - Back */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-10" style={{ transform: 'translateX(24px) translateY(24px) rotate(6deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-md opacity-40">
-                          {essenceImages[3] && (
-                            <Image
-                              src={essenceImages[3]}
-                              alt="Essence 4"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
+                    <div className="relative w-full h-full">
+                      {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
+                        const imageIndex = (essenceIndex + offset) % essenceImages.length
+                        const zIndex = 40 - offset * 10
+                        const transform = `translateX(${offset * 8}px) translateY(${offset * 8}px) rotate(${offset * 2}deg)`
+                        const opacity = 1 - offset * 0.2
+                        
+                        return (
+                          <motion.div
+                            key={`essence-${offset}`}
+                            className="card-stack absolute inset-0"
+                            style={{ zIndex }}
+                            initial={false}
+                            animate={{ 
+                              transform,
+                              opacity,
+                              scale: 1 - offset * 0.02
+                            }}
+                            transition={{ 
+                              duration: 0.5,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
+                              {essenceImages[imageIndex] && (
+                                <Image
+                                  src={essenceImages[imageIndex]}
+                                  alt={`Essence ${imageIndex + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 768px) 100vw, 50vw"
+                                  unoptimized
+                                />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                                  {imageIndex + 1} / {essenceImages.length}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )
+                      })}
                     </div>
                     
                     {/* Animated swipe indicator */}
@@ -621,98 +580,55 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      const stack = document.getElementById('fragment-stack');
-                      if (stack) {
-                        const firstCard = stack.firstElementChild;
-                        if (firstCard) {
-                          firstCard.classList.add('swipe-out-left');
-                          setTimeout(() => {
-                            stack.appendChild(firstCard);
-                            firstCard.classList.remove('swipe-out-left');
-                          }, 600);
-                        }
+                      if (fragmentImages.length > 0) {
+                        setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
                       }
                     }}
                   >
-                    <div id="fragment-stack" className="relative w-full h-full">
-                      {/* Card 1 - Front with animated hint */}
-                      <motion.div 
-                        className="card-stack absolute inset-0 transition-all duration-500 z-40" 
-                        style={{ transform: 'translateX(0) translateY(0) rotate(0deg)' }}
-                        animate={{ 
-                          x: [0, -20, 0],
-                          rotate: [0, -3, 0]
-                        }}
-                        transition={{ 
-                          duration: 2.5, 
-                          repeat: Infinity, 
-                          repeatDelay: 3,
-                          ease: "easeInOut"
-                        }}
-                      >
-                        <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
-                          {fragmentImages[0] && (
-                            <Image
-                              src={fragmentImages[0]}
-                              alt="Fragment 1"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                          <div className="absolute bottom-4 left-4 text-white text-sm font-medium">1 / {fragmentImages.length}</div>
-                        </div>
-                      </motion.div>
-                              
-                      {/* Card 2 */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-30" style={{ transform: 'translateX(-8px) translateY(8px) rotate(-2deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-xl opacity-80">
-                          {fragmentImages[1] && (
-                            <Image
-                              src={fragmentImages[1]}
-                              alt="Fragment 2"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Card 3 */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-20" style={{ transform: 'translateX(-16px) translateY(16px) rotate(-4deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-lg opacity-60">
-                          {fragmentImages[2] && (
-                            <Image
-                              src={fragmentImages[2]}
-                              alt="Fragment 3"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Card 4 - Back */}
-                      <div className="card-stack absolute inset-0 transition-all duration-500 z-10" style={{ transform: 'translateX(-24px) translateY(24px) rotate(-6deg)' }}>
-                        <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-md opacity-40">
-                          {fragmentImages[3] && (
-                            <Image
-                              src={fragmentImages[3]}
-                              alt="Fragment 4"
-                              fill
-                              className="object-cover"
-                              sizes="(max-width: 768px) 100vw, 50vw"
-                              unoptimized
-                            />
-                          )}
-                        </div>
-                      </div>
+                    <div className="relative w-full h-full">
+                      {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
+                        const imageIndex = (fragmentIndex + offset) % fragmentImages.length
+                        const zIndex = 40 - offset * 10
+                        const transform = `translateX(${-offset * 8}px) translateY(${offset * 8}px) rotate(${-offset * 2}deg)`
+                        const opacity = 1 - offset * 0.2
+                        
+                        return (
+                          <motion.div
+                            key={`fragment-${offset}`}
+                            className="card-stack absolute inset-0"
+                            style={{ zIndex }}
+                            initial={false}
+                            animate={{ 
+                              transform,
+                              opacity,
+                              scale: 1 - offset * 0.02
+                            }}
+                            transition={{ 
+                              duration: 0.5,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
+                              {fragmentImages[imageIndex] && (
+                                <Image
+                                  src={fragmentImages[imageIndex]}
+                                  alt={`Fragment ${imageIndex + 1}`}
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 768px) 100vw, 50vw"
+                                  unoptimized
+                                />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                                  {imageIndex + 1} / {fragmentImages.length}
+                                </div>
+                              )}
+                            </div>
+                          </motion.div>
+                        )
+                      })}
                     </div>
                     
                     {/* Animated swipe indicator */}
