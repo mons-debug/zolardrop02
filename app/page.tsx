@@ -1,78 +1,24 @@
 'use client'
 
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
-import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import FashionCarousel from '@/components/FashionCarousel'
 import ArchiveCollection from '@/components/ArchiveCollection'
-import AnimatedBackground from '@/components/AnimatedBackground'
 
 export default function Home() {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [essenceImages, setEssenceImages] = useState<string[]>([])
+  const [fragmentImages, setFragmentImages] = useState<string[]>([])
+  const [recodeImages, setRecodeImages] = useState<string[]>([])
   const [products, setProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
+  const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
-  const [dominantColors, setDominantColors] = useState<Record<string, string>>({})
-
-  // Extract dominant color from image
-  const extractDominantColor = async (imageUrl: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = document.createElement('img')
-      img.crossOrigin = 'Anonymous'
-      img.src = imageUrl
-      
-      img.onload = () => {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        if (!ctx) {
-          resolve('rgba(0, 0, 0, 0.3)') // Default fallback
-          return
-        }
-        
-        canvas.width = img.width
-        canvas.height = img.height
-        ctx.drawImage(img, 0, 0)
-        
-        try {
-          // Sample center region for dominant color
-          const imageData = ctx.getImageData(
-            Math.floor(img.width * 0.3),
-            Math.floor(img.height * 0.3),
-            Math.floor(img.width * 0.4),
-            Math.floor(img.height * 0.4)
-          )
-          
-          let r = 0, g = 0, b = 0, count = 0
-          
-          // Average color values
-          for (let i = 0; i < imageData.data.length; i += 4) {
-            r += imageData.data[i]
-            g += imageData.data[i + 1]
-            b += imageData.data[i + 2]
-            count++
-          }
-          
-          r = Math.floor(r / count)
-          g = Math.floor(g / count)
-          b = Math.floor(b / count)
-          
-          resolve(`rgba(${r}, ${g}, ${b}, 0.3)`)
-        } catch (e) {
-          // CORS error or other issue - use fallback
-          resolve('rgba(0, 0, 0, 0.3)')
-        }
-      }
-      
-      img.onerror = () => {
-        resolve('rgba(0, 0, 0, 0.3)')
-      }
-    })
-  }
 
   // Navigation functions
   const nextSlide = () => {
@@ -83,31 +29,38 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
   }
 
-  // Extract colors from hero slides
+  // Fetch collection stacks from database
   useEffect(() => {
-    if (heroSlides.length === 0) return
-    
-    const extractColors = async () => {
-      const colors: Record<string, string> = {}
-      for (const slide of heroSlides) {
-        if (slide.image && !dominantColors[slide.id]) {
-          const color = await extractDominantColor(slide.image)
-          colors[slide.id] = color
+    const fetchCollections = async () => {
+      try {
+        const res = await fetch('/api/collection-stacks')
+        if (res.ok) {
+          const data = await res.json()
+          const stacks = data.stacks || []
+          
+          // Find each collection by name
+          const essence = stacks.find((s: any) => s.collectionName === 'ESSENCE')
+          const fragment = stacks.find((s: any) => s.collectionName === 'FRAGMENT')
+          const recode = stacks.find((s: any) => s.collectionName === 'RECODE')
+          
+          setEssenceImages(essence?.images || [])
+          setFragmentImages(fragment?.images || [])
+          setRecodeImages(recode?.images || [])
         }
-      }
-      if (Object.keys(colors).length > 0) {
-        setDominantColors(prev => ({ ...prev, ...colors }))
+      } catch (error) {
+        console.error('Error fetching collections:', error)
+      } finally {
+        setCollectionsLoading(false)
       }
     }
-    
-    extractColors()
-  }, [heroSlides])
+    fetchCollections()
+  }, [])
 
   // Fetch real products from database
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const res = await fetch('/api/products?limit=4')
+        const res = await fetch('/api/products')
         if (res.ok) {
           const data = await res.json()
           setProducts(data.products || [])
@@ -125,7 +78,6 @@ export default function Home() {
   useEffect(() => {
     const fetchHeroSlides = async () => {
       try {
-        // Add cache busting to get fresh data
         const res = await fetch(`/api/hero-slides?t=${Date.now()}`, {
           cache: 'no-store'
         })
@@ -143,17 +95,15 @@ export default function Home() {
             accentColor: slide.accentColor || '#ff5b00',
             duration: slide.duration || 5000
           }))
-          console.log('Loaded hero slides:', slides) // Debug log
           setHeroSlides(slides)
         }
       } catch (error) {
         console.error('Error fetching hero slides:', error)
-        // Fallback to default slides
         setHeroSlides([
           {
             id: '1',
-      title: 'ESSENTIAL TEE',
-      subtitle: 'DROP 02',
+            title: 'DROP 02',
+            subtitle: 'BEYOND',
             image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
             mediaType: 'image',
             backgroundColor: '#000000',
@@ -169,17 +119,13 @@ export default function Home() {
     fetchHeroSlides()
   }, [])
 
-  // Auto-rotate carousel with dynamic duration
+  // Auto-rotate carousel
   useEffect(() => {
     if (heroSlides.length === 0) return
-    
-    // Use the current slide's duration
     const currentDuration = heroSlides[currentSlide]?.duration || 5000
-    
     const timer = setTimeout(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
     }, currentDuration)
-
     return () => clearTimeout(timer)
   }, [heroSlides, currentSlide])
 
@@ -227,64 +173,37 @@ export default function Home() {
     },
   }
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        delay: i * 0.1,
-        ease: [0.4, 0, 0.2, 1] as any,
-      },
-    }),
-  }
-
   return (
     <div className="bg-white">
-      {/* Hero Section - Award-Winning Split Design */}
-      <section
-        className="relative h-screen w-full overflow-hidden bg-black"
-      >
+      {/* 🟣 SECTION 1 — HERO SECTION */}
+      <section className="relative h-screen w-full overflow-hidden bg-black">
         <div className="flex flex-col lg:flex-row h-screen">
-          {/* Left Side - Clean Minimal Design */}
+          {/* Left Side - New Brand Messaging */}
           <motion.div 
             className="relative flex flex-col justify-center px-6 sm:px-8 md:px-12 lg:px-20 py-8 lg:py-0 overflow-hidden h-1/2 lg:h-full lg:w-1/2"
           >
-            {/* Simple Gradient Background with Subtle Color Theme */}
+            {/* Cinematic Background */}
             <AnimatePresence mode="wait">
               <motion.div 
                 key={`bg-${currentSlide}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1, ease: 'easeInOut' }}
+                transition={{ duration: 1.2, ease: 'easeInOut' }}
                 className="absolute inset-0"
               >
-                {/* Product-specific subtle gradient */}
                 <div 
                   className="absolute inset-0"
                   style={{
-                    background: heroSlides[currentSlide]?.title === 'Eclipse Black' 
-                      ? 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)'
-                      : heroSlides[currentSlide]?.title === 'Forest Dusk'
-                      ? 'linear-gradient(135deg, #0a1810 0%, #000000 100%)'
-                      : heroSlides[currentSlide]?.title === 'Ocean Deep'
-                      ? 'linear-gradient(135deg, #0a1628 0%, #000000 100%)'
-                      : heroSlides[currentSlide]?.title === 'Cloud Mist'
-                      ? 'linear-gradient(135deg, #1a1c1e 0%, #000000 100%)'
-                      : 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)'
+                    background: 'linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%)'
                   }}
                 />
 
-                {/* Atmospheric Effects - Smoke/Mist */}
-                {heroSlides[currentSlide]?.title === 'Eclipse Black' && (
-                  <>
-                    {/* Eclipse Black - Dark smoke effect */}
+                {/* Atmospheric smoke effects */}
                     <motion.div
-                      className="absolute inset-0 opacity-40"
+                  className="absolute inset-0 opacity-30"
                       animate={{
-                        opacity: [0.3, 0.5, 0.3],
+                    opacity: [0.2, 0.4, 0.2],
                       }}
                       transition={{
                         duration: 8,
@@ -295,213 +214,105 @@ export default function Home() {
                       <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
                       <div className="absolute bottom-1/3 left-1/4 w-[400px] h-[400px] bg-gray-800/10 rounded-full blur-3xl" />
                     </motion.div>
-                    <motion.div
-                      className="absolute inset-0 opacity-25"
-                      animate={{
-                        x: ['0%', '15%', '0%'],
-                      }}
-                      transition={{
-                        duration: 25,
-                        repeat: Infinity,
-                        ease: 'linear'
-                      }}
-                    >
-                      <div className="absolute top-1/2 left-0 w-full h-80 bg-gradient-to-r from-transparent via-white/5 to-transparent blur-3xl" />
-                    </motion.div>
-                  </>
-                )}
-
-                {heroSlides[currentSlide]?.title === 'Cloud Mist' && (
-                  <>
-                    {/* Cloud Mist - Prominent smoke effect */}
-                    <motion.div
-                      className="absolute inset-0 opacity-50"
-                      animate={{
-                        opacity: [0.4, 0.6, 0.4],
-                      }}
-                      transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    >
-                      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-gray-400/30 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/3 right-1/4 w-[450px] h-[450px] bg-gray-300/25 rounded-full blur-3xl" />
-                      <div className="absolute top-1/2 left-1/2 w-[350px] h-[350px] bg-white/10 rounded-full blur-3xl" />
-                    </motion.div>
-                    <motion.div
-                      className="absolute inset-0 opacity-35"
-                      animate={{
-                        x: ['-10%', '10%', '-10%'],
-                      }}
-                      transition={{
-                        duration: 20,
-                        repeat: Infinity,
-                        ease: 'linear'
-                      }}
-                    >
-                      <div className="absolute top-1/2 left-0 w-full h-96 bg-gradient-to-r from-transparent via-gray-300/20 to-transparent blur-3xl" />
-                    </motion.div>
-                  </>
-                )}
-
-                {heroSlides[currentSlide]?.title === 'Forest Dusk' && (
-                  <>
-                    {/* Forest Dusk - Green misty fog effect */}
-                    <motion.div
-                      className="absolute inset-0 opacity-40"
-                      animate={{
-                        opacity: [0.3, 0.5, 0.3],
-                      }}
-                      transition={{
-                        duration: 10,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    >
-                      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-green-600/25 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/4 left-1/3 w-[450px] h-[450px] bg-emerald-600/20 rounded-full blur-3xl" />
-                      <div className="absolute top-1/2 left-1/4 w-[380px] h-[380px] bg-green-500/15 rounded-full blur-3xl" />
-                    </motion.div>
-                    <motion.div
-                      className="absolute inset-0 opacity-30"
-                      animate={{
-                        y: ['0%', '10%', '0%'],
-                      }}
-                      transition={{
-                        duration: 18,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    >
-                      <div className="absolute top-1/3 left-0 w-full h-80 bg-gradient-to-b from-transparent via-green-700/15 to-transparent blur-3xl" />
-                    </motion.div>
-                  </>
-                )}
-
-                {heroSlides[currentSlide]?.title === 'Ocean Deep' && (
-                  <>
-                    {/* Ocean Deep - Blue flowing mist effect */}
-                    <motion.div
-                      className="absolute inset-0 opacity-45"
-                      animate={{
-                        opacity: [0.35, 0.55, 0.35],
-                        y: ['-5%', '5%', '-5%']
-                      }}
-                      transition={{
-                        duration: 12,
-                        repeat: Infinity,
-                        ease: 'easeInOut'
-                      }}
-                    >
-                      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-blue-600/30 rounded-full blur-3xl" />
-                      <div className="absolute bottom-1/3 right-1/4 w-[450px] h-[450px] bg-cyan-600/25 rounded-full blur-3xl" />
-                      <div className="absolute top-1/2 right-1/3 w-[380px] h-[380px] bg-blue-500/20 rounded-full blur-3xl" />
-                    </motion.div>
-                    <motion.div
-                      className="absolute inset-0 opacity-30"
-                      animate={{
-                        x: ['0%', '-15%', '0%'],
-                      }}
-                      transition={{
-                        duration: 22,
-                        repeat: Infinity,
-                        ease: 'linear'
-                      }}
-                    >
-                      <div className="absolute bottom-1/3 left-0 w-full h-96 bg-gradient-to-r from-transparent via-cyan-600/20 to-transparent blur-3xl" />
-                    </motion.div>
-                  </>
-                )}
               </motion.div>
             </AnimatePresence>
 
-            {/* Main Content - Clean Typography */}
+            {/* Main Content */}
             <div className="relative z-10">
-              {/* Generic Tagline */}
+              {/* Brand Tagline */}
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="mb-6 lg:mb-8"
               >
-                <h2 className="text-sm lg:text-base font-light tracking-[0.3em] uppercase text-white/60 mb-2">
-                  Zolar
-                </h2>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight leading-[0.9] text-white mb-4">
-                  Make your<br />
-                  fashion look
-                </h1>
+                <div className="inline-flex items-center space-x-3 mb-6">
+                  <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent" />
+                  <span className="text-xs lg:text-sm font-medium tracking-[0.3em] uppercase text-orange-500">
+                    Drop 02
+                  </span>
+                </div>
+                
+                {/* Main Headline - NEW */}
+                <motion.h1
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-light tracking-tight leading-[0.9] text-white mb-4"
+                >
+                  GO<br />
+                  BEYOND.
+                </motion.h1>
               </motion.div>
 
-              {/* Subtitle with dynamic product name */}
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={`desc-${currentSlide}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 1, ease: 'easeInOut' }}
-                  className="text-base lg:text-lg mb-8 lg:mb-12 max-w-md leading-relaxed font-light text-white/70"
-                >
-                  {heroSlides[currentSlide]?.title || 'More Charming'}
-                </motion.p>
-              </AnimatePresence>
-
-              {/* Button and Navigation */}
+              {/* Subheadline - NEW */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="flex items-center gap-6"
+                transition={{ duration: 1, delay: 0.8 }}
+                className="mb-8 lg:mb-12 max-w-md space-y-4"
+              >
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 1, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-xl lg:text-2xl font-medium text-white/95 leading-relaxed tracking-wide"
+                >
+                  Drop 02 — clean designs for people who move different.
+                </motion.p>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-base lg:text-lg font-light text-white/70 leading-relaxed"
+                >
+                  Essentials made for everyday ambition.
+                </motion.p>
+              </motion.div>
+
+              {/* Buttons */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 1.4 }}
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
               >
                 <Link
                   href="/products"
-                  className="inline-block px-8 lg:px-12 py-3 lg:py-4 border-2 border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 group"
+                  className="inline-block px-10 lg:px-14 py-4 lg:py-5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
+                >
+                  <span className="text-xs lg:text-sm font-semibold tracking-widest uppercase">
+                    Explore Drop 02
+                  </span>
+                </Link>
+
+                <Link
+                  href="/products"
+                  className="inline-block px-10 lg:px-14 py-4 lg:py-5 border-2 border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 group"
                 >
                   <span className="text-xs lg:text-sm font-medium tracking-widest uppercase">
-                    Explore
+                    Shop Collections
                   </span>
                 </Link>
 
                 {/* Navigation Arrows */}
-                <div className="flex items-center gap-3">
+                <div className="hidden lg:flex items-center gap-3 ml-4">
                   <button
                     onClick={prevSlide}
-                    className="w-10 h-10 lg:w-12 lg:h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
+                    className="w-12 h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
                     aria-label="Previous slide"
                   >
-                    <svg
-                      className="w-4 h-4 lg:w-5 lg:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                      />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                   <button
                     onClick={nextSlide}
-                    className="w-10 h-10 lg:w-12 lg:h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
+                    className="w-12 h-12 border border-white/30 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-300"
                     aria-label="Next slide"
                   >
-                    <svg
-                      className="w-4 h-4 lg:w-5 lg:h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 </div>
@@ -509,9 +320,8 @@ export default function Home() {
             </div>
           </motion.div>
 
-          {/* Bottom/Right Side - Dynamic Image Grid */}
+          {/* Right Side - Dynamic Hero Images */}
           <div className="relative bg-gray-900 h-1/2 lg:h-full lg:w-1/2">
-            {/* Main Feature Image */}
             <div className="absolute inset-0">
           <AnimatePresence mode="wait">
             <motion.div
@@ -544,596 +354,862 @@ export default function Home() {
         </motion.div>
               </AnimatePresence>
             </div>
-
           </div>
-
         </div>
-
-        {/* Scroll Indicator - Removed for performance */}
       </section>
 
       {/* Section Divider */}
       <div className="border-t border-gray-100" />
 
-      {/* The Drop - Product Grid */}
-      <section className="relative bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden">
-        {/* Dynamic Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
+      {/* 🔵 SECTION 2 — COLLECTIONS SHOWCASE (SPLIT SCREEN DESIGN) */}
+      <section className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 overflow-hidden">
+        {/* Subtle Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
           <motion.div 
-            className="absolute top-20 right-0 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl"
+            className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-[120px]"
             animate={{
-              x: [0, 100, 0],
-              y: [0, -50, 0],
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          />
-          <motion.div 
-            className="absolute bottom-20 left-0 w-[400px] h-[400px] bg-purple-500/5 rounded-full blur-3xl"
-            animate={{
-              x: [0, -80, 0],
-              y: [0, 80, 0],
-            }}
-            transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 8, repeat: Infinity }}
           />
         </div>
         
-        {/* Content */}
-        <div className="py-20 md:py-28 lg:py-32 relative z-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Section Header */}
           <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
-            variants={containerVariants}
-          >
-            {/* Enhanced Header with Split Design */}
-            <motion.div 
-              variants={itemVariants} 
-              className="mb-16 sm:mb-20"
-            >
-              <div className="grid lg:grid-cols-2 gap-8 items-end">
-                <div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
-                  >
-                    <div className="inline-flex items-center space-x-3 mb-6">
-                      <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent" />
-                      <span className="text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
-                        Exclusive Release
-                      </span>
-              </div>
-              
-                    <h2 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight text-black mb-4 leading-[0.95]">
-                      <span className="block">The</span>
-                      <span className="block font-serif italic bg-gradient-to-r from-black via-gray-700 to-black bg-clip-text text-transparent"
-                            style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
-                        Drop
-                      </span>
-                    </h2>
+            className="text-center mb-12 md:mb-16"
+          >
+            <div className="inline-flex items-center justify-center mb-8">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+              <span className="mx-4 text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
+                Collections
+              </span>
+              <div className="h-px w-16 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+            </div>
+            
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight text-black mb-6 leading-[0.9]">
+              Three Collections.<br />
+              <span className="font-medium">Your Style.</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
+              Choose your path. Each collection unlocks a new chapter.
+            </p>
                   </motion.div>
-                </div>
-                
-                <div>
-                  <motion.p
-                    initial={{ opacity: 0, x: 20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
+
+          {/* ESSENCE & FRAGMENT - STAGGERED LAYOUT */}
+          <div className="relative space-y-12 md:space-y-0">
+            {/* ESSENCE COLLECTION */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-lg md:text-xl text-gray-600 leading-relaxed font-light"
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
+              {/* Background Panel */}
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
+              
+              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+                {/* Left: Interactive 4-Card Stack */}
+                <div className="relative order-2 md:order-1 px-8 md:px-0">
+                  <div 
+                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
+                    onClick={() => {
+                      const stack = document.getElementById('essence-stack');
+                      if (stack) {
+                        const firstCard = stack.firstElementChild;
+                        if (firstCard) {
+                          firstCard.classList.add('swipe-out');
+                          setTimeout(() => {
+                            stack.appendChild(firstCard);
+                            firstCard.classList.remove('swipe-out');
+                          }, 600);
+                        }
+                      }
+                    }}
                   >
-                    Curated excellence. Each piece represents the pinnacle of design and craftsmanship. 
-                    <span className="block mt-2 text-black font-medium">Limited quantities. Forever exclusive.</span>
-                  </motion.p>
+                    <div id="essence-stack" className="relative w-full h-full">
+                      {/* Card 1 - Front with animated hint */}
+                      <motion.div 
+                        className="card-stack absolute inset-0 transition-all duration-500 z-40" 
+                        style={{ transform: 'translateX(0) translateY(0) rotate(0deg)' }}
+                        animate={{ 
+                          x: [0, 20, 0],
+                          rotate: [0, 3, 0]
+                        }}
+                        transition={{ 
+                          duration: 2.5, 
+                          repeat: Infinity, 
+                          repeatDelay: 3,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
+                          {essenceImages[0] && (
+                            <Image
+                              src={essenceImages[0]}
+                              alt="Essence 1"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                          <div className="absolute bottom-4 left-4 text-white text-sm font-medium">1 / {essenceImages.length}</div>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Card 2 */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-30" style={{ transform: 'translateX(8px) translateY(8px) rotate(2deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-xl opacity-80">
+                          {essenceImages[1] && (
+                            <Image
+                              src={essenceImages[1]}
+                              alt="Essence 2"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Card 3 */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-20" style={{ transform: 'translateX(16px) translateY(16px) rotate(4deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-lg opacity-60">
+                          {essenceImages[2] && (
+                            <Image
+                              src={essenceImages[2]}
+                              alt="Essence 3"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Card 4 - Back */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-10" style={{ transform: 'translateX(24px) translateY(24px) rotate(6deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-md opacity-40">
+                          {essenceImages[3] && (
+                            <Image
+                              src={essenceImages[3]}
+                              alt="Essence 4"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Animated swipe indicator */}
+                    <motion.div 
+                      className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full z-50"
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatDelay: 1
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <motion.svg 
+                          className="w-4 h-4 text-white" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                        </motion.svg>
+                        <p className="text-white text-xs uppercase tracking-wider">Swipe</p>
+                      </div>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Right: Content */}
+                <div className="space-y-4 order-1 md:order-2">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500 rounded-full">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
+                      </div>
+
+                  <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
+                    ESSENCE
+                  </h3>
+                  
+                  <p className="text-base text-gray-600 leading-relaxed">
+                    Simple. Clean. Easy to wear.<br />
+                    Everyday essentials built for your rhythm.
+                  </p>
+                  
+                  <Link
+                    href="/products?collection=essence"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
+                  >
+                    <span>See Collection</span>
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                  </Link>
+                                  </div>
+                              </div>
+                            </motion.div>
+                  
+            {/* FRAGMENT COLLECTION - STAGGERED UP */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative md:mt-8"
+            >
+              {/* Background Panel */}
+              <div className="absolute inset-0 bg-gradient-to-bl from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
+              
+              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+                {/* Left: Content */}
+                <div className="space-y-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500 rounded-full">
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
+                    </div>
+                    
+                  <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
+                    FRAGMENT
+                      </h3>
+                  
+                  <p className="text-base text-gray-600 leading-relaxed">
+                    Bold without trying.<br />
+                    Shattered graphics for a confident, effortless look.
+                  </p>
+                  
+                  <Link
+                    href="/products?collection=fragment"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
+                  >
+                    <span>See Collection</span>
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                            </div>
+                            
+                {/* Right: Interactive 4-Card Stack */}
+                <div className="relative px-8 md:px-0">
+                  <div 
+                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
+                    onClick={() => {
+                      const stack = document.getElementById('fragment-stack');
+                      if (stack) {
+                        const firstCard = stack.firstElementChild;
+                        if (firstCard) {
+                          firstCard.classList.add('swipe-out-left');
+                          setTimeout(() => {
+                            stack.appendChild(firstCard);
+                            firstCard.classList.remove('swipe-out-left');
+                          }, 600);
+                        }
+                      }
+                    }}
+                  >
+                    <div id="fragment-stack" className="relative w-full h-full">
+                      {/* Card 1 - Front with animated hint */}
+                      <motion.div 
+                        className="card-stack absolute inset-0 transition-all duration-500 z-40" 
+                        style={{ transform: 'translateX(0) translateY(0) rotate(0deg)' }}
+                        animate={{ 
+                          x: [0, -20, 0],
+                          rotate: [0, -3, 0]
+                        }}
+                        transition={{ 
+                          duration: 2.5, 
+                          repeat: Infinity, 
+                          repeatDelay: 3,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
+                          {fragmentImages[0] && (
+                            <Image
+                              src={fragmentImages[0]}
+                              alt="Fragment 1"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                          <div className="absolute bottom-4 left-4 text-white text-sm font-medium">1 / {fragmentImages.length}</div>
+                        </div>
+                      </motion.div>
+                              
+                      {/* Card 2 */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-30" style={{ transform: 'translateX(-8px) translateY(8px) rotate(-2deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-xl opacity-80">
+                          {fragmentImages[1] && (
+                            <Image
+                              src={fragmentImages[1]}
+                              alt="Fragment 2"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Card 3 */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-20" style={{ transform: 'translateX(-16px) translateY(16px) rotate(-4deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-lg opacity-60">
+                          {fragmentImages[2] && (
+                            <Image
+                              src={fragmentImages[2]}
+                              alt="Fragment 3"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Card 4 - Back */}
+                      <div className="card-stack absolute inset-0 transition-all duration-500 z-10" style={{ transform: 'translateX(-24px) translateY(24px) rotate(-6deg)' }}>
+                        <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-md opacity-40">
+                          {fragmentImages[3] && (
+                            <Image
+                              src={fragmentImages[3]}
+                              alt="Fragment 4"
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, 50vw"
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Animated swipe indicator */}
+                    <motion.div 
+                      className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full z-50"
+                      animate={{ 
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        repeatDelay: 1
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <motion.svg 
+                          className="w-4 h-4 text-white" 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor"
+                          animate={{ x: [0, -5, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                        </motion.svg>
+                        <p className="text-white text-xs uppercase tracking-wider">Swipe</p>
+                      </div>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
             </motion.div>
-
-            {/* Desktop Grid */}
-            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {productsLoading ? (
-                // Loading skeleton
-                Array.from({ length: 4 }).map((_, index) => (
-                  <div key={index} className="bg-white border border-gray-200 overflow-hidden animate-pulse">
-                    <div className="aspect-[3/4] bg-gray-200" />
-                    <div className="p-5">
-                      <div className="h-4 bg-gray-200 rounded mb-2" />
-                      <div className="h-4 bg-gray-200 rounded w-1/2 mb-3" />
-                      <div className="flex space-x-1.5">
-                        <div className="w-5 h-5 bg-gray-200 rounded-full" />
-                        <div className="w-5 h-5 bg-gray-200 rounded-full" />
-                        <div className="w-5 h-5 bg-gray-200 rounded-full" />
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : products.length === 0 ? (
-                <div className="col-span-4 text-center py-12">
-                  <p className="text-gray-600">No products available</p>
-                  <Link href="/admin/products/new" className="text-blue-600 hover:text-blue-800 mt-2 inline-block">
-                    Add products in admin →
-                  </Link>
-                </div>
-              ) : (
-                products.map((product, index) => {
-                  const productImages = JSON.parse(product.images) as string[]
-                  const mainImage = productImages[0] || '/placeholder.jpg'
-                  
-                  return (
-                <motion.div
-                  key={product.id}
-                  custom={index}
-                  variants={cardVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.2 }}
-                  className="group"
-                >
-                      <Link href={`/product/${product.sku}`} className="block">
-                        <div className="bg-white overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 relative">
-                          {/* Product Image */}
-                          <div className="relative aspect-[4/5] sm:aspect-[3/4] overflow-hidden bg-gray-900">
-                            {imageErrors[product.id] ? (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                <div className="text-center p-4">
-                                  <div className="w-16 h-16 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                  </div>
-                                  <span className="text-gray-400 text-xs">{product.title}</span>
-                                </div>
-                              </div>
-                            ) : (
-                      <Image
-                                src={mainImage}
-                        alt={product.title}
-                        fill
-                                className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                                onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
-                                unoptimized
-                              />
-                            )}
-                            {/* Gradient Overlay on Hover */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            
-                            {/* Premium Badge */}
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold uppercase tracking-wider"
-                            >
-                              New
-                            </motion.div>
-                            
-                      {/* Glass Shine Effect */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-                      </div>
-
-                            {/* Quick View Button */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 20 }}
-                              whileHover={{ opacity: 1, y: 0 }}
-                              className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300"
-                            >
-                              <div className="bg-white text-black px-6 py-3 text-center text-sm font-semibold uppercase tracking-wider hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 hover:text-white transition-all duration-300">
-                                Quick View
-                              </div>
-                            </motion.div>
-                    </div>
+          </div>
                     
-                          {/* Product Info */}
-                          <div className="p-5 sm:p-6 bg-white">
-                            <div className="flex items-start justify-between mb-3">
-                              <div className="flex-1">
-                                <h3 className="text-base sm:text-lg font-medium text-black mb-1 tracking-wide group-hover:text-orange-500 transition-colors">
-                        {product.title}
-                      </h3>
-                                <p className="text-sm text-gray-500 uppercase tracking-wider">Limited Edition</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-lg sm:text-xl font-semibold text-black">
-                              ${(product.priceCents / 100).toFixed(2)}
-                            </p>
-                              </div>
-                            </div>
-                            
-                            {/* Color Variants with Enhanced Design */}
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                              <div className="flex items-center space-x-2">
-                              {product.variants && product.variants.slice(0, 4).map((variant: any, idx: number) => (
-                                  <motion.div
-                            key={idx}
-                                    whileHover={{ scale: 1.2 }}
-                                    className="relative w-6 h-6 border-2 border-gray-200 transition-all duration-200 hover:border-orange-500 cursor-pointer shadow-sm"
-                                  style={{ backgroundColor: colorMap[variant.color] || '#6B7280' }}
-                                  title={variant.color}
-                                  >
-                                    {idx === 0 && (
-                                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full border border-white" />
-                                    )}
-                                  </motion.div>
-                                ))}
-                                {product.variants && product.variants.length > 4 && (
-                                  <span className="text-xs text-gray-500">+{product.variants.length - 4}</span>
-                                )}
-                      </div>
-                              
-                              <motion.svg
-                                className="w-5 h-5 text-gray-400 group-hover:text-orange-500 transition-colors"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                animate={{ x: [0, 4, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity }}
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                              </motion.svg>
-                    </div>
-                  </div>
-                        </div>
-                      </Link>
-                </motion.div>
-                  )
-                })
-              )}
-            </div>
-          </motion.div>
-
-          {/* Mobile Carousel */}
-          <div className="sm:hidden">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              {/* Carousel Container with Snap Scroll */}
-              <div className="overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory pb-2">
-                <div className="flex gap-4 px-4">
-                  {productsLoading ? (
-                    // Loading skeleton for mobile
-                    Array.from({ length: 4 }).map((_, index) => (
-                      <div key={index} className="min-w-[300px] max-w-[300px] flex-shrink-0">
-                        <div className="bg-white border border-gray-200 overflow-hidden animate-pulse">
-                          <div className="aspect-[4/5] bg-gray-200" />
-                          <div className="p-4">
-                            <div className="h-4 bg-gray-200 rounded mb-2" />
-                            <div className="h-4 bg-gray-200 rounded w-1/2" />
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    products.map((product, index) => {
-                      const productImages = JSON.parse(product.images) as string[]
-                      const mainImage = productImages[0] || '/placeholder.jpg'
-                      
-                      return (
+          {/* RECODE COLLECTION - LOCKED WITH CARD STACK */}
                     <motion.div
-                      key={product.id}
-                      className="group min-w-[300px] max-w-[300px] flex-shrink-0 snap-center"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                          <Link href={`/product/${product.sku}`}>
-                            <div className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer">
-                        <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-                                {imageErrors[product.id] ? (
-                                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                                    <div className="text-center p-4">
-                                      <div className="w-12 h-12 mx-auto mb-2 bg-gray-200 rounded flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            transition={{ duration: 0.8 }}
+            className="relative md:mt-8"
+          >
+            {/* Background Panel */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
+            
+            <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+              {/* Left: Locked 4-Card Stack */}
+              <div className="relative px-8 md:px-0 order-2 md:order-1">
+                <div className="relative aspect-[3/4] max-w-md mx-auto cursor-not-allowed">
+                  <div className="relative w-full h-full">
+                    {/* Card 1 - Front (Locked/Blurred) */}
+                    <div className="absolute inset-0 z-40">
+                      <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-2xl">
+                        {recodeImages[0] && (
+                          <Image
+                            src={recodeImages[0]}
+                            alt="Recode Locked 1"
+                            fill
+                            className="object-cover blur-md grayscale opacity-40"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            unoptimized
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-black/50" />
+                        
+                        {/* Lock Icon Overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <motion.div
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="w-20 h-20 rounded-full bg-gray-900/80 backdrop-blur-sm border-2 border-gray-600 flex items-center justify-center"
+                          >
+                            <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
+                          </motion.div>
                                       </div>
-                                      <span className="text-gray-400 text-xs">{product.title}</span>
+                        
+                        <div className="absolute bottom-4 left-4 text-white/60 text-sm font-medium">Locked</div>
                                     </div>
                                   </div>
-                                ) : (
+                    
+                    {/* Card 2 */}
+                    <div className="absolute inset-0 z-30" style={{ transform: 'translateX(8px) translateY(8px) rotate(2deg)' }}>
+                      <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-xl opacity-60">
+                        {recodeImages[1] && (
                           <Image
-                                    src={mainImage}
-                            alt={product.title}
+                            src={recodeImages[1]}
+                            alt="Recode Locked 2"
                             fill
-                            className="object-cover transition-all duration-500 group-hover:scale-105"
-                            sizes="300px"
-                                    onError={() => setImageErrors(prev => ({ ...prev, [product.id]: true }))}
+                            className="object-cover blur-sm grayscale opacity-50"
+                            sizes="(max-width: 768px) 100vw, 50vw"
                                     unoptimized
                           />
                                 )}
-                          {/* Glass Shine Effect */}
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
+                        <div className="absolute inset-0 bg-black/40" />
                           </div>
                         </div>
                         
-                        <div className="p-4">
-                          <h3 className="text-sm font-normal text-black mb-1 tracking-wide">
-                            {product.title}
-                          </h3>
-                          <p className="text-sm font-normal text-gray-600 mb-3">
-                                  ${(product.priceCents / 100).toFixed(2)}
-                          </p>
-                          
-                          <div className="flex items-center space-x-1.5 mb-3">
-                                  {product.variants && product.variants.slice(0, 4).map((variant: any, idx: number) => (
-                              <div
-                                key={idx}
-                                className="w-4 h-4 border border-gray-300 transition-all duration-200 hover:scale-110 cursor-pointer"
-                                      style={{ backgroundColor: colorMap[variant.color] || '#6B7280' }}
-                                      title={variant.color}
-                              />
-                            ))}
-                          </div>
-                        </div>
+                    {/* Card 3 */}
+                    <div className="absolute inset-0 z-20" style={{ transform: 'translateX(16px) translateY(16px) rotate(4deg)' }}>
+                      <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-lg opacity-40">
+                        {recodeImages[2] && (
+                          <Image
+                            src={recodeImages[2]}
+                            alt="Recode Locked 3"
+                            fill
+                            className="object-cover blur-sm grayscale opacity-30"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            unoptimized
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-black/50" />
                       </div>
-                          </Link>
-                    </motion.div>
-                      )
-                    })
-                  )}
+                    </div>
+                    
+                    {/* Card 4 - Back */}
+                    <div className="absolute inset-0 z-10" style={{ transform: 'translateX(24px) translateY(24px) rotate(6deg)' }}>
+                      <div className="relative w-full h-full overflow-hidden bg-gray-500 rounded-sm shadow-md opacity-30">
+                        {recodeImages[3] && (
+                          <Image
+                            src={recodeImages[3]}
+                            alt="Recode Locked 4"
+                            fill
+                            className="object-cover blur-sm grayscale opacity-20"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            unoptimized
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-black/60" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Locked indicator */}
+                  <div className="absolute bottom-4 right-4 bg-gray-800/70 backdrop-blur-sm px-3 py-2 rounded-full z-50">
+                    <p className="text-white text-xs uppercase tracking-wider flex items-center gap-2">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      Locked
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Scroll Indicator Dots */}
-              {!productsLoading && products.length > 0 && (
-              <div className="flex justify-center gap-2 mt-6">
-                  {products.map((_, idx) => (
-                  <div
-                    key={idx}
-                    className="w-2 h-2 rounded-full bg-gray-300 transition-all duration-300"
-                  />
-                ))}
+              {/* Right: Content */}
+              <div className="space-y-4 order-1 md:order-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700 rounded-full">
+                  <svg className="w-3 h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span className="text-xs font-bold uppercase tracking-wider text-gray-300">Locked</span>
+                </div>
+                
+                <h3 className="text-4xl md:text-5xl font-light text-gray-400 tracking-tight leading-none">
+                  RECODE
+                          </h3>
+                
+                <p className="text-base text-gray-500 leading-relaxed">
+                  Made for the new you.<br />
+                  Text-driven pieces that reflect your direction.
+                </p>
+                
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 font-medium uppercase tracking-wider text-xs cursor-not-allowed border border-gray-300">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span>Coming Soon</span>
+                          </div>
+                        </div>
+                  </div>
+                    </motion.div>
+
+                </div>
+      </section>
+
+      {/* 🟠 SECTION 4 — BRAND PHILOSOPHY BLOCK */}
+      <section className="relative pt-16 md:pt-20 lg:pt-24 pb-32 md:pb-40 lg:pb-48 bg-white overflow-hidden">
+        {/* ZOLAR Logo Watermark - Subtle & Large */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 0.02, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 2, ease: 'easeOut' }}
+            className="text-[35vw] font-black tracking-tighter select-none whitespace-nowrap text-gray-900"
+            style={{ lineHeight: 0.8 }}
+          >
+            ZOLAR
+          </motion.div>
               </div>
-              )}
+
+        {/* Enhanced Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
+          <motion.div 
+            className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-500/5 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 8, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-orange-600/5 rounded-full blur-3xl"
+            animate={{
+              scale: [1.3, 1, 1.3],
+              opacity: [0.5, 0.3, 0.5],
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
+          />
+              </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            variants={containerVariants}
+            className="text-center"
+          >
+            {/* Enhanced Badge */}
+            <motion.div variants={itemVariants} className="mb-12">
+              <div className="inline-flex items-center justify-center space-x-3">
+                <div className="h-px w-20 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+                <span className="text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
+                  Our Story
+                </span>
+                <div className="h-px w-20 bg-gradient-to-l from-transparent via-orange-500 to-transparent" />
+              </div>
             </motion.div>
+
+            {/* Enhanced Title */}
+            <motion.div variants={itemVariants} className="mb-20">
+              <h2 className="text-6xl sm:text-7xl lg:text-8xl xl:text-9xl font-light tracking-tight leading-[0.85] mb-8 text-black">
+                Made for<br />
+                <span className="font-medium text-black">Movement.</span>
+              </h2>
+            </motion.div>
+
+            {/* Enhanced Philosophy Content */}
+            <motion.div 
+              variants={itemVariants}
+              className="max-w-5xl mx-auto space-y-10 mb-20"
+            >              
+              <div className="space-y-10">
+                <p className="text-3xl sm:text-4xl lg:text-5xl text-black font-light leading-tight tracking-tight">
+                  ZOLAR is built for people who want more from themselves.
+                </p>
+                
+                <div className="max-w-3xl mx-auto space-y-6 text-gray-700">
+                  <p className="text-xl sm:text-2xl font-light leading-relaxed">
+                    Better days. Better energy. Better versions.
+                  </p>
+                  <p className="text-lg sm:text-xl font-light leading-relaxed text-gray-600">
+                    We create modern essentials that move with you—designed for those who push boundaries and define their own path.
+                  </p>
           </div>
 
-          {/* View All Products Button - Enhanced */}
+                <div className="relative py-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-8 text-2xl sm:text-3xl lg:text-4xl font-medium text-orange-500">
+                      Wear what moves you forward.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Enhanced CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center mt-16"
+              transition={{ duration: 0.6, delay: 0.5 }}
           >
             <Link
-              href="/products"
-              className="group relative inline-flex items-center gap-4 px-16 py-5 bg-black text-white text-sm uppercase tracking-[0.3em] overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105"
-            >
-              <span className="relative z-10">Explore Full Collection</span>
-              <motion.svg
-                className="w-6 h-6 relative z-10"
+                href="/about"
+                className="group relative inline-flex items-center gap-4 px-14 py-6 bg-black text-white text-sm uppercase tracking-[0.3em] font-semibold overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-105"
+              >
+                <span className="relative z-10">Our Story</span>
+                <svg 
+                  className="w-6 h-6 relative z-10 group-hover:translate-x-2 transition-transform" 
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
-                animate={{ x: [0, 5, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </motion.svg>
+                </svg>
               
-              {/* Animated Background */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-orange-500"
+                  className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600"
                 initial={{ x: '-100%' }}
                 whileHover={{ x: 0 }}
                 transition={{ duration: 0.5 }}
               />
             </Link>
-            
-            {/* Additional Info */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-              className="mt-6 text-sm text-gray-500"
-            >
-              50+ Exclusive Pieces Available
-            </motion.p>
+            </motion.div>
           </motion.div>
-          </div>
         </div>
       </section>
 
-      {/* Section Divider */}
-      <div className="border-t border-gray-100" />
-
-      {/* Fashion Carousel Section */}
-      <FashionCarousel />
-
-      {/* Section Divider */}
-      <div className="border-t border-gray-100" />
-
-      {/* Quality & Design Section - Award-Winning Design */}
-      <section className="relative py-20 md:py-28 lg:py-32 bg-white overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50" />
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-orange-50/30 to-transparent" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            {/* Left Content Area - Enhanced */}
+      {/* Modern Action Gallery / Reel Section */}
+      <section className="relative py-16 md:py-20 bg-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
           <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="space-y-8"
-            >
-              {/* Label with Accent Line */}
-              <div className="inline-flex items-center space-x-3">
-                <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent" />
-                <span className="text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
-                  Our Philosophy
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center justify-center mb-4">
+              <div className="h-px w-12 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+              <span className="mx-3 text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
+                In Action
                 </span>
+              <div className="h-px w-12 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
               </div>
               
-              {/* Headline */}
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-black leading-tight">
-                <span className="block mb-2">Quality &</span>
-                <span className="block font-serif italic bg-gradient-to-r from-black via-gray-700 to-black bg-clip-text text-transparent"
-                      style={{ fontFamily: 'Playfair Display, Georgia, serif' }}>
-                  Design
-                </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-light tracking-tight text-black mb-3 leading-tight">
+              Style in <span className="font-medium">Motion</span>
               </h2>
-              
-              {/* Description */}
-              <div className="space-y-4 border-l-2 border-orange-500 pl-6">
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
-                  Every piece in our collection is crafted with meticulous attention to detail. 
-                  We believe in creating timeless designs that transcend seasonal trends.
-                </p>
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
-                  From fabric selection to final stitch, each step is carefully considered 
-                  to deliver products that exceed expectations.
-                </p>
-              </div>
+            <p className="text-base text-gray-600 font-light">
+              ZOLAR on the streets.
+            </p>
+          </motion.div>
 
-              {/* Feature List */}
-              <div className="space-y-6 pt-6">
-                {[
-                  { icon: '✓', title: '100% Premium Materials', desc: 'Organic and recycled fabrics from ethical suppliers' },
-                  { icon: '∞', title: 'Timeless Design', desc: 'Styles that transcend seasonal trends' },
-                  { icon: '⚡', title: 'Master Craftsmanship', desc: 'Every stitch placed by skilled artisans' },
-                ].map((feature, idx) => (
+          {/* Horizontal Scrolling Gallery */}
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+              {/* Gallery Item 1 */}
                   <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1, duration: 0.5 }}
-                    className="flex items-start space-x-4 group"
-                  >
-                    <div className="flex-shrink-0 w-12 h-12 bg-black text-white rounded-full flex items-center justify-center text-xl font-light group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-red-500 transition-all duration-300">
-                      {feature.icon}
-                </div>
-                <div>
-                      <h3 className="text-lg font-semibold text-black mb-1">{feature.title}</h3>
-                      <p className="text-sm text-gray-600">{feature.desc}</p>
-                </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-                <Link
-                  href="/about"
-                className="group inline-flex items-center space-x-3 mt-8"
+                transition={{ duration: 0.5 }}
+                className="flex-none w-[280px] snap-center"
               >
-                <span className="text-sm uppercase tracking-[0.2em] font-semibold text-black border-b-2 border-black pb-1 group-hover:border-orange-500 group-hover:text-orange-500 transition-all duration-300">
-                  Discover Our Process
-                </span>
-                <svg 
-                  className="w-5 h-5 text-black group-hover:text-orange-500 transition-all duration-300 group-hover:translate-x-1" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
+                <Link href="/products" className="group block relative overflow-hidden rounded-sm">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    {products[0] && (
+                      <Image
+                        src={JSON.parse(products[0].images)[0] || '/placeholder.jpg'}
+                        alt="ZOLAR style 1"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="280px"
+                        unoptimized
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                </div>
                 </Link>
               </motion.div>
 
-            {/* Right Image Grid - Enhanced Layout */}
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-6">
-                {/* Large Main Image */}
+              {/* Gallery Item 2 */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="col-span-2 relative overflow-hidden group"
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="flex-none w-[280px] snap-center"
                 >
-                  <div className="relative h-[300px] sm:h-[400px] lg:h-[450px]">
+                <Link href="/products" className="group block relative overflow-hidden rounded-sm">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    {products[1] && (
                   <Image
-                      src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=1200"
-                      alt="Quality Craftsmanship"
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                    {/* Overlay on Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    {/* Floating Badge */}
+                        src={JSON.parse(products[1].images)[0] || '/placeholder.jpg'}
+                        alt="ZOLAR style 2"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="280px"
+                        unoptimized
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                  </div>
+                </Link>
+              </motion.div>
+
+              {/* Gallery Item 3 */}
                     <motion.div
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: 0.5 }}
-                      className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm px-6 py-3 shadow-xl"
-                    >
-                      <div className="text-2xl font-light text-black">2025</div>
-                      <div className="text-[10px] uppercase tracking-widest text-gray-600">Award Winner</div>
-                    </motion.div>
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex-none w-[280px] snap-center"
+              >
+                <Link href="/products" className="group block relative overflow-hidden rounded-sm">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    {products[2] && (
+                      <Image
+                        src={JSON.parse(products[2].images)[0] || '/placeholder.jpg'}
+                        alt="ZOLAR style 3"
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="280px"
+                        unoptimized
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
                   </div>
+                </Link>
                 </motion.div>
 
-                {/* Two Smaller Images */}
+              {/* Gallery Item 4 */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="relative overflow-hidden group"
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex-none w-[280px] snap-center"
                 >
-                  <div className="relative h-[200px] sm:h-[250px]">
+                <Link href="/products" className="group block relative overflow-hidden rounded-sm">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    {products[3] && (
                     <Image
-                      src="https://images.unsplash.com/photo-1558769132-cb1aea709744?w=600"
-                      alt="Premium Fabrics"
+                        src={JSON.parse(products[3].images)[0] || '/placeholder.jpg'}
+                        alt="ZOLAR style 4"
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-2"
-                      sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="280px"
+                        unoptimized
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
                   </div>
+                </Link>
                 </motion.div>
 
+              {/* Gallery Item 5 */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="relative overflow-hidden group"
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="flex-none w-[280px] snap-center"
                 >
-                  <div className="relative h-[200px] sm:h-[250px]">
+                <Link href="/products" className="group block relative overflow-hidden rounded-sm">
+                  <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
+                    {products[4] && (
                     <Image
-                      src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600"
-                      alt="Detailed Design"
+                        src={JSON.parse(products[4].images)[0] || '/placeholder.jpg'}
+                        alt="ZOLAR style 5"
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-2"
-                      sizes="(max-width: 768px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="280px"
+                        unoptimized
                   />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+                    )}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
                 </div>
+                </Link>
               </motion.div>
             </div>
-
-              {/* Decorative Element */}
-              <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
             </div>
-          </div>
+
+          {/* View All Link */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-center mt-8"
+          >
+            <Link
+              href="/products"
+              className="group inline-flex items-center gap-2 text-black text-sm uppercase tracking-wider font-medium hover:text-orange-500 transition-colors duration-300"
+            >
+              <span>View All</span>
+              <svg 
+                className="w-4 h-4 group-hover:translate-x-1 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* Archive Collection - Zolar Borderline */}
+      {/* Archive Collection */}
       <ArchiveCollection />
 
       {/* Section Divider */}
       <div className="border-t border-gray-100" />
 
-      {/* Join the Drop - Newsletter Section - White Background */}
+      {/* Newsletter Section */}
       <section className="relative py-32 bg-white text-black overflow-hidden">
-        {/* Animated Background Gradient - Orange on White */}
         <div className="absolute inset-0">
           <motion.div 
             className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl"
@@ -1142,14 +1218,6 @@ export default function Home() {
               opacity: [0.4, 0.6, 0.4],
             }}
             transition={{ duration: 8, repeat: Infinity }}
-          />
-          <motion.div 
-            className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-400/10 rounded-full blur-3xl"
-            animate={{
-              scale: [1.2, 1, 1.2],
-              opacity: [0.6, 0.4, 0.6],
-            }}
-            transition={{ duration: 10, repeat: Infinity }}
           />
         </div>
 
@@ -1161,7 +1229,6 @@ export default function Home() {
             variants={containerVariants}
             className="max-w-4xl mx-auto"
           >
-            {/* Header */}
             <div className="text-center mb-16">
               <motion.div 
                 variants={itemVariants} 
@@ -1180,23 +1247,18 @@ export default function Home() {
                 variants={itemVariants} 
                 className="mb-6 text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight leading-tight"
               >
-                <span className="block text-black">Join the</span>
-                <span className="block font-serif italic bg-gradient-to-r from-black via-orange-600 to-black bg-clip-text text-transparent"
-                      style={{ fontFamily: 'Playfair Display, Georgia, serif', backgroundSize: '200%' }}>
-                  Movement
-                </span>
+                <span className="block text-black">Stay</span>
+                <span className="block font-medium">Connected</span>
             </motion.h2>
               
               <motion.p 
                 variants={itemVariants} 
                 className="text-xl text-gray-600 max-w-2xl mx-auto font-light leading-relaxed"
               >
-                Be the first to access new collections, exclusive drops, and insider perks. 
-                Join 50,000+ fashion enthusiasts worldwide.
+                Be the first to know about new drops, exclusive releases, and special offers from ZOLAR.
             </motion.p>
             </div>
 
-            {/* Newsletter Form */}
             <motion.form
               variants={itemVariants}
               onSubmit={handleSubscribe}
@@ -1212,7 +1274,6 @@ export default function Home() {
                     className="w-full px-8 py-5 bg-gray-50 border-2 border-gray-200 focus:border-orange-500 focus:outline-none transition-all duration-300 text-base text-black placeholder-gray-400 group-hover:bg-gray-100"
                 required
               />
-                  <div className="absolute inset-0 border-2 border-orange-500/0 group-hover:border-orange-500/30 transition-all duration-300 pointer-events-none" />
                 </div>
                 <motion.button
                 type="submit"
@@ -1237,56 +1298,25 @@ export default function Home() {
                 By subscribing, you agree to our Privacy Policy and consent to receive updates.
               </p>
             </motion.form>
-
-            {/* Stats - Enhanced Design for White Background */}
-            <motion.div
-              variants={containerVariants}
-              className="grid grid-cols-1 sm:grid-cols-3 gap-8"
-            >
-              <motion.div
-                variants={itemVariants}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="relative p-8 bg-gray-50 border-2 border-gray-200 overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative">
-                  <p className="text-5xl font-light text-black mb-3">50K+</p>
-                  <p className="text-sm uppercase tracking-wider text-gray-600">Global Community</p>
-                </div>
-                <div className="absolute top-4 right-4 text-6xl opacity-5">🌍</div>
               </motion.div>
+                </div>
+      </section>
               
+      {/* 🟤 SECTION 5 — FOOTER SLOGAN */}
+      <section className="relative bg-black text-white py-8 border-t border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
-                variants={itemVariants}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="relative p-8 bg-gray-50 border-2 border-gray-200 overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative">
-                  <p className="text-5xl font-light text-black mb-3">4.9</p>
-                  <p className="text-sm uppercase tracking-wider text-gray-600">Average Rating</p>
-                </div>
-                <div className="absolute top-4 right-4 text-6xl opacity-5">⭐</div>
-              </motion.div>
-              
-              <motion.div
-                variants={itemVariants}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="relative p-8 bg-gray-50 border-2 border-gray-200 overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative">
-                  <p className="text-5xl font-light text-black mb-3">100%</p>
-                  <p className="text-sm uppercase tracking-wider text-gray-600">Quality Promise</p>
-                </div>
-                <div className="absolute top-4 right-4 text-6xl opacity-5">✨</div>
-              </motion.div>
-            </motion.div>
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <p className="text-sm sm:text-base font-light tracking-[0.2em] uppercase text-white/60">
+              Wear what moves you.
+            </p>
           </motion.div>
         </div>
-
-        {/* Decorative Elements */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
       </section>
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import ProductCard from '@/components/ProductCard'
 
 interface Product {
@@ -26,11 +27,22 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const collectionFilter = searchParams.get('collection')
+  
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'sweatshirts'>('all')
+  const [filter, setFilter] = useState<'all' | 'essence' | 'fragment' | 'recode' | 'sweatshirts'>('all')
   const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high' | 'name'>('default')
+
+  // Set filter from URL parameter
+  useEffect(() => {
+    if (collectionFilter && ['essence', 'fragment', 'recode'].includes(collectionFilter)) {
+      setFilter(collectionFilter as 'essence' | 'fragment' | 'recode')
+    }
+  }, [collectionFilter])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -59,13 +71,18 @@ export default function ProductsPage() {
   useEffect(() => {
     let result = [...products]
 
-    // Filter by category
+    // Filter by category or collection
+    if (filter !== 'all') {
     if (filter === 'sweatshirts') {
       result = result.filter(p => 
         p.title.toLowerCase().includes('sweatshirt') ||
         p.category?.toLowerCase() === 'sweatshirts' ||
         p.category?.toLowerCase() === 'sweatshirt'
       )
+      } else {
+        // Filter by collection (essence, fragment, recode)
+        result = result.filter(p => p.category?.toLowerCase() === filter.toLowerCase())
+      }
     }
 
     // Sort products
@@ -130,10 +147,13 @@ export default function ProductsPage() {
                 className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
               >
                 {/* Filter Buttons */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-center">
                   <span className="text-xs uppercase tracking-wider text-gray-500 mr-2">Filter:</span>
                   <button
-                    onClick={() => setFilter('all')}
+                    onClick={() => {
+                      setFilter('all')
+                      router.push('/products')
+                    }}
                     className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
                       filter === 'all'
                         ? 'bg-black text-white'
@@ -143,7 +163,49 @@ export default function ProductsPage() {
                     All
                   </button>
                   <button
-                    onClick={() => setFilter('sweatshirts')}
+                    onClick={() => {
+                      setFilter('essence')
+                      router.push('/products?collection=essence')
+                    }}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
+                      filter === 'essence'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Essence
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilter('fragment')
+                      router.push('/products?collection=fragment')
+                    }}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
+                      filter === 'fragment'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Fragment
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilter('recode')
+                      router.push('/products?collection=recode')
+                    }}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
+                      filter === 'recode'
+                        ? 'bg-black text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Recode
+                  </button>
+                  <button
+                    onClick={() => {
+                      setFilter('sweatshirts')
+                      router.push('/products')
+                    }}
                     className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
                       filter === 'sweatshirts'
                         ? 'bg-black text-white'

@@ -447,3 +447,53 @@ a, button, input, textarea, select {
     content: " (" attr(href) ")";
   }
 }
+
+/* Card Stack Swipe Animations */
+@keyframes swipeOutRight {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(150%) translateY(-50%) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+@keyframes swipeOutLeft {
+  0% {
+    transform: translateX(0) translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-150%) translateY(-50%) rotate(-15deg);
+    opacity: 0;
+  }
+}
+
+.swipe-out {
+  animation: swipeOutRight 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.swipe-out-left {
+  animation: swipeOutLeft 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.card-stack {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Hide Scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

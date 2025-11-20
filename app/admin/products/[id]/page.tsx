@@ -288,7 +288,10 @@ export default function EditProductPage() {
                   required
                 >
                   <option value="">Select Category</option>
-                  <option value="sweatshirts">Sweatshirts</option>
+                  <option value="essence">Essence Collection</option>
+                  <option value="fragment">Fragment Collection</option>
+                  <option value="recode">Recode Collection</option>
+                  <option value="sweatshirts">Sweatshirts (Generic)</option>
                   <option value="hoodies">Hoodies</option>
                   <option value="other">Other</option>
                 </select>

@@ -270,35 +270,43 @@ export default function Navbar({ className = '' }: NavbarProps) {
         </div>
       </motion.nav>
 
-      {/* Side Menu Overlay - Premium Design */}
+      {/* Side Menu Overlay - Enhanced Premium Design */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            {/* Enhanced Backdrop with Blur */}
+            {/* Enhanced Backdrop with Blur & Dark Overlay */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60]"
+              initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+              animate={{ opacity: 1, backdropFilter: 'blur(8px)' }}
+              exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+              className="fixed inset-0 bg-black/50 z-[60]"
               onClick={() => setIsMenuOpen(false)}
             />
 
-            {/* Premium Side Menu */}
+            {/* Premium Side Menu with Improved Overflow */}
             <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-              className="fixed left-0 top-0 bottom-0 w-full sm:w-[450px] bg-white z-[70] overflow-y-auto shadow-2xl"
+              initial={{ x: '-100%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-100%', opacity: 0 }}
+              transition={{ 
+                duration: 0.6, 
+                ease: [0.22, 1, 0.36, 1],
+                opacity: { duration: 0.4 }
+              }}
+              className="fixed left-0 top-0 bottom-0 w-full sm:w-[450px] bg-white z-[70] shadow-2xl overflow-hidden flex flex-col"
             >
-              {/* Decorative Header Gradient */}
-              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-orange-50/50 to-transparent pointer-events-none" />
+              {/* Decorative Header Gradient - Enhanced */}
+              <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-orange-50/50 to-transparent pointer-events-none z-0" />
               
-              {/* Close Button - Enhanced */}
-              <button
+              {/* Close Button - Enhanced with Animation */}
+              <motion.button
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                exit={{ scale: 0, rotate: 180 }}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1], delay: 0.2 }}
                 onClick={() => setIsMenuOpen(false)}
-                className="absolute top-6 right-6 p-2.5 text-black hover:text-orange-500 transition-all duration-300 group z-10 bg-white/80 backdrop-blur-sm rounded-full hover:bg-orange-50"
+                className="absolute top-6 right-6 p-2.5 text-black hover:text-orange-500 transition-all duration-300 group z-20 bg-white/90 backdrop-blur-sm rounded-full hover:bg-orange-50 shadow-lg"
                 aria-label="Close menu"
               >
                 <svg
@@ -314,10 +322,14 @@ export default function Navbar({ className = '' }: NavbarProps) {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-              </button>
+              </motion.button>
 
-              {/* Menu Content */}
-              <div className="p-8 pt-24 relative">
+              {/* Scrollable Menu Content with Better Overflow Handling */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-8 pt-24 relative" 
+                   style={{ 
+                     scrollbarWidth: 'thin',
+                     scrollbarColor: '#ff5b00 transparent'
+                   }}>
                 {/* Logo in Menu */}
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
@@ -354,45 +366,66 @@ export default function Navbar({ className = '' }: NavbarProps) {
                 {menuSections.map((section, sectionIndex) => (
                   <motion.div
                     key={sectionIndex}
-                    initial={{ opacity: 0, x: -20 }}
+                    initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * (sectionIndex + 1) }}
+                    transition={{ 
+                      delay: 0.15 * (sectionIndex + 1),
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1]
+                    }}
                     className="mb-12"
                   >
-                    {/* Section Title with Orange Accent */}
+                    {/* Section Title with Enhanced Orange Accent */}
                     <div className="flex items-center mb-6">
-                      <div className="w-8 h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3" />
+                      <motion.div 
+                        className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3"
+                        initial={{ width: 0 }}
+                        animate={{ width: 32 }}
+                        transition={{ delay: 0.15 * (sectionIndex + 1) + 0.2, duration: 0.5 }}
+                      />
                       <h3 className="text-xs tracking-[0.25em] text-gray-500 uppercase font-semibold">
                       {section.title}
                     </h3>
                     </div>
 
-                    {/* Section Links - Enhanced */}
+                    {/* Section Links - Enhanced with Smooth Animations */}
                     <ul className="space-y-3">
                       {section.links.map((link, linkIndex) => (
                         <motion.li
                           key={link.href}
-                          initial={{ opacity: 0, x: -10 }}
+                          initial={{ opacity: 0, x: -20 }}
                           animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.05 * linkIndex + 0.1 * (sectionIndex + 1) }}
+                          transition={{ 
+                            delay: 0.05 * linkIndex + 0.15 * (sectionIndex + 1) + 0.3,
+                            duration: 0.4,
+                            ease: [0.22, 1, 0.36, 1]
+                          }}
                         >
                           <Link
                             href={link.href}
                             onClick={() => setIsMenuOpen(false)}
                             className="group relative text-2xl font-light text-black hover:text-orange-500 transition-all duration-300 block uppercase tracking-wide flex items-center py-2"
                           >
-                            <span className="relative">
+                            <span className="relative overflow-hidden">
                             {link.label}
-                              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500 group-hover:w-full transition-all duration-300" />
+                              <motion.span 
+                                className="absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-500"
+                                initial={{ width: 0 }}
+                                whileHover={{ width: '100%' }}
+                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                              />
                             </span>
-                            <svg
-                              className="w-5 h-5 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300"
+                            <motion.svg
+                              className="w-5 h-5 ml-2"
+                              initial={{ opacity: 0, x: -8 }}
+                              whileHover={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3 }}
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
+                            </motion.svg>
                           </Link>
                         </motion.li>
                       ))}
@@ -402,13 +435,22 @@ export default function Navbar({ className = '' }: NavbarProps) {
 
                 {/* Utility Links Section */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
+                  transition={{ 
+                    delay: 0.5,
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
                   className="border-t border-gray-200 pt-8 mt-8"
                 >
                   <div className="flex items-center mb-6">
-                    <div className="w-8 h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3" />
+                    <motion.div 
+                      className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3"
+                      initial={{ width: 0 }}
+                      animate={{ width: 32 }}
+                      transition={{ delay: 0.6, duration: 0.5 }}
+                    />
                     <h3 className="text-xs tracking-[0.25em] text-gray-500 uppercase font-semibold">
                       SUPPORT
                     </h3>
@@ -468,33 +510,46 @@ export default function Navbar({ className = '' }: NavbarProps) {
                   </ul>
                 </motion.div>
 
-                {/* Footer Info */}
+                {/* Footer Info with Staggered Animations */}
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: 0.7,
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1]
+                  }}
                   className="mt-12 pt-8 border-t border-gray-200"
                 >
-                  <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className="text-xs text-gray-500 mb-4 leading-relaxed"
+                  >
                     Experience luxury fashion that redefines elegance. Discover our curated collection of timeless pieces.
-                  </p>
+                  </motion.p>
                   <div className="flex items-center space-x-4">
-                    <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                      </svg>
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
-                        <path d="M12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                    </a>
-                    <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                      </svg>
-                    </a>
+                    {[
+                      { path: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" },
+                      { path: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM12 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" },
+                      { path: "M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" }
+                    ].map((icon, idx) => (
+                      <motion.a 
+                        key={idx}
+                        href="#" 
+                        className="text-gray-400 hover:text-orange-500 transition-colors"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.85 + (idx * 0.05) }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d={icon.path} />
+                        </svg>
+                      </motion.a>
+                    ))}
                 </div>
                 </motion.div>
               </div>

@@ -5,86 +5,154 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 export default function AboutPage() {
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] }
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
+    },
   }
 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative pt-32 pb-20 md:pb-24 bg-white overflow-hidden">
+        {/* ZOLAR Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none overflow-hidden">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 0.02, scale: 1 }}
+            transition={{ duration: 2, ease: 'easeOut' }}
+            className="text-[35vw] font-black tracking-tighter select-none whitespace-nowrap text-gray-900"
+            style={{ lineHeight: 0.8 }}
+          >
+            ZOLAR
+          </motion.div>
+        </div>
+
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-white" />
+          <motion.div 
+            className="absolute top-0 right-1/4 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 8, repeat: Infinity }}
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <span className="text-xs font-normal uppercase tracking-widest text-gray-500 block mb-4">
-              About Zolar
-            </span>
-            <h1 
-              className="text-4xl md:text-6xl font-light tracking-tight text-black mb-6"
-              style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
-            >
-              Crafting Excellence
+            <div className="inline-flex items-center justify-center mb-8">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+              <span className="mx-4 text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
+                About ZOLAR
+              </span>
+              <div className="h-px w-16 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+            </div>
+            
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight text-black mb-8 leading-[0.9]">
+              Made for<br />
+              <span className="font-medium">Movement.</span>
             </h1>
-            <p className="text-gray-600 text-sm md:text-base font-light max-w-2xl mx-auto leading-relaxed">
-              We believe in creating timeless pieces that transcend seasonal trends.
-              Each product is a testament to quality, design, and meticulous craftsmanship.
+            
+            <p className="text-xl md:text-2xl text-gray-700 font-light max-w-3xl mx-auto leading-relaxed mb-4">
+              Modern streetwear for people who want more from themselves.
+            </p>
+            <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
+              Better days. Better energy. Better versions.
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Our Story Section */}
-      <section className="py-16 md:py-20">
+      <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.8 }}
             >
-              <span className="text-xs font-normal uppercase tracking-widest text-gray-500 block mb-4">
-                Our Story
-              </span>
-              <h2 className="text-3xl md:text-4xl font-light tracking-tight text-black mb-6">
-                Born from Passion
+              <div className="inline-flex items-center mb-6">
+                <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent mr-3" />
+                <span className="text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
+                  Our Story
+                </span>
+              </div>
+              
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-black mb-8 leading-tight">
+                A Brand Built on<br />
+                <span className="font-medium">Forward Energy</span>
               </h2>
-              <div className="space-y-4 text-gray-600 text-sm leading-relaxed font-light">
+              
+              <div className="space-y-6 text-gray-700 text-base sm:text-lg leading-relaxed font-light">
                 <p>
-                  Zolar began with a simple vision: to create clothing that speaks to individuality 
-                  while maintaining the highest standards of quality and design.
+                  ZOLAR started with a simple belief: clothing should move with you, not against you. 
+                  We create modern essentials for people who refuse to stand still.
                 </p>
                 <p>
-                  Every collection is carefully curated, with each piece designed to become a 
-                  staple in your wardrobe. We don't chase trends—we set them.
+                  Born in Morocco, inspired by global streetwear culture, ZOLAR represents a new 
+                  generation of style—clean lines, bold identity, and everyday ambition.
                 </p>
                 <p>
-                  From fabric selection to the final stitch, we ensure that every detail meets 
-                  our exacting standards. This is more than fashion; it's a commitment to excellence.
+                  We're not here to follow trends. We're here to build a movement of people who 
+                  wear what moves them forward.
                 </p>
               </div>
+
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-3 mt-8 px-8 py-4 bg-black text-white text-sm uppercase tracking-wider font-medium hover:bg-orange-500 transition-all duration-300 group"
+              >
+                <span>Explore Collections</span>
+                <svg 
+                  className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative aspect-[4/5]"
+              transition={{ duration: 0.8 }}
+              className="relative aspect-[4/5] bg-gray-100 rounded-sm overflow-hidden shadow-lg"
             >
               <Image
                 src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&q=80"
-                alt="Zolar Craftsmanship"
+                alt="ZOLAR Brand"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </motion.div>
           </div>
         </div>
