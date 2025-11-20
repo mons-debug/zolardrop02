@@ -107,7 +107,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const parsedCart = JSON.parse(savedCart)
         dispatch({ type: 'SET_CART', payload: parsedCart })
       } catch (error) {
-        console.error('Error loading cart from localStorage:', error)
+        // Silently handle error
       }
     }
   }, [])

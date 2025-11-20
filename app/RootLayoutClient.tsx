@@ -2,12 +2,17 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { CartProvider } from '@/components/CartContext'
-import CartDrawer from '@/components/CartDrawer'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CustomCursor from '@/components/CustomCursor'
 import FloatingActions from '@/components/FloatingActions'
+
+// Lazy load CartDrawer since it's only needed when cart is opened
+const CartDrawer = dynamic(() => import('@/components/CartDrawer'), {
+  ssr: false,
+})
 
 export default function RootLayoutClient({
   children,
@@ -17,7 +22,7 @@ export default function RootLayoutClient({
   const pathname = usePathname()
   
   // Check if current path is an admin page
-  const isAdminPage = pathname?.startsWith('/admin')
+  const isAdminPage = pathname?.startsWith('/zr-control-2024')
 
   // Add/remove admin-page class to body based on current page
   useEffect(() => {

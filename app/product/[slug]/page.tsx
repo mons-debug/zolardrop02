@@ -80,7 +80,7 @@ export default function ProductPage() {
           setLoading(false)
         })
         .catch(error => {
-          console.error('Error fetching product:', error)
+          // Silently handle error
           setProduct(null)
           setLoading(false)
         })

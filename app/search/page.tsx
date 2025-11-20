@@ -47,7 +47,7 @@ export default function SearchPage() {
         setResults([])
       }
     } catch (error) {
-      console.error('Search error:', error)
+      // Silently handle error
       setResults([])
     } finally {
       setLoading(false)

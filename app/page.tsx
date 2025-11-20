@@ -2,9 +2,15 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
-import ArchiveCollection from '@/components/ArchiveCollection'
+
+// Lazy load ArchiveCollection as it's below fold
+const ArchiveCollection = dynamic(() => import('@/components/ArchiveCollection'), {
+  ssr: true,
+  loading: () => <div className="py-32 text-center">Loading...</div>
+})
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -56,7 +62,7 @@ export default function Home() {
           setFragmentDelay(fragment?.autoRotateDelay || 3000)
         }
       } catch (error) {
-        console.error('Error fetching collections:', error)
+        // Silently handle error
       } finally {
         setCollectionsLoading(false)
       }
@@ -74,7 +80,7 @@ export default function Home() {
           setProducts(data.products || [])
         }
       } catch (error) {
-        console.error('Error fetching products:', error)
+        // Silently handle error
       } finally {
         setProductsLoading(false)
       }
@@ -106,7 +112,7 @@ export default function Home() {
           setHeroSlides(slides)
         }
       } catch (error) {
-        console.error('Error fetching hero slides:', error)
+        // Silently handle error
         setHeroSlides([
           {
             id: '1',
@@ -366,6 +372,7 @@ export default function Home() {
               <Image
                 src={heroSlides[currentSlide]?.image || ''}
                 alt={heroSlides[currentSlide]?.title || ''}
+                priority
                 fill
                 className="object-cover object-center"
                 priority
@@ -476,6 +483,7 @@ export default function Home() {
                                 <Image
                                   src={essenceImages[imageIndex]}
                                   alt={`Essence ${imageIndex + 1}`}
+                                  loading="lazy"
                                   fill
                                   className="object-cover"
                                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -575,7 +583,7 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Content */}
                 <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500 rounded-full">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
@@ -641,6 +649,7 @@ export default function Home() {
                                 <Image
                                   src={fragmentImages[imageIndex]}
                                   alt={`Fragment ${imageIndex + 1}`}
+                                  loading="lazy"
                                   fill
                                   className="object-cover"
                                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -721,6 +730,7 @@ export default function Home() {
                           <Image
                             src={recodeImages[0]}
                             alt="Recode Locked 1"
+                            loading="lazy"
                             fill
                             className="object-cover blur-md grayscale opacity-40"
                             sizes="(max-width: 768px) 100vw, 50vw"
@@ -753,6 +763,7 @@ export default function Home() {
                           <Image
                             src={recodeImages[1]}
                             alt="Recode Locked 2"
+                            loading="lazy"
                             fill
                             className="object-cover blur-sm grayscale opacity-50"
                             sizes="(max-width: 768px) 100vw, 50vw"

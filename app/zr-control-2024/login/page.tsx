@@ -20,12 +20,12 @@ export default function AdminLoginPage() {
         if (response.ok) {
           const data = await response.json()
           if (data.user && ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'VIEWER'].includes(data.user.role)) {
-            router.push('/admin')
+            router.push('/zr-control-2024')
             return
           }
         }
       } catch (error) {
-        console.error('Session check error:', error)
+        // Silently handle error
       } finally {
         setCheckingSession(false)
       }
@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
         }
 
         // Redirect to admin dashboard
-        router.push('/admin')
+        router.push('/zr-control-2024')
       } else {
         setError(data.message || 'Login failed')
       }

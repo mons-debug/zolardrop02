@@ -6,13 +6,13 @@ import RootLayoutClient from './RootLayoutClient'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Zolar Drop 02 - Exclusive Limited Edition Drops',
-  description: 'Discover exclusive limited edition products with premium quality and unique designs',
+  title: 'ZOLAR - Modern Streetwear & Limited Edition Drops',
+  description: 'Modern streetwear for people who want more from themselves. Discover exclusive collections: ESSENCE, FRAGMENT, and RECODE. Made for movement.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Zolar Admin'
+    title: 'ZOLAR'
   },
   formatDetection: {
     telephone: false
@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon-192x192.png',
     apple: '/icon-192x192.png'
+  },
+  keywords: ['streetwear', 'fashion', 'modern clothing', 'limited edition', 'Morocco', 'ZOLAR'],
+  openGraph: {
+    title: 'ZOLAR - Modern Streetwear',
+    description: 'Modern streetwear for people who want more from themselves.',
+    type: 'website',
+    locale: 'en_US'
   }
 }
 
@@ -43,7 +50,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Zolar Admin" />
+        <meta name="apple-mobile-web-app-title" content="ZOLAR" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         
         {/* Service Worker Registration */}
@@ -52,14 +59,7 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    function(registration) {
-                      console.log('✅ ServiceWorker registration successful:', registration.scope);
-                    },
-                    function(err) {
-                      console.log('❌ ServiceWorker registration failed:', err);
-                    }
-                  );
+                  navigator.serviceWorker.register('/sw.js').catch(function() {});
                 });
               }
             `,

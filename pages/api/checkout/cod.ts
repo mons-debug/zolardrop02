@@ -153,6 +153,37 @@ export default async function handler(
 
     await Promise.all(stockUpdatePromises)
 
+    // Check for low stock and send notifications
+    try {
+      const updatedVariants = await prisma.variant.findMany({
+        where: {
+          id: { in: items.map(item => item.variantId) }
+        },
+        include: {
+          product: {
+            select: { title: true, sku: true }
+          }
+        }
+      })
+
+      const lowStockItems = updatedVariants.filter(v => v.stock < 5 && v.stock > 0)
+      
+      if (lowStockItems.length > 0) {
+        for (const item of lowStockItems) {
+          await pusherServer.trigger('admin-orders', 'low-stock', {
+            id: item.id,
+            productTitle: item.product.title,
+            productSku: item.product.sku,
+            variantColor: item.color,
+            stock: item.stock,
+            message: `Low stock alert: ${item.product.title} (${item.color}) - Only ${item.stock} left`
+          })
+        }
+      }
+    } catch (error) {
+      // Silently handle low stock notification error
+    }
+
     // Broadcast new order to admin dashboard via Pusher
     try {
       await pusherServer.trigger('admin-orders', 'new-order', {
@@ -171,8 +202,7 @@ export default async function handler(
         itemCount: items.length
       })
     } catch (pusherError) {
-      // Log error but don't fail the order creation
-      console.error('Failed to broadcast order to Pusher:', pusherError)
+      // Silently handle error
     }
 
     res.status(201).json({

@@ -66,7 +66,6 @@ export default function CartDrawer() {
         alert(data.message || 'Failed to place order')
       }
     } catch (error) {
-      console.error('Checkout error:', error)
       alert('Failed to place order. Please try again.')
     } finally {
       setIsSubmitting(false)

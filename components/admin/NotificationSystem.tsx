@@ -49,7 +49,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     const channel = pusherClient.subscribe('admin-orders')
 
     channel.bind('new-order', (data: any) => {
-      console.log('🔔 New order received:', data)
+      // New order received
       
       // Extract customer info from data
       const customerName = data.customer?.name || data.customer || 'Customer'
@@ -74,7 +74,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
       // Play sound
       if (audioRef.current) {
-        audioRef.current.play().catch(err => console.log('Audio play failed:', err))
+        audioRef.current.play().catch(() => {})
       }
 
       // Show browser notification if permission granted
@@ -104,11 +104,50 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       window.dispatchEvent(customEvent)
     })
 
+    // Listen for low stock alerts
+    channel.bind('low-stock', (data: any) => {
+      const notification: Notification = {
+        id: 'stock-' + (data.id || Date.now().toString()),
+        title: '⚠️ Low Stock Alert',
+        message: data.message || `${data.productTitle} (${data.variantColor}) - Only ${data.stock} left`,
+        type: 'warning',
+        timestamp: new Date(),
+        read: false,
+        data
+      }
+
+      setNotifications(prev => [notification, ...prev])
+
+      // Show browser notification
+      if (pushEnabled && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(notification.title, {
+          body: notification.message,
+          icon: '/icon-192x192.png',
+          tag: 'stock-' + data.id
+        })
+      }
+    })
+
     return () => {
       channel.unbind('new-order')
+      channel.unbind('low-stock')
       pusherClient.unsubscribe('admin-orders')
     }
   }, [pushEnabled, onNewOrder])
+
+  // Register service worker for push notifications
+  const registerPushNotification = async () => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw-admin.js', {
+          scope: '/zr-control-2024/'
+        })
+        // Service worker registered successfully
+      } catch (error) {
+        // Silently handle error
+      }
+    }
+  }
 
   // Request push notification permission
   const requestNotificationPermission = async () => {

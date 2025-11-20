@@ -116,19 +116,33 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group h-full flex flex-col">
-      <Link href={`/product/${product.sku}`} className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
+      <Link href={`/product/${product.sku}`} className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col" style={{ willChange: 'transform' }}>
         {/* Image Section */}
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
           {allImages.length > 0 && !imageError ? (
-            <Image
-              src={allImages[currentImageIndex]}
-              alt={product.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-              onError={() => setImageError(true)}
-              unoptimized
-            />
+            <>
+              <Image
+                src={allImages[currentImageIndex]}
+                alt={product.title}
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                loading="lazy"
+                priority={false}
+                onError={() => setImageError(true)}
+                unoptimized
+              />
+              {/* Hover Overlay with Quick View */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 text-white text-xs uppercase tracking-wider font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>Quick View</span>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100">
               <div className="text-center p-4">

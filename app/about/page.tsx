@@ -97,7 +97,7 @@ export default function AboutPage() {
       </section>
 
       {/* Our Story Section with Parallax */}
-      <section ref={storyRef} className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100/30 to-gray-50">
+      <section ref={storyRef} className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-br from-orange-100 via-orange-50 to-white">
         {/* Parallax Background Elements */}
         <motion.div 
           className="absolute inset-0 z-0 pointer-events-none"
@@ -105,7 +105,7 @@ export default function AboutPage() {
         >
           {/* Animated Orange Orb */}
           <motion.div 
-            className="absolute top-0 right-[10%] w-[500px] h-[500px] bg-gradient-radial from-orange-400/40 via-orange-300/20 to-transparent rounded-full blur-3xl"
+            className="absolute top-0 right-[10%] w-[500px] h-[500px] bg-gradient-radial from-orange-400/60 via-orange-300/30 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
               x: [0, 50, 0],
@@ -116,7 +116,7 @@ export default function AboutPage() {
           
           {/* Animated Red Orb */}
           <motion.div 
-            className="absolute bottom-0 left-[15%] w-[600px] h-[600px] bg-gradient-radial from-red-400/30 via-pink-300/15 to-transparent rounded-full blur-3xl"
+            className="absolute bottom-0 left-[15%] w-[600px] h-[600px] bg-gradient-radial from-red-400/50 via-pink-300/25 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1.2, 1, 1.2],
               x: [0, -40, 0],
