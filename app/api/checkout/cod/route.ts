@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { pusherServer } from '@/lib/pusher'
 
@@ -21,50 +21,33 @@ interface CheckoutRequest {
   shippingCents?: number
 }
 
-// Disable body parsing size limits
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '1mb',
-    },
-  },
-}
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Set CORS headers to ensure requests work
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end()
-  }
-
-  if (req.method !== 'POST') {
-    console.error('Method not allowed:', req.method)
-    return res.status(405).json({ message: 'Method not allowed' })
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const { items, customer, shippingCents = 0 }: CheckoutRequest = req.body
+    const body: CheckoutRequest = await request.json()
+    const { items, customer, shippingCents = 0 } = body
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Items array is required and cannot be empty' })
+      return NextResponse.json(
+        { message: 'Items array is required and cannot be empty' },
+        { status: 400 }
+      )
     }
 
     if (!customer || !customer.name || !customer.email || !customer.address || !customer.phone) {
-      return res.status(400).json({ message: 'Customer information is required' })
+      return NextResponse.json(
+        { message: 'Customer information is required' },
+        { status: 400 }
+      )
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(customer.email)) {
-      return res.status(400).json({ message: 'Invalid email format' })
+      return NextResponse.json(
+        { message: 'Invalid email format' },
+        { status: 400 }
+      )
     }
 
     // Calculate subtotal and validate stock for each item
@@ -210,29 +193,43 @@ export default async function handler(
       console.error('❌ Error checking/sending low stock alerts:', error)
     }
 
-    // Broadcast new order to admin dashboard via Pusher (fire-and-forget, don't await)
-    pusherServer.trigger('admin-orders', 'new-order', {
-      id: order.id,
-      totalCents: order.totalCents,
-      paymentMethod: 'COD',
-      customer: {
-        id: dbCustomer.id,
-        name: dbCustomer.name,
-        phone: dbCustomer.phone,
-        city: dbCustomer.city,
-        totalOrders: dbCustomer.totalOrders,
-        tags: dbCustomer.tags
-      },
-      createdAt: order.createdAt,
-      itemCount: items.length
-    }).then(() => {
-      console.log('✅ Pusher event sent successfully')
-    }).catch((pusherError) => {
-      console.error('❌ Failed to send Pusher notification (non-critical):', pusherError)
+    // Broadcast new order to admin dashboard via Pusher
+    console.log('🔔 Attempting to send Pusher notification...')
+    console.log('📍 Pusher Config Check:', {
+      hasAppId: !!process.env.PUSHER_APP_ID,
+      hasKey: !!process.env.PUSHER_KEY,
+      hasSecret: !!process.env.PUSHER_SECRET,
+      cluster: process.env.PUSHER_CLUSTER
     })
+    
+    try {
+      const pusherPayload = {
+        id: order.id,
+        totalCents: order.totalCents,
+        paymentMethod: 'COD',
+        customer: {
+          id: dbCustomer.id,
+          name: dbCustomer.name,
+          phone: dbCustomer.phone,
+          city: dbCustomer.city,
+          totalOrders: dbCustomer.totalOrders,
+          tags: dbCustomer.tags
+        },
+        createdAt: order.createdAt,
+        itemCount: items.length
+      }
+      
+      console.log('📤 Triggering Pusher event with payload:', JSON.stringify(pusherPayload, null, 2))
+      
+      await pusherServer.trigger('admin-orders', 'new-order', pusherPayload)
+      console.log('✅ Pusher event sent successfully!')
+    } catch (pusherError) {
+      console.error('❌ Failed to send Pusher notification:', pusherError)
+      // Don't fail the order if Pusher fails
+    }
 
     // Send success response
-    res.status(201).json({
+    return NextResponse.json({
       success: true,
       orderId: order.id,
       message: 'Order placed successfully',
@@ -245,23 +242,36 @@ export default async function handler(
         status: order.status,
         paymentMethod: order.paymentMethod
       }
-    })
+    }, { status: 201 })
   } catch (error) {
     console.error('Error creating COD order:', error)
 
     if (error instanceof Error) {
       if (error.message.includes('not found')) {
-        return res.status(404).json({ message: error.message })
+        return NextResponse.json({ message: error.message }, { status: 404 })
       }
 
       if (error.message.includes('Insufficient stock')) {
-        return res.status(400).json({ message: error.message })
+        return NextResponse.json({ message: error.message }, { status: 400 })
       }
 
       // Return the actual error message for debugging
-      return res.status(500).json({ message: error.message })
+      return NextResponse.json({ message: error.message }, { status: 500 })
     }
 
-    res.status(500).json({ message: 'Internal server error' })
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 })
   }
 }
+
+// Handle OPTIONS for CORS
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  })
+}
+

@@ -84,7 +84,46 @@ export default function CustomersPage() {
   }
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
+  }
+
+  const updateCustomer = async (id: string, updateData: any) => {
+    try {
+      const response = await fetch(`/api/admin/customers/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData)
+      })
+
+      if (response.ok) {
+        fetchCustomers()
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Error updating customer:', error)
+      return false
+    }
+  }
+
+  const toggleVIP = async (customer: Customer) => {
+    const currentTags = customer.tags ? JSON.parse(customer.tags) : []
+    const hasVIP = currentTags.includes('VIP')
+    
+    if (hasVIP) {
+      const newTags = currentTags.filter((tag: string) => tag !== 'VIP')
+      await updateCustomer(customer.id, { tags: newTags })
+    } else {
+      const newTags = [...currentTags, 'VIP']
+      await updateCustomer(customer.id, { tags: newTags })
+    }
+  }
+
+  const toggleBlock = async (customer: Customer) => {
+    if (!confirm(`Are you sure you want to ${customer.isBlocked ? 'unblock' : 'block'} ${customer.name}?`)) {
+      return
+    }
+    await updateCustomer(customer.id, { isBlocked: !customer.isBlocked })
   }
 
   const formatDate = (dateString: string) => {
@@ -307,12 +346,45 @@ export default function CustomersPage() {
                         {formatDate(customer.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <Link
-                          href={`/admin/customers/${customer.id}`}
-                          className="text-blue-600 hover:text-blue-900 font-medium"
-                        >
-                          View Profile →
-                        </Link>
+                        <div className="flex items-center space-x-2">
+                          <Link
+                            href={`/admin/customers/${customer.id}`}
+                            className="text-blue-600 hover:text-blue-900 font-medium"
+                          >
+                            View
+                          </Link>
+                          <span className="text-gray-300">|</span>
+                          <a
+                            href={`tel:${customer.phone}`}
+                            className="text-green-600 hover:text-green-900 font-medium"
+                            title="Call"
+                          >
+                            📞
+                          </a>
+                          <a
+                            href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-green-900 font-medium"
+                            title="WhatsApp"
+                          >
+                            💬
+                          </a>
+                          <button
+                            onClick={() => toggleVIP(customer)}
+                            className="text-purple-600 hover:text-purple-900 font-medium"
+                            title={customer.tags && JSON.parse(customer.tags).includes('VIP') ? 'Remove VIP' : 'Mark as VIP'}
+                          >
+                            💎
+                          </button>
+                          <button
+                            onClick={() => toggleBlock(customer)}
+                            className={`font-medium ${customer.isBlocked ? 'text-green-600 hover:text-green-900' : 'text-red-600 hover:text-red-900'}`}
+                            title={customer.isBlocked ? 'Unblock' : 'Block'}
+                          >
+                            {customer.isBlocked ? '✓' : '🚫'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

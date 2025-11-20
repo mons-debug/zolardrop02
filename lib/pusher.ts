@@ -25,8 +25,7 @@ export const pusherServer = new Pusher({
   key: PUSHER_KEY || '',
   secret: PUSHER_SECRET || '',
   cluster: PUSHER_CLUSTER,
-  useTLS: true,
-  encrypted: true
+  useTLS: true
 })
 
 // Helper function to trigger events with error handling

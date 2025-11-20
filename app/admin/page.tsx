@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { pusherClient } from '@/lib/pusher-client'
 
+interface Customer {
+  id: string
+  name: string
+  phone: string
+  city: string | null
+}
+
 interface Order {
   id: string
   totalCents: number
@@ -11,6 +18,7 @@ interface Order {
   status: string
   createdAt: string
   items?: string
+  customer?: Customer | null
 }
 
 interface Product {
@@ -134,7 +142,14 @@ export default function AdminDashboard() {
   }, [orders, stats, loading])
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
+  }
+
+  const formatOrderDisplay = (order: Order) => {
+    const phone = order.customer?.phone || 'Unknown'
+    const city = order.customer?.city || 'N/A'
+    const total = formatPrice(order.totalCents)
+    return `${phone} • ${city} • ${total}`
   }
 
   const formatDate = (dateString: string) => {
@@ -330,8 +345,7 @@ export default function AdminDashboard() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order Details</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
                 </tr>
@@ -346,22 +360,23 @@ export default function AdminDashboard() {
                         : ''
                     }`}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                      <span className="text-sm font-mono text-gray-900">
-                        {order.id.slice(0, 8)}...
-                      </span>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+                        >
+                          {formatOrderDisplay(order)}
+                        </Link>
+                        <span className="text-xs text-gray-400 mt-1 font-mono">
+                          #{order.id.slice(0, 8)}
+                        </span>
                         {isNewOrder(order.createdAt) && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white animate-pulse">
-                            NEW
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white mt-1 animate-pulse">
+                            ⚡ NEW
                           </span>
                         )}
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {formatPrice(order.totalCents)}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${

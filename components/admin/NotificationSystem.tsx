@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { pusherClient } from '@/lib/pusher-client'
 
 interface Notification {
@@ -19,6 +20,7 @@ interface NotificationSystemProps {
 }
 
 export default function NotificationSystem({ userId, onNewOrder }: NotificationSystemProps) {
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [pushEnabled, setPushEnabled] = useState(false)
@@ -26,7 +28,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   const [pusherConnected, setPusherConnected] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(false)
   const [showSoundPrompt, setShowSoundPrompt] = useState(false)
-  const audioRef = useRef<any>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
 
   // Check push notification support and permission
   useEffect(() => {
@@ -84,26 +86,109 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     }
   }, [])
 
-  // Initialize audio for notifications - Cash register "cha-ching" sale sound
+  // Initialize Web Audio Context
   useEffect(() => {
-    // Cash register sale sound for desktop notifications
-    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGe+7+ilTQ0OUKXh8LZkHAU7k9jxy3grBSF1yPLaizsKFFyz6OyrWBELTKXh8bllHgU7ldnyy3YqBRtusunppmERDVGl4PG2ZRsEPJPX88p3KwUdd8rx2oo4CAReturqpmMQDFGj4PC0ZBwFOpTZ88p5LAQYb7Ls6KpfEgtOouDxtWYdBTqV2/HLdywFGG+17.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')
-    audioRef.current.volume = 0.7 // Louder for desktop sale notifications
-    console.log('🔊 Audio initialized for notifications')
+    try {
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+      if (AudioContext) {
+        audioContextRef.current = new AudioContext()
+        console.log('🔊 Audio Context initialized for notifications')
+      } else {
+        console.error('❌ Web Audio API not supported in this browser')
+      }
+    } catch (error) {
+      console.error('❌ Failed to initialize Audio Context:', error)
+    }
   }, [])
+  
+  // Function to play notification sound - Cash register "cha-ching"
+  const playNotificationSound = async () => {
+    try {
+      console.log('🔊 Attempting to play notification sound...')
+      
+      if (!audioContextRef.current) {
+        throw new Error('Audio Context not initialized')
+      }
+      
+      const audioContext = audioContextRef.current
+      console.log('🎵 AudioContext state:', audioContext.state)
+      
+      // Resume context if suspended (required by browsers)
+      if (audioContext.state === 'suspended') {
+        console.log('▶️ Resuming audio context...')
+        await audioContext.resume()
+      }
+      
+      const now = audioContext.currentTime
+      
+      // Create a more pleasant "cha-ching" sound with multiple tones
+      
+      // FIRST "CHA" - Higher pitched bell sound
+      const createBellTone = (frequency: number, startTime: number, duration: number, volume: number) => {
+        // Fundamental frequency
+        const osc1 = audioContext.createOscillator()
+        const gain1 = audioContext.createGain()
+        
+        osc1.type = 'sine'
+        osc1.frequency.setValueAtTime(frequency, startTime)
+        osc1.frequency.exponentialRampToValueAtTime(frequency * 0.8, startTime + duration)
+        
+        gain1.gain.setValueAtTime(0, startTime)
+        gain1.gain.linearRampToValueAtTime(volume, startTime + 0.005)
+        gain1.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+        
+        osc1.connect(gain1)
+        gain1.connect(audioContext.destination)
+        
+        osc1.start(startTime)
+        osc1.stop(startTime + duration)
+        
+        // Harmonic overtone for richness
+        const osc2 = audioContext.createOscillator()
+        const gain2 = audioContext.createGain()
+        
+        osc2.type = 'sine'
+        osc2.frequency.setValueAtTime(frequency * 2, startTime)
+        
+        gain2.gain.setValueAtTime(0, startTime)
+        gain2.gain.linearRampToValueAtTime(volume * 0.3, startTime + 0.005)
+        gain2.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.6)
+        
+        osc2.connect(gain2)
+        gain2.connect(audioContext.destination)
+        
+        osc2.start(startTime)
+        osc2.stop(startTime + duration)
+      }
+      
+      // First "CHA" - E6 note (1318.51 Hz)
+      createBellTone(1318.51, now, 0.15, 0.3)
+      
+      // Second "CHING" - A5 note (880 Hz) - slightly delayed and longer
+      createBellTone(880, now + 0.08, 0.25, 0.35)
+      
+      // Add a subtle low "ding" for depth - C4 note (261.63 Hz)
+      createBellTone(523.25, now + 0.12, 0.3, 0.15)
+      
+      console.log('✅ Cash register sound played successfully!')
+    } catch (error) {
+      console.error('❌ Failed to play sound:', error)
+      throw error
+    }
+  }
 
   // Enable sound on user interaction
-  const enableSound = () => {
+  const enableSound = async () => {
     setSoundEnabled(true)
     setShowSoundPrompt(false)
     localStorage.setItem('zolar-sound-enabled', 'true')
     console.log('🔊 Sound enabled for notifications')
     
     // Test play
-    if (audioRef.current) {
-      audioRef.current.play().catch((err: any) => {
-        console.warn('Could not test play audio:', err)
-      })
+    try {
+      await playNotificationSound()
+    } catch (err) {
+      console.warn('Could not test play audio:', err)
     }
   }
 
@@ -145,13 +230,13 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       setNotifications(prev => [notification, ...prev])
 
       // Play sound if enabled
-      if (soundEnabled && audioRef.current) {
+      if (soundEnabled) {
         console.log('🔊 Playing notification sound...')
-        audioRef.current.play().catch((err: any) => {
+        playNotificationSound().catch((err: any) => {
           console.warn('⚠️ Could not play notification sound (user interaction may be required):', err)
           setShowSoundPrompt(true)
         })
-      } else if (!soundEnabled) {
+      } else {
         console.log('🔇 Sound is disabled. Showing sound prompt...')
         setShowSoundPrompt(true)
       }
@@ -432,6 +517,42 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                       {pusherConnected ? 'Live connection active' : 'Connection unavailable'}
                     </span>
                   </div>
+                  {/* Sound Status */}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className={`w-2 h-2 rounded-full ${soundEnabled ? 'bg-orange-500' : 'bg-gray-400'}`}></div>
+                    <span className={`text-xs ${soundEnabled ? 'text-orange-600' : 'text-gray-600'}`}>
+                      {soundEnabled ? 'Sound enabled' : 'Sound disabled'}
+                    </span>
+                    {!soundEnabled && (
+                      <button
+                        onClick={enableSound}
+                        className="text-xs text-orange-600 hover:text-orange-800 font-medium underline"
+                      >
+                        Enable
+                      </button>
+                    )}
+                    {soundEnabled && (
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          console.log('🔘 Test button clicked!')
+                          try {
+                            console.log('▶️ Playing sound...')
+                            await playNotificationSound()
+                            console.log('✅ Sound played!')
+                            alert('✅ Sound test successful!')
+                          } catch (err: any) {
+                            console.error('❌ Sound failed:', err)
+                            alert('❌ Sound test failed: ' + err.message)
+                          }
+                        }}
+                        className="text-xs text-orange-600 hover:text-orange-800 font-medium underline cursor-pointer"
+                      >
+                        Test 🔊
+                      </button>
+                    )}
+                  </div>
                 </div>
                 {notifications.length > 0 && (
                   <div className="flex space-x-2">
@@ -466,7 +587,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                     {notifications.map((notification) => (
                       <div
                         key={notification.id}
-                        onClick={() => markAsRead(notification.id)}
+                        onClick={() => {
+                          markAsRead(notification.id)
+                          // Navigate to order detail if this is an order notification
+                          if (notification.data && notification.data.id) {
+                            setShowDropdown(false)
+                            router.push(`/admin/orders/${notification.data.id}`)
+                          }
+                        }}
                         className={`px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors ${
                           !notification.read ? 'bg-blue-50' : ''
                         }`}

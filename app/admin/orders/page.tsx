@@ -112,7 +112,34 @@ export default function OrdersPage() {
   }
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
+  }
+
+  const formatOrderDisplay = (order: Order) => {
+    const phone = order.customer?.phone || 'Unknown'
+    const city = order.customer?.city || 'N/A'
+    const total = formatPrice(order.totalCents)
+    return `${phone} • ${city} • ${total}`
+  }
+
+  const getItemCount = (order: Order) => {
+    try {
+      const items = JSON.parse(order.items || '[]')
+      return items.reduce((sum: number, item: any) => sum + (item.qty || 0), 0)
+    } catch {
+      return 0
+    }
+  }
+
+  const getItemSummary = (order: Order) => {
+    try {
+      const items = JSON.parse(order.items || '[]')
+      const count = items.reduce((sum: number, item: any) => sum + (item.qty || 0), 0)
+      const uniqueProducts = items.length
+      return { count, uniqueProducts }
+    } catch {
+      return { count: 0, uniqueProducts: 0 }
+    }
   }
 
   const formatDate = (dateString: string) => {
@@ -231,13 +258,13 @@ export default function OrdersPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
+                      Order Details
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Items
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Loyalty
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Status
@@ -263,19 +290,17 @@ export default function OrdersPage() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <Link 
-                            href={order.customer ? `/admin/customers/${order.customer.id}` : '#'}
+                            href={`/admin/orders/${order.id}`}
                             className="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors"
+                          >
+                            {formatOrderDisplay(order)}
+                          </Link>
+                          <Link
+                            href={order.customer ? `/admin/customers/${order.customer.id}` : '#'}
+                            className="text-xs text-gray-500 mt-0.5 hover:text-blue-600"
                           >
                             {order.customer?.name || 'Unknown Customer'}
                           </Link>
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            {order.customer?.phone || 'No phone'}
-                          </span>
-                          {order.customer?.city && (
-                            <span className="text-xs text-gray-400 mt-0.5">
-                              📍 {order.customer.city}
-                            </span>
-                          )}
                           <span className="text-xs text-gray-400 mt-1 font-mono">
                             #{order.id.slice(0, 8)}
                           </span>
@@ -287,6 +312,17 @@ export default function OrdersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {(() => {
+                          const { count, uniqueProducts } = getItemSummary(order)
+                          return (
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-gray-900">{count} items</span>
+                              <span className="text-xs text-gray-500">{uniqueProducts} product{uniqueProducts !== 1 ? 's' : ''}</span>
+                            </div>
+                          )
+                        })()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {order.customer && (
                           <CustomerBadge 
                             totalOrders={order.customer.totalOrders}
@@ -294,14 +330,6 @@ export default function OrdersPage() {
                             size="sm"
                           />
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-gray-900">
-                          {formatPrice(order.totalCents)}
-                        </span>
-                        <span className="block text-xs text-gray-500 mt-0.5">
-                          {order.paymentMethod}
-                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeColor(order.status)}`}>

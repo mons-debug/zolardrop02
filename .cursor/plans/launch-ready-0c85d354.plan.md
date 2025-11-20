@@ -1,103 +1,145 @@
-<!-- 0c85d354-e32e-4090-8f44-5c859541d19e dff85352-f026-4f9a-b09c-4feb8d637801 -->
-# Fix Admin Push Notifications
+<!-- 0c85d354-e32e-4090-8f44-5c859541d19e 51f2a84a-6668-41fa-a530-59de6da772a8 -->
+# Enhanced Admin CRM & Order Management
 
-## Problem
+## 1. Create Order Detail Page
 
-New orders don't trigger real-time notifications, sound, or dashboard updates. The notification system is built but not working in production.
+**New file:** `app/admin/orders/[id]/page.tsx`
 
-## Root Causes
+- Display full order details with customer info, products, status timeline
+- Show products list with images, names, quantities, prices
+- Include quick action buttons: Mark Shipped, Cancel Order, Refund
+- Add editable fields with permission checks (admin notes, internal status)
+- Show customer profile summary with link to customer detail page
 
-1. NotificationSystem component is properly mounted but Pusher connection may be failing
-2. Environment variables (Pusher keys) might not be set in Vercel
-3. The notification bell icon is in a fixed position but may have visibility issues
-4. Sound autoplay restrictions need proper handling
+**API Route:** `pages/api/admin/orders/[id].ts`
 
-## Solution
+- GET endpoint to fetch single order with full details
+- Include customer data, order items with product info, order history
 
-### 1. Verify and Fix Pusher Configuration
+## 2. Update Notifications to Navigate to Order Details
 
-**Files**: `lib/pusher-client.ts`, `lib/pusher-server.ts`
+**File:** `components/admin/NotificationSystem.tsx`
 
-Add connection debugging and error handling:
+- Change `onClick` handler to navigate to `/admin/orders/[orderId]` 
+- Use `useRouter` from `next/navigation`
+- Pass order ID from notification data
 
-- Log Pusher connection status
-- Add error handlers for failed connections
-- Verify environment variables are present
+## 3. Improve Order Display Format
 
-### 2. Enhance NotificationSystem Component
+**Files:**
 
-**File**: `components/admin/NotificationSystem.tsx`
+- `app/admin/orders/page.tsx` - orders list
+- `components/admin/NotificationSystem.tsx` - notification display
+- `app/admin/page.tsx` - dashboard recent orders
 
-Improvements needed:
+**Change from:** Order ID (e.g., "d3f13947...")
 
-- Add Pusher connection state debugging
-- Add visual feedback when Pusher connects/disconnects
-- Better error handling for audio playback
-- Add "click anywhere to enable sound" message on first load
-- Log when events are received from Pusher
+**Change to:** Phone + City + Total (e.g., "0663406326 - Tangier - 50.00 MAD")
 
-### 3. Make Notification Badge More Prominent
+Update display logic:
 
-**File**: `app/admin/layout.tsx`
+```typescript
+const formatOrderDisplay = (order) => {
+  const phone = order.customer?.phone || 'Unknown'
+  const city = order.customer?.city || 'N/A'
+  const total = formatPrice(order.totalCents)
+  return `${phone} - ${city} - ${total}`
+}
+```
 
-Current: Badge is in `fixed top-4 right-8` position
+## 4. Enhanced Customer Search & Filtering
 
-- Ensure z-index is high enough
-- Add a glowing animation to the badge when there are unread notifications
-- Consider moving it to the dashboard header for better visibility
+**File:** `app/admin/customers/page.tsx`
 
-### 4. Add Sound Enablement on First Click
+Add advanced filters:
 
-**File**: `components/admin/NotificationSystem.tsx`
+- Search by name, phone, city, email
+- Filter by tags (New, Regular, VIP, Premium)
+- Filter by order count ranges (1, 2-4, 5-9, 10+)
+- Filter by spending tiers (< 500 MAD, 500-1000, 1000-5000, 5000+)
+- Sort options: Recent orders, Total spent, Name A-Z
 
-- Add a "click to enable notifications sound" prompt
-- Initialize audio playback on first user interaction
-- Store preference in localStorage
+Update UI with multi-select dropdown filters and enhanced search bar.
 
-### 5. Verify Dashboard Auto-Refresh
+## 5. Customer Order History View
 
-**File**: `app/admin/page.tsx`
+**New file:** `app/admin/customers/[id]/page.tsx`
 
-Already has event listener for 'new-order-event', should work once Pusher is connected.
+- Display customer profile with full details
+- Show complete order history in chronological table
+- Include order totals, dates, statuses, products purchased
+- Add customer lifetime value stats
+- Show customer activity timeline
 
-- Add console logs to verify the event is received
-- Ensure fetchDashboardData() is being called
+**API Route:** `pages/api/admin/customers/[id].ts`
 
-### 6. Environment Variables Documentation
+- GET endpoint with customer data + all orders
+- Include order items and product details
 
-Create clear instructions for setting up Pusher in Vercel:
+## 6. Quick Actions for Customers
 
-1. Sign up at pusher.com
-2. Create a Channels app  
-3. Get credentials
-4. Add to Vercel environment variables:
+**File:** `app/admin/customers/page.tsx`
 
-- `PUSHER_APP_ID`
-- `PUSHER_KEY`
-- `PUSHER_SECRET`
-- `PUSHER_CLUSTER`
-- `NEXT_PUBLIC_PUSHER_KEY`
-- `NEXT_PUBLIC_PUSHER_CLUSTER`
+Add action buttons per customer row:
 
-## Implementation Steps
+- Call button (opens tel: link with phone number)
+- Message button (opens WhatsApp with pre-filled message)
+- Mark as VIP (updates customer tags)
+- Block/Unblock customer (toggle isBlocked status)
+- View orders (navigate to customer detail page)
 
-1. Add Pusher connection debugging to `pusher-client.ts`
-2. Enhance NotificationSystem with better logging and error handling
-3. Add sound enablement prompt on first user interaction
-4. Test locally with Pusher credentials
-5. Deploy and verify Vercel environment variables are set
-6. Test end-to-end: place order → see notification + sound + auto-refresh
+**API Route:** `pages/api/admin/customers/[id].ts`
 
-## Expected Behavior After Fix
+- PATCH endpoint to update customer tags, blocked status, notes
 
-When a new order is placed:
+## 7. Order Quick Actions with Permissions
 
-1. Dashboard receives Pusher event instantly
-2. Notification badge shows red count (1, 2, 3...)
-3. "Cha-ching" sound plays automatically
-4. Dashboard stats refresh without manual reload
-5. New order appears in "Recent Orders" table with "NEW" badge
-6. Clicking notification bell shows the detailed notification panel
+**File:** `app/admin/orders/page.tsx`
+
+Add inline action buttons:
+
+- View details (navigate to order page)
+- Mark as Shipped (update status)
+- Cancel order (update status + restore stock)
+- Quick status dropdown (pending/processing/shipped/delivered/cancelled)
+
+Add permission check:
+
+```typescript
+const canEditOrders = session?.user?.role === 'admin' || session?.user?.permissions?.includes('edit_orders')
+```
+
+Show actions only if user has permission.
+
+## 8. Display Products in Orders List
+
+**File:** `app/admin/orders/page.tsx`
+
+Parse `items` JSON field and display:
+
+- Product count badge (e.g., "3 items")
+- On hover/expand: Show product names and quantities
+- Use compact product list component
+
+## Key Files to Modify
+
+- `components/admin/NotificationSystem.tsx` - clickable notifications, display format
+- `app/admin/orders/page.tsx` - display format, quick actions, products list
+- `app/admin/orders/[id]/page.tsx` - NEW - order detail page
+- `app/admin/customers/page.tsx` - enhanced search/filters, quick actions
+- `app/admin/customers/[id]/page.tsx` - NEW - customer detail page
+- `app/admin/page.tsx` - display format for recent orders
+- `pages/api/admin/orders/[id].ts` - NEW/update - single order endpoint
+- `pages/api/admin/customers/[id].ts` - NEW/update - single customer endpoint with orders
+
+## Implementation Notes
+
+- Use existing `CustomerBadge` component for loyalty status display
+- Maintain consistent MAD currency formatting throughout
+- Add loading states for all async actions
+- Include error handling and toast notifications
+- Preserve real-time Pusher updates for new orders
+- Use existing authentication/session for permission checks
 
 ### To-dos
 
@@ -108,3 +150,11 @@ When a new order is placed:
 - [ ] Move admin to secret URL and update all references
 - [ ] Setup admin push notifications for orders and stock
 - [ ] Update metadata and add final security checks
+- [ ] Create order detail page with full info and quick actions
+- [ ] Update notifications to navigate to order detail page
+- [ ] Change order display to phone + city + total format
+- [ ] Add advanced search and filtering to customers page
+- [ ] Create customer detail page with order history
+- [ ] Add call, message, VIP, block quick actions
+- [ ] Add order quick actions with permission checks
+- [ ] Show products in orders list with counts

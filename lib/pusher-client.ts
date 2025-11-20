@@ -24,7 +24,7 @@ export const pusherClient = new PusherClient(
   {
     cluster: PUSHER_CLUSTER,
     enabledTransports: ['ws', 'wss'],
-    authEndpoint: '/api/pusher/auth',
+    // No authEndpoint needed for public channels
   }
 )
 
