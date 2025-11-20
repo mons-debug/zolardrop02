@@ -135,20 +135,6 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     }
   }, [pushEnabled, onNewOrder])
 
-  // Register service worker for push notifications
-  const registerPushNotification = async () => {
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw-admin.js', {
-          scope: '/zr-control-2024/'
-        })
-        // Service worker registered successfully
-      } catch (error) {
-        // Silently handle error
-      }
-    }
-  }
-
   // Request push notification permission
   const requestNotificationPermission = async () => {
     if ('Notification' in window) {
@@ -169,7 +155,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     }
   }
 
-  // Register push notification with service worker
+  // Register push notification with service worker  
   const registerPushNotification = async () => {
     try {
       if ('serviceWorker' in navigator) {
