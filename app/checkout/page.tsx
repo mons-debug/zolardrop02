@@ -56,6 +56,15 @@ export default function CheckoutPage() {
         })
       })
 
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type')
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('Response is not JSON. Status:', response.status)
+        const text = await response.text()
+        console.error('Response body:', text.substring(0, 200))
+        throw new Error(`Server error: ${response.status}. Please contact support.`)
+      }
+
       const data = await response.json()
 
       if (response.ok && data.success) {
@@ -67,7 +76,8 @@ export default function CheckoutPage() {
       }
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('An error occurred while placing your order. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred while placing your order. Please try again.'
+      alert(errorMessage)
     } finally {
       setSubmitting(false)
     }
