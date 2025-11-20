@@ -85,7 +85,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="flex-1 overflow-y-auto">
         {/* Notification Bell - Fixed in top right */}
         <div className="fixed top-4 right-8 z-50">
-          <NotificationSystem userId={user.id} />
+          <NotificationSystem 
+            userId={user.id}
+            onNewOrder={(data) => {
+              console.log('🔔 Layout: New order callback triggered', data)
+            }}
+          />
         </div>
         
         {children}
