@@ -18,8 +18,6 @@ export default function Home() {
   const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [essenceIndex, setEssenceIndex] = useState(0)
   const [fragmentIndex, setFragmentIndex] = useState(0)
-  const [essenceAnimating, setEssenceAnimating] = useState(false)
-  const [fragmentAnimating, setFragmentAnimating] = useState(false)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -425,57 +423,32 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      if (essenceImages.length > 0 && !essenceAnimating) {
-                        setEssenceAnimating(true)
-                        setTimeout(() => {
-                          setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
-                          setEssenceAnimating(false)
-                        }, 600)
+                      if (essenceImages.length > 0) {
+                        setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
                       }
                     }}
                   >
                     <div className="relative w-full h-full">
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
-                        const isTopCard = offset === 0
                         const zIndex = 40 - offset * 10
-                        
-                        // Calculate positions
-                        let x = offset * 10
-                        let y = offset * 10
-                        let rotate = offset * 2
-                        let scale = 1 - offset * 0.03
-                        let opacity = 1 - offset * 0.15
-                        
-                        // Top card animates away
-                        if (isTopCard && essenceAnimating) {
-                          x = 150
-                          y = -50
-                          rotate = 25
-                          scale = 0.8
-                          opacity = 0
-                        }
+                        const transform = `translateX(${offset * 8}px) translateY(${offset * 8}px) rotate(${offset * 2}deg)`
+                        const opacity = 1 - offset * 0.2
                         
                         return (
                           <motion.div
-                            key={`essence-${imageIndex}-${offset}`}
+                            key={`essence-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ 
-                              zIndex: isTopCard && essenceAnimating ? 50 : zIndex
-                            }}
+                            style={{ zIndex }}
                             initial={false}
                             animate={{ 
-                              x,
-                              y,
-                              rotate,
-                              scale,
-                              opacity
+                              transform,
+                              opacity,
+                              scale: 1 - offset * 0.02
                             }}
                             transition={{ 
-                              type: "spring",
-                              stiffness: 260,
-                              damping: 20,
-                              mass: 0.8
+                              duration: 0.5,
+                              ease: "easeInOut"
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -489,26 +462,11 @@ export default function Home() {
                                   unoptimized
                                 />
                               )}
-                              
-                              {/* Shine effect on swipe */}
-                              {isTopCard && essenceAnimating && (
-                                <motion.div
-                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
-                                  initial={{ x: '-100%' }}
-                                  animate={{ x: '200%' }}
-                                  transition={{ duration: 0.6, ease: "easeOut" }}
-                                />
-                              )}
-                              
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && !essenceAnimating && (
-                                <motion.div 
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  className="absolute bottom-4 left-4 text-white text-sm font-medium"
-                                >
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
                                   {imageIndex + 1} / {essenceImages.length}
-                                </motion.div>
+                                </div>
                               )}
                             </div>
                           </motion.div>
@@ -516,30 +474,37 @@ export default function Home() {
                       })}
                     </div>
                     
-                    {/* Animated swipe indicator */}
+                    {/* Animated click indicator */}
                     <motion.div 
-                      className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full z-50"
+                      className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-full z-50 border border-white/20"
                       animate={{ 
-                        scale: [1, 1.1, 1],
+                        scale: [1, 1.15, 1],
+                        boxShadow: [
+                          '0 0 0 0 rgba(255,255,255,0.4)',
+                          '0 0 0 8px rgba(255,255,255,0)',
+                          '0 0 0 0 rgba(255,255,255,0)'
+                        ]
                       }}
                       transition={{ 
                         duration: 2, 
                         repeat: Infinity, 
-                        repeatDelay: 1
+                        repeatDelay: 0.5
                       }}
                     >
                       <div className="flex items-center gap-2">
                         <motion.svg 
-                          className="w-4 h-4 text-white" 
+                          className="w-5 h-5 text-white" 
                           fill="none" 
                           viewBox="0 0 24 24" 
                           stroke="currentColor"
-                          animate={{ x: [0, 5, 0] }}
+                          animate={{ 
+                            scale: [1, 0.9, 1],
+                          }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                         </motion.svg>
-                        <p className="text-white text-xs uppercase tracking-wider">Swipe</p>
+                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Click</p>
                       </div>
                     </motion.div>
                   </div>
@@ -622,57 +587,32 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      if (fragmentImages.length > 0 && !fragmentAnimating) {
-                        setFragmentAnimating(true)
-                        setTimeout(() => {
-                          setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
-                          setFragmentAnimating(false)
-                        }, 600)
+                      if (fragmentImages.length > 0) {
+                        setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
                       }
                     }}
                   >
                     <div className="relative w-full h-full">
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
-                        const isTopCard = offset === 0
                         const zIndex = 40 - offset * 10
-                        
-                        // Calculate positions
-                        let x = -offset * 10
-                        let y = offset * 10
-                        let rotate = -offset * 2
-                        let scale = 1 - offset * 0.03
-                        let opacity = 1 - offset * 0.15
-                        
-                        // Top card animates away (to the left)
-                        if (isTopCard && fragmentAnimating) {
-                          x = -150
-                          y = -50
-                          rotate = -25
-                          scale = 0.8
-                          opacity = 0
-                        }
+                        const transform = `translateX(${-offset * 8}px) translateY(${offset * 8}px) rotate(${-offset * 2}deg)`
+                        const opacity = 1 - offset * 0.2
                         
                         return (
                           <motion.div
-                            key={`fragment-${imageIndex}-${offset}`}
+                            key={`fragment-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ 
-                              zIndex: isTopCard && fragmentAnimating ? 50 : zIndex
-                            }}
+                            style={{ zIndex }}
                             initial={false}
                             animate={{ 
-                              x,
-                              y,
-                              rotate,
-                              scale,
-                              opacity
+                              transform,
+                              opacity,
+                              scale: 1 - offset * 0.02
                             }}
                             transition={{ 
-                              type: "spring",
-                              stiffness: 260,
-                              damping: 20,
-                              mass: 0.8
+                              duration: 0.5,
+                              ease: "easeInOut"
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -686,26 +626,11 @@ export default function Home() {
                                   unoptimized
                                 />
                               )}
-                              
-                              {/* Shine effect on swipe */}
-                              {isTopCard && fragmentAnimating && (
-                                <motion.div
-                                  className="absolute inset-0 bg-gradient-to-l from-transparent via-white to-transparent opacity-30"
-                                  initial={{ x: '100%' }}
-                                  animate={{ x: '-200%' }}
-                                  transition={{ duration: 0.6, ease: "easeOut" }}
-                                />
-                              )}
-                              
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && !fragmentAnimating && (
-                                <motion.div 
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  className="absolute bottom-4 left-4 text-white text-sm font-medium"
-                                >
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
                                   {imageIndex + 1} / {fragmentImages.length}
-                                </motion.div>
+                                </div>
                               )}
                             </div>
                           </motion.div>
@@ -713,30 +638,37 @@ export default function Home() {
                       })}
                     </div>
                     
-                    {/* Animated swipe indicator */}
+                    {/* Animated click indicator */}
                     <motion.div 
-                      className="absolute bottom-4 right-4 bg-black/70 backdrop-blur-sm px-3 py-2 rounded-full z-50"
+                      className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-full z-50 border border-white/20"
                       animate={{ 
-                        scale: [1, 1.1, 1],
+                        scale: [1, 1.15, 1],
+                        boxShadow: [
+                          '0 0 0 0 rgba(255,255,255,0.4)',
+                          '0 0 0 8px rgba(255,255,255,0)',
+                          '0 0 0 0 rgba(255,255,255,0)'
+                        ]
                       }}
                       transition={{ 
                         duration: 2, 
                         repeat: Infinity, 
-                        repeatDelay: 1
+                        repeatDelay: 0.5
                       }}
                     >
                       <div className="flex items-center gap-2">
                         <motion.svg 
-                          className="w-4 h-4 text-white" 
+                          className="w-5 h-5 text-white" 
                           fill="none" 
                           viewBox="0 0 24 24" 
                           stroke="currentColor"
-                          animate={{ x: [0, -5, 0] }}
+                          animate={{ 
+                            scale: [1, 0.9, 1],
+                          }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
                         </motion.svg>
-                        <p className="text-white text-xs uppercase tracking-wider">Swipe</p>
+                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Click</p>
                       </div>
                     </motion.div>
                   </div>
