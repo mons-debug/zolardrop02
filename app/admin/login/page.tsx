@@ -20,12 +20,12 @@ export default function AdminLoginPage() {
         if (response.ok) {
           const data = await response.json()
           if (data.user && ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'VIEWER'].includes(data.user.role)) {
-            router.push('/admin')
+            window.location.href = '/admin'
             return
           }
         }
       } catch (error) {
-        console.error('Session check error:', error)
+        // Silently handle error
       } finally {
         setCheckingSession(false)
       }
@@ -43,27 +43,25 @@ export default function AdminLoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        // Check if user has admin role
         if (!['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'VIEWER'].includes(data.user.role)) {
           setError('You do not have admin access')
           return
         }
 
-        // Redirect to admin dashboard
-        router.push('/admin')
+        // Force redirect to admin dashboard
+        window.location.href = '/admin'
       } else {
         setError(data.message || 'Login failed')
       }
     } catch (error) {
-      console.error('Login error:', error)
       setError('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -72,21 +70,21 @@ export default function AdminLoginPage() {
 
   if (checkingSession) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
-          <p className="text-gray-600">Checking session...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking session...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        {/* Header */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 p-4">
+      <div className="w-full max-w-md">
+        {/* Logo & Title */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-6">
+          <Link href="/" className="inline-block mb-6 transform hover:scale-105 transition-transform">
             <span
               className="text-5xl font-serif italic text-black"
               style={{
@@ -150,7 +148,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className="w-full bg-black text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -180,13 +178,3 @@ export default function AdminLoginPage() {
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
