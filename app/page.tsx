@@ -110,7 +110,7 @@ export default function Home() {
         setHeroSlides([
           {
             id: '1',
-            title: 'DROP 02',
+            title: 'CURRENT DROP',
             subtitle: 'BEYOND',
             image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1920&q=80',
             mediaType: 'image',
@@ -252,12 +252,7 @@ export default function Home() {
                 transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="mb-6 lg:mb-8"
               >
-                <div className="inline-flex items-center space-x-3 mb-6">
-                  <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent" />
-                  <span className="text-xs lg:text-sm font-medium tracking-[0.3em] uppercase text-orange-500">
-                    Drop 02
-                  </span>
-                </div>
+                {/* Removed Drop 02 label as requested */}
                 
                 {/* Main Headline - NEW */}
                 <motion.h1
@@ -284,7 +279,7 @@ export default function Home() {
                   transition={{ duration: 0.8, delay: 1, ease: [0.22, 1, 0.36, 1] }}
                   className="text-xl lg:text-2xl font-medium text-white/95 leading-relaxed tracking-wide"
                 >
-                  Drop 02 — clean designs for people who move different.
+                  Current Drop — clean designs for people who move different.
                 </motion.p>
                 <motion.p 
                   initial={{ opacity: 0, x: -20 }}
@@ -308,7 +303,7 @@ export default function Home() {
                   className="inline-block px-10 lg:px-14 py-4 lg:py-5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
                 >
                   <span className="text-xs lg:text-sm font-semibold tracking-widest uppercase">
-                    Explore Drop 02
+                    Explore Current Drop
                   </span>
                 </Link>
 
@@ -537,7 +532,7 @@ export default function Home() {
 
                 {/* Right: Content */}
                 <div className="space-y-4 order-1 md:order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500 rounded-full">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
