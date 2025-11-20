@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import CartIcon from './CartIcon'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,6 +21,11 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const pathname = usePathname()
+  
+  // Force black text on products/shop page
+  const isProductsPage = pathname === '/products' || pathname === '/shop'
+  const shouldBeBlack = isScrolled || isProductsPage
 
   useEffect(() => {
     const updateScroll = () => {
@@ -106,10 +112,10 @@ export default function Navbar({ className = '' }: NavbarProps) {
               <button
                 onClick={() => setIsMenuOpen(true)}
                 className={`group relative p-2 transition-all duration-300 ${
-                  isScrolled ? 'text-black hover:text-orange-500' : 'text-white hover:text-orange-500'
+                  shouldBeBlack ? 'text-black hover:text-orange-500' : 'text-white hover:text-orange-500'
                 }`}
                 aria-label="Open menu"
-                style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
+                style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
               >
                 <div className="absolute inset-0 bg-orange-500/0 group-hover:bg-orange-500/10 rounded-lg transition-all duration-300" />
                 <svg
@@ -167,9 +173,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
               >
                 <span 
                   className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
-                    isScrolled ? 'text-black' : 'text-white'
+                    shouldBeBlack ? 'text-black' : 'text-white'
                   }`}
-                  style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
+                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
                 >
                   SHOP
                 </span>
@@ -180,9 +186,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
               >
                 <span 
                   className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
-                    isScrolled ? 'text-black' : 'text-white'
+                    shouldBeBlack ? 'text-black' : 'text-white'
                   }`}
-                  style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
+                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
                 >
                   SWEATSHIRTS
                 </span>
@@ -193,9 +199,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
               >
                 <span 
                   className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
-                    isScrolled ? 'text-black' : 'text-white'
+                    shouldBeBlack ? 'text-black' : 'text-white'
                   }`}
-                  style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
+                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
                 >
                   ABOUT
                 </span>
@@ -208,10 +214,10 @@ export default function Navbar({ className = '' }: NavbarProps) {
               <Link
                 href="/search"
                 className={`group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
-                  isScrolled ? 'text-black' : 'text-white'
+                  shouldBeBlack ? 'text-black' : 'text-white'
                 }`}
                 aria-label="Search"
-                style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
+                style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -225,10 +231,10 @@ export default function Navbar({ className = '' }: NavbarProps) {
               <Link
                 href="/account"
                 className={`group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
-                  isScrolled ? 'text-black' : 'text-white'
+                  shouldBeBlack ? 'text-black' : 'text-white'
                 }`}
                 aria-label="Account"
-                style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
+                style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -243,10 +249,10 @@ export default function Navbar({ className = '' }: NavbarProps) {
                 <Link
                   href="/admin"
                   className={`group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
-                    isScrolled ? 'text-black' : 'text-white'
+                    shouldBeBlack ? 'text-black' : 'text-white'
                   }`}
                   aria-label="Admin"
-                  style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
+                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
