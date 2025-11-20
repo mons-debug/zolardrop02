@@ -20,12 +20,12 @@ export default function AdminLoginPage() {
         if (response.ok) {
           const data = await response.json()
           if (data.user && ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'VIEWER'].includes(data.user.role)) {
-            router.push('/zr-control-2024')
+            router.push('/admin')
             return
           }
         }
       } catch (error) {
-        // Silently handle error
+        console.error('Session check error:', error)
       } finally {
         setCheckingSession(false)
       }
@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
         }
 
         // Redirect to admin dashboard
-        router.push('/zr-control-2024')
+        router.push('/admin')
       } else {
         setError(data.message || 'Login failed')
       }
@@ -165,17 +165,6 @@ export default function AdminLoginPage() {
               )}
             </button>
           </form>
-
-          {/* Default Credentials Info */}
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-800 mb-2 font-medium">
-              Default Credentials (Development)
-            </p>
-            <p className="text-xs text-blue-700 font-mono">
-              Email: admin@zolar.com<br />
-              Password: Admin123!
-            </p>
-          </div>
         </div>
 
         {/* Back to Store */}
