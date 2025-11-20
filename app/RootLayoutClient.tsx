@@ -22,7 +22,7 @@ export default function RootLayoutClient({
   const pathname = usePathname()
   
   // Check if current path is an admin page
-  const isAdminPage = pathname?.startsWith('/zr-control-2024')
+  const isAdminPage = pathname?.startsWith('/admin')
 
   // Add/remove admin-page class to body based on current page
   useEffect(() => {

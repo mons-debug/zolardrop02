@@ -255,7 +255,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
               {/* Admin Link - Only visible if logged in as admin */}
               {user && (
                 <Link
-                  href="/zr-control-2024"
+                  href="/admin"
                   className={`group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
                     shouldBeBlack ? 'text-black' : 'text-white'
                   }`}
@@ -509,7 +509,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
                     {user && (
                       <li>
                         <Link
-                          href="/zr-control-2024"
+                          href="/admin"
                           onClick={() => setIsMenuOpen(false)}
                           className="group flex items-center text-lg font-light text-black hover:text-orange-500 transition-all duration-300 uppercase"
                         >

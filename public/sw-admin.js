@@ -51,14 +51,14 @@ self.addEventListener('notificationclick', (event) => {
   }
 
   // Open or focus the admin panel
-  const urlToOpen = event.notification.data?.url || '/zr-control-2024'
+  const urlToOpen = event.notification.data?.url || '/admin'
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((windowClients) => {
         // Check if there's already a window open
         for (let client of windowClients) {
-          if (client.url.includes('/zr-control-2024') && 'focus' in client) {
+          if (client.url.includes('/admin') && 'focus' in client) {
             return client.focus().then(() => {
               if ('navigate' in client) {
                 return client.navigate(urlToOpen)
