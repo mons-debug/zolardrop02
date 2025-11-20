@@ -18,6 +18,8 @@ export default function Home() {
   const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [essenceIndex, setEssenceIndex] = useState(0)
   const [fragmentIndex, setFragmentIndex] = useState(0)
+  const [essenceAnimating, setEssenceAnimating] = useState(false)
+  const [fragmentAnimating, setFragmentAnimating] = useState(false)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -423,32 +425,57 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      if (essenceImages.length > 0) {
-                        setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+                      if (essenceImages.length > 0 && !essenceAnimating) {
+                        setEssenceAnimating(true)
+                        setTimeout(() => {
+                          setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+                          setEssenceAnimating(false)
+                        }, 600)
                       }
                     }}
                   >
                     <div className="relative w-full h-full">
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
+                        const isTopCard = offset === 0
                         const zIndex = 40 - offset * 10
-                        const transform = `translateX(${offset * 8}px) translateY(${offset * 8}px) rotate(${offset * 2}deg)`
-                        const opacity = 1 - offset * 0.2
+                        
+                        // Calculate positions
+                        let x = offset * 10
+                        let y = offset * 10
+                        let rotate = offset * 2
+                        let scale = 1 - offset * 0.03
+                        let opacity = 1 - offset * 0.15
+                        
+                        // Top card animates away
+                        if (isTopCard && essenceAnimating) {
+                          x = 150
+                          y = -50
+                          rotate = 25
+                          scale = 0.8
+                          opacity = 0
+                        }
                         
                         return (
                           <motion.div
-                            key={`essence-${offset}`}
+                            key={`essence-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ zIndex }}
+                            style={{ 
+                              zIndex: isTopCard && essenceAnimating ? 50 : zIndex
+                            }}
                             initial={false}
                             animate={{ 
-                              transform,
-                              opacity,
-                              scale: 1 - offset * 0.02
+                              x,
+                              y,
+                              rotate,
+                              scale,
+                              opacity
                             }}
                             transition={{ 
-                              duration: 0.5,
-                              ease: "easeInOut"
+                              type: "spring",
+                              stiffness: 260,
+                              damping: 20,
+                              mass: 0.8
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -462,11 +489,26 @@ export default function Home() {
                                   unoptimized
                                 />
                               )}
+                              
+                              {/* Shine effect on swipe */}
+                              {isTopCard && essenceAnimating && (
+                                <motion.div
+                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30"
+                                  initial={{ x: '-100%' }}
+                                  animate={{ x: '200%' }}
+                                  transition={{ duration: 0.6, ease: "easeOut" }}
+                                />
+                              )}
+                              
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && (
-                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                              {offset === 0 && !essenceAnimating && (
+                                <motion.div 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="absolute bottom-4 left-4 text-white text-sm font-medium"
+                                >
                                   {imageIndex + 1} / {essenceImages.length}
-                                </div>
+                                </motion.div>
                               )}
                             </div>
                           </motion.div>
@@ -580,32 +622,57 @@ export default function Home() {
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
                     onClick={() => {
-                      if (fragmentImages.length > 0) {
-                        setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
+                      if (fragmentImages.length > 0 && !fragmentAnimating) {
+                        setFragmentAnimating(true)
+                        setTimeout(() => {
+                          setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
+                          setFragmentAnimating(false)
+                        }, 600)
                       }
                     }}
                   >
                     <div className="relative w-full h-full">
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
+                        const isTopCard = offset === 0
                         const zIndex = 40 - offset * 10
-                        const transform = `translateX(${-offset * 8}px) translateY(${offset * 8}px) rotate(${-offset * 2}deg)`
-                        const opacity = 1 - offset * 0.2
+                        
+                        // Calculate positions
+                        let x = -offset * 10
+                        let y = offset * 10
+                        let rotate = -offset * 2
+                        let scale = 1 - offset * 0.03
+                        let opacity = 1 - offset * 0.15
+                        
+                        // Top card animates away (to the left)
+                        if (isTopCard && fragmentAnimating) {
+                          x = -150
+                          y = -50
+                          rotate = -25
+                          scale = 0.8
+                          opacity = 0
+                        }
                         
                         return (
                           <motion.div
-                            key={`fragment-${offset}`}
+                            key={`fragment-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ zIndex }}
+                            style={{ 
+                              zIndex: isTopCard && fragmentAnimating ? 50 : zIndex
+                            }}
                             initial={false}
                             animate={{ 
-                              transform,
-                              opacity,
-                              scale: 1 - offset * 0.02
+                              x,
+                              y,
+                              rotate,
+                              scale,
+                              opacity
                             }}
                             transition={{ 
-                              duration: 0.5,
-                              ease: "easeInOut"
+                              type: "spring",
+                              stiffness: 260,
+                              damping: 20,
+                              mass: 0.8
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -619,11 +686,26 @@ export default function Home() {
                                   unoptimized
                                 />
                               )}
+                              
+                              {/* Shine effect on swipe */}
+                              {isTopCard && fragmentAnimating && (
+                                <motion.div
+                                  className="absolute inset-0 bg-gradient-to-l from-transparent via-white to-transparent opacity-30"
+                                  initial={{ x: '100%' }}
+                                  animate={{ x: '-200%' }}
+                                  transition={{ duration: 0.6, ease: "easeOut" }}
+                                />
+                              )}
+                              
                               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && (
-                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                              {offset === 0 && !fragmentAnimating && (
+                                <motion.div 
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="absolute bottom-4 left-4 text-white text-sm font-medium"
+                                >
                                   {imageIndex + 1} / {fragmentImages.length}
-                                </div>
+                                </motion.div>
                               )}
                             </div>
                           </motion.div>
