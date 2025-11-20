@@ -190,7 +190,28 @@ export default async function handler(
       console.error('❌ Error checking/sending low stock alerts:', error)
     }
 
-    // Send success response FIRST
+    // Broadcast new order to admin dashboard via Pusher (fire-and-forget, don't await)
+    pusherServer.trigger('admin-orders', 'new-order', {
+      id: order.id,
+      totalCents: order.totalCents,
+      paymentMethod: 'COD',
+      customer: {
+        id: dbCustomer.id,
+        name: dbCustomer.name,
+        phone: dbCustomer.phone,
+        city: dbCustomer.city,
+        totalOrders: dbCustomer.totalOrders,
+        tags: dbCustomer.tags
+      },
+      createdAt: order.createdAt,
+      itemCount: items.length
+    }).then(() => {
+      console.log('✅ Pusher event sent successfully')
+    }).catch((pusherError) => {
+      console.error('❌ Failed to send Pusher notification (non-critical):', pusherError)
+    })
+
+    // Send success response
     res.status(201).json({
       success: true,
       orderId: order.id,
@@ -205,31 +226,6 @@ export default async function handler(
         paymentMethod: order.paymentMethod
       }
     })
-
-    // Broadcast new order to admin dashboard via Pusher (non-blocking)
-    // Do this AFTER sending the response so it doesn't block the checkout
-    try {
-      console.log('📤 Triggering Pusher event: new-order for', order.id)
-      await pusherServer.trigger('admin-orders', 'new-order', {
-        id: order.id,
-        totalCents: order.totalCents,
-        paymentMethod: 'COD',
-        customer: {
-          id: dbCustomer.id,
-          name: dbCustomer.name,
-          phone: dbCustomer.phone,
-          city: dbCustomer.city,
-          totalOrders: dbCustomer.totalOrders,
-          tags: dbCustomer.tags
-        },
-        createdAt: order.createdAt,
-        itemCount: items.length
-      })
-      console.log('✅ Pusher event sent successfully')
-    } catch (pusherError) {
-      console.error('❌ Failed to send Pusher notification (non-critical):', pusherError)
-      // Don't fail the request - order was already saved and response sent
-    }
   } catch (error) {
     console.error('Error creating COD order:', error)
 
