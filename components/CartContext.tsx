@@ -122,6 +122,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       type: 'ADD_ITEM',
       payload: { ...item, qty: item.qty || 1 }
     })
+    // Auto-open cart drawer when item is added
+    if (!state.isOpen) {
+      setTimeout(() => {
+        dispatch({ type: 'TOGGLE_CART' })
+      }, 100)
+    }
   }
 
   const removeItem = (productId: string, variantId: string) => {

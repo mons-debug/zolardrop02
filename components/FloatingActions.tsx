@@ -15,7 +15,7 @@ export default function FloatingActions() {
   ]
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 hidden lg:block">
+    <div className="fixed bottom-8 right-8 z-50 lg:hidden">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -34,7 +34,8 @@ export default function FloatingActions() {
               >
                 <Link
                   href={action.href}
-                  className="group flex items-center gap-3 bg-white/95 backdrop-blur-md hover:bg-black hover:text-white transition-all duration-300 px-6 py-3 rounded-full shadow-lg hover:shadow-xl"
+                  className="group flex items-center gap-3 bg-white/95 backdrop-blur-md hover:bg-orange-500 hover:text-white transition-all duration-300 px-6 py-3 rounded-full shadow-lg hover:shadow-xl"
+                  onClick={() => setIsOpen(false)}
                 >
                   <span className="text-xl">{action.icon}</span>
                   <span className="text-sm font-medium whitespace-nowrap">{action.label}</span>
@@ -47,7 +48,7 @@ export default function FloatingActions() {
 
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-16 h-16 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-gradient-to-r hover:from-orange-500 hover:to-red-500 transition-all duration-300"
+        className="w-16 h-16 bg-black text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-orange-500 transition-all duration-300"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         animate={{ rotate: isOpen ? 45 : 0 }}
@@ -62,7 +63,7 @@ export default function FloatingActions() {
             strokeLinecap="round" 
             strokeLinejoin="round" 
             strokeWidth={2} 
-            d="M12 4v16m8-8H4" 
+            d="M4 6h16M4 12h16M4 18h16" 
           />
         </svg>
       </motion.button>
@@ -85,4 +86,3 @@ export default function FloatingActions() {
     </div>
   )
 }
-

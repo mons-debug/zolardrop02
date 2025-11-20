@@ -189,14 +189,19 @@ export default function CartDrawer() {
                     <span>{formatPrice(getSubtotal())}</span>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <Link
                       href="/checkout"
                       onClick={toggleCart}
-                      className="block w-full bg-black text-white py-3 px-4 text-center font-semibold hover:bg-gray-800"
-                      style={{ transition: 'all 0.3s ease' }}
+                      className="relative block w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-4 px-6 text-center font-bold text-lg hover:from-orange-600 hover:to-red-600 transform hover:scale-105 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group"
                     >
-                      Proceed to Checkout
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        <svg className="w-5 h-5 group-hover:animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                        Proceed to Checkout
+                      </span>
+                      <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
                     </Link>
                     <button
                       onClick={toggleCart}

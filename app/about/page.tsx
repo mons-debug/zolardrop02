@@ -1,10 +1,20 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
 export default function AboutPage() {
+  const storyRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({
+    target: storyRef,
+    offset: ["start end", "end start"]
+  })
+  
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '15%'])
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -85,15 +95,40 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Our Story Section */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Our Story Section with Parallax */}
+      <section ref={storyRef} className="relative py-16 md:py-24 overflow-hidden">
+        {/* Parallax Background */}
+        <motion.div 
+          className="absolute inset-0 z-0"
+          style={{ y: backgroundY }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-gray-50 to-orange-50/30" />
+          <motion.div 
+            className="absolute top-20 right-20 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.3, 0.2],
+            }}
+            transition={{ duration: 8, repeat: Infinity }}
+          />
+          <motion.div 
+            className="absolute bottom-20 left-20 w-96 h-96 bg-red-400/15 rounded-full blur-3xl"
+            animate={{
+              scale: [1.2, 1, 1.2],
+              opacity: [0.15, 0.25, 0.15],
+            }}
+            transition={{ duration: 10, repeat: Infinity }}
+          />
+        </motion.div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
+              style={{ y: textY }}
             >
               <div className="inline-flex items-center mb-6">
                 <div className="h-px w-12 bg-gradient-to-r from-orange-500 to-transparent mr-3" />
