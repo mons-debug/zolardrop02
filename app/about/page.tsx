@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import { useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -12,8 +12,9 @@ export default function AboutPage() {
     offset: ["start end", "end start"]
   })
   
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
-  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '15%'])
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['-20%', '20%'])
+  const textY = useTransform(scrollYProgress, [0, 1], ['-10%', '10%'])
+  const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 1, 0.3])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -96,29 +97,37 @@ export default function AboutPage() {
       </section>
 
       {/* Our Story Section with Parallax */}
-      <section ref={storyRef} className="relative py-16 md:py-24 overflow-hidden">
-        {/* Parallax Background */}
+      <section ref={storyRef} className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-br from-orange-50 via-orange-100/30 to-gray-50">
+        {/* Parallax Background Elements */}
         <motion.div 
-          className="absolute inset-0 z-0"
-          style={{ y: backgroundY }}
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{ y: backgroundY, opacity }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 via-gray-50 to-orange-50/30" />
+          {/* Animated Orange Orb */}
           <motion.div 
-            className="absolute top-20 right-20 w-96 h-96 bg-orange-400/20 rounded-full blur-3xl"
+            className="absolute top-0 right-[10%] w-[500px] h-[500px] bg-gradient-radial from-orange-400/40 via-orange-300/20 to-transparent rounded-full blur-3xl"
             animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.3, 0.2],
+              scale: [1, 1.3, 1],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
             }}
-            transition={{ duration: 8, repeat: Infinity }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           />
+          
+          {/* Animated Red Orb */}
           <motion.div 
-            className="absolute bottom-20 left-20 w-96 h-96 bg-red-400/15 rounded-full blur-3xl"
+            className="absolute bottom-0 left-[15%] w-[600px] h-[600px] bg-gradient-radial from-red-400/30 via-pink-300/15 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1.2, 1, 1.2],
-              opacity: [0.15, 0.25, 0.15],
+              x: [0, -40, 0],
+              y: [0, 40, 0],
             }}
-            transition={{ duration: 10, repeat: Infinity }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
           />
+
+          {/* Geometric Patterns */}
+          <div className="absolute top-20 left-10 w-32 h-32 border border-orange-300/20 rotate-45" />
+          <div className="absolute bottom-32 right-20 w-24 h-24 border border-red-300/20 rotate-12" />
         </motion.div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
