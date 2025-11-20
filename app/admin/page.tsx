@@ -99,19 +99,39 @@ export default function AdminDashboard() {
   // Note: Pusher subscription is handled by NotificationSystem in layout
   // We listen for a custom event to refresh data
   useEffect(() => {
-    const handleNewOrder = () => {
-      console.log('📱 New order event received - refreshing dashboard')
-      setToast('New order received!')
+    console.log('📊 Dashboard: Setting up new-order-event listener')
+    
+    const handleNewOrder = (event: any) => {
+      console.log('📱 Dashboard: New order event received!', event.detail)
+      setToast('🎉 New order received!')
+      
+      // Refresh dashboard data
+      console.log('🔄 Dashboard: Fetching fresh data...')
       fetchDashboardData()
+      
+      // Hide toast after 5 seconds
       setTimeout(() => setToast(null), 5000)
     }
 
     window.addEventListener('new-order-event', handleNewOrder)
 
     return () => {
+      console.log('📊 Dashboard: Removing new-order-event listener')
       window.removeEventListener('new-order-event', handleNewOrder)
     }
   }, [])
+
+  // Log when dashboard data changes
+  useEffect(() => {
+    if (!loading && orders.length > 0) {
+      console.log('📊 Dashboard data updated:', {
+        totalOrders: stats.totalOrders,
+        pendingOrders: stats.pendingOrders,
+        totalRevenue: stats.totalRevenue,
+        recentOrders: orders.slice(0, 3).map(o => o.id)
+      })
+    }
+  }, [orders, stats, loading])
 
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`

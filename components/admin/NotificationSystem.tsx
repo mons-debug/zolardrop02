@@ -23,6 +23,9 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   const [showDropdown, setShowDropdown] = useState(false)
   const [pushEnabled, setPushEnabled] = useState(false)
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false)
+  const [pusherConnected, setPusherConnected] = useState(false)
+  const [soundEnabled, setSoundEnabled] = useState(false)
+  const [showSoundPrompt, setShowSoundPrompt] = useState(false)
   const audioRef = useRef<any>(null)
 
   // Check push notification support and permission
@@ -35,6 +38,50 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         setTimeout(() => setShowPermissionPrompt(true), 3000)
       }
     }
+
+    // Check if sound was previously enabled
+    const soundPref = localStorage.getItem('zolar-sound-enabled')
+    if (soundPref === 'true') {
+      setSoundEnabled(true)
+    } else {
+      // Show sound prompt after a delay
+      setTimeout(() => setShowSoundPrompt(true), 5000)
+    }
+  }, [])
+
+  // Monitor Pusher connection state
+  useEffect(() => {
+    console.log('🔌 Setting up Pusher connection monitoring...')
+    
+    const handleConnected = () => {
+      console.log('✅ Pusher connected!')
+      setPusherConnected(true)
+    }
+
+    const handleDisconnected = () => {
+      console.warn('⚠️ Pusher disconnected')
+      setPusherConnected(false)
+    }
+
+    const handleError = (err: any) => {
+      console.error('❌ Pusher connection error:', err)
+      setPusherConnected(false)
+    }
+
+    pusherClient.connection.bind('connected', handleConnected)
+    pusherClient.connection.bind('disconnected', handleDisconnected)
+    pusherClient.connection.bind('error', handleError)
+
+    // Check initial state
+    if (pusherClient.connection.state === 'connected') {
+      setPusherConnected(true)
+    }
+
+    return () => {
+      pusherClient.connection.unbind('connected', handleConnected)
+      pusherClient.connection.unbind('disconnected', handleDisconnected)
+      pusherClient.connection.unbind('error', handleError)
+    }
   }, [])
 
   // Initialize audio for notifications - Cash register "cha-ching" sale sound
@@ -42,14 +89,39 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     // Cash register sale sound for desktop notifications
     audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGe+7+ilTQ0OUKXh8LZkHAU7k9jxy3grBSF1yPLaizsKFFyz6OyrWBELTKXh8bllHgU7ldnyy3YqBRtusunppmERDVGl4PG2ZRsEPJPX88p3KwUdd8rx2oo4CAReturqpmMQDFGj4PC0ZBwFOpTZ88p5LAQYb7Ls6KpfEgtOouDxtWYdBTqV2/HLdywFGG+17.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')
     audioRef.current.volume = 0.7 // Louder for desktop sale notifications
+    console.log('🔊 Audio initialized for notifications')
   }, [])
+
+  // Enable sound on user interaction
+  const enableSound = () => {
+    setSoundEnabled(true)
+    setShowSoundPrompt(false)
+    localStorage.setItem('zolar-sound-enabled', 'true')
+    console.log('🔊 Sound enabled for notifications')
+    
+    // Test play
+    if (audioRef.current) {
+      audioRef.current.play().catch((err: any) => {
+        console.warn('Could not test play audio:', err)
+      })
+    }
+  }
 
   // Listen for real-time orders via Pusher
   useEffect(() => {
+    console.log('📡 Subscribing to Pusher channel: admin-orders')
     const channel = pusherClient.subscribe('admin-orders')
 
+    channel.bind('pusher:subscription_succeeded', () => {
+      console.log('✅ Successfully subscribed to admin-orders channel')
+    })
+
+    channel.bind('pusher:subscription_error', (error: any) => {
+      console.error('❌ Failed to subscribe to admin-orders:', error)
+    })
+
     channel.bind('new-order', (data: any) => {
-      // New order received
+      console.log('🎉 NEW ORDER received via Pusher:', data)
       
       // Extract customer info from data
       const customerName = data.customer?.name || data.customer || 'Customer'
@@ -72,9 +144,16 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
       setNotifications(prev => [notification, ...prev])
 
-      // Play sound
-      if (audioRef.current) {
-        audioRef.current.play().catch(() => {})
+      // Play sound if enabled
+      if (soundEnabled && audioRef.current) {
+        console.log('🔊 Playing notification sound...')
+        audioRef.current.play().catch((err: any) => {
+          console.warn('⚠️ Could not play notification sound (user interaction may be required):', err)
+          setShowSoundPrompt(true)
+        })
+      } else if (!soundEnabled) {
+        console.log('🔇 Sound is disabled. Showing sound prompt...')
+        setShowSoundPrompt(true)
       }
 
       // Show browser notification if permission granted
@@ -106,6 +185,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
     // Listen for low stock alerts
     channel.bind('low-stock', (data: any) => {
+      console.log('⚠️ LOW STOCK alert received via Pusher:', data)
       const notification: Notification = {
         id: 'stock-' + (data.id || Date.now().toString()),
         title: '⚠️ Low Stock Alert',
@@ -129,11 +209,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     })
 
     return () => {
+      console.log('🔌 Unsubscribing from Pusher channel: admin-orders')
       channel.unbind('new-order')
       channel.unbind('low-stock')
+      channel.unbind('pusher:subscription_succeeded')
+      channel.unbind('pusher:subscription_error')
       pusherClient.unsubscribe('admin-orders')
     }
-  }, [pushEnabled, onNewOrder])
+  }, [pushEnabled, soundEnabled, onNewOrder])
 
   // Request push notification permission
   const requestNotificationPermission = async () => {
@@ -206,7 +289,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   }
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
   }
 
   const markAsRead = (id: string) => {
@@ -264,6 +347,41 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         </div>
       )}
 
+      {/* Sound Enable Prompt Banner */}
+      {showSoundPrompt && !soundEnabled && (
+        <div className="fixed top-0 left-0 right-0 bg-orange-600 text-white px-6 py-4 z-50 shadow-lg">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+              <div>
+                <p className="font-semibold">Enable Notification Sound</p>
+                <p className="text-sm opacity-90">Click to enable the "cha-ching" sound for new orders</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={enableSound}
+                className="bg-white text-orange-600 px-6 py-2 rounded-lg font-semibold hover:bg-orange-50 transition-colors"
+              >
+                Enable Sound
+              </button>
+              <button
+                onClick={() => setShowSoundPrompt(false)}
+                className="text-white hover:text-orange-100 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pusher Connection Status Indicator (in dropdown header) */}
+
       {/* Notification Bell Icon */}
       <div className="relative">
         <button
@@ -307,6 +425,13 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                       </button>
                     )}
                   </p>
+                  {/* Pusher Connection Status */}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <div className={`w-2 h-2 rounded-full ${pusherConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                    <span className={`text-xs ${pusherConnected ? 'text-green-600' : 'text-red-600'}`}>
+                      {pusherConnected ? 'Live connection active' : 'Connection unavailable'}
+                    </span>
+                  </div>
                 </div>
                 {notifications.length > 0 && (
                   <div className="flex space-x-2">
@@ -382,14 +507,32 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               </div>
 
               {/* Footer */}
-              {pushEnabled && (
-                <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
-                  <div className="flex items-center space-x-2 text-xs text-gray-600">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span>Push notifications enabled</span>
-                  </div>
+              <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+                <div className="flex items-center justify-between text-xs">
+                  {pushEnabled && (
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Push enabled</span>
+                    </div>
+                  )}
+                  {soundEnabled && (
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                      </svg>
+                      <span>Sound enabled</span>
+                    </div>
+                  )}
+                  {!soundEnabled && (
+                    <button
+                      onClick={enableSound}
+                      className="text-orange-600 hover:text-orange-800 font-medium"
+                    >
+                      Enable Sound
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </>
         )}

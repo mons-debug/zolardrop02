@@ -169,24 +169,31 @@ export default async function handler(
       const lowStockItems = updatedVariants.filter(v => v.stock < 5 && v.stock > 0)
       
       if (lowStockItems.length > 0) {
+        console.log(`⚠️ Low stock detected for ${lowStockItems.length} item(s)`)
         for (const item of lowStockItems) {
-          await pusherServer.trigger('admin-orders', 'low-stock', {
-            id: item.id,
-            productTitle: item.product.title,
-            productSku: item.product.sku,
-            variantColor: item.color,
-            stock: item.stock,
-            message: `Low stock alert: ${item.product.title} (${item.color}) - Only ${item.stock} left`
-          })
+          try {
+            await pusherServer.trigger('admin-orders', 'low-stock', {
+              id: item.id,
+              productTitle: item.product.title,
+              productSku: item.product.sku,
+              variantColor: item.color,
+              stock: item.stock,
+              message: `Low stock alert: ${item.product.title} (${item.color}) - Only ${item.stock} left`
+            })
+            console.log(`📤 Low stock alert sent for: ${item.product.title} (${item.color})`)
+          } catch (stockError) {
+            console.error('❌ Failed to send low stock alert:', stockError)
+          }
         }
       }
     } catch (error) {
-      // Silently handle low stock notification error
+      console.error('❌ Error checking/sending low stock alerts:', error)
     }
 
     // Broadcast new order to admin dashboard via Pusher
     try {
-      await pusherServer.trigger('admin-orders', 'new-order', {
+      console.log('📤 Triggering Pusher event: new-order for', order.id)
+      const result = await pusherServer.trigger('admin-orders', 'new-order', {
         id: order.id,
         totalCents: order.totalCents,
         paymentMethod: 'COD',
@@ -201,8 +208,10 @@ export default async function handler(
         createdAt: order.createdAt,
         itemCount: items.length
       })
+      console.log('✅ Pusher event sent successfully')
     } catch (pusherError) {
-      // Silently handle error
+      console.error('❌ Failed to send Pusher notification:', pusherError)
+      // Continue anyway - order was created successfully
     }
 
     res.status(201).json({
