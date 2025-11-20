@@ -31,7 +31,7 @@ export default async function handler(
 
   if (req.method === 'POST') {
     try {
-      const { collectionName, title, description, images, linkUrl, isActive } = req.body
+      const { collectionName, title, description, images, linkUrl, autoRotateDelay, isActive } = req.body
 
       if (!collectionName || !title || !images || !Array.isArray(images)) {
         return res.status(400).json({ 
@@ -47,6 +47,7 @@ export default async function handler(
           description: description || '',
           images: JSON.stringify(images),
           linkUrl: linkUrl || '',
+          autoRotateDelay: autoRotateDelay || 3000,
           isActive: isActive ?? true
         }
       })

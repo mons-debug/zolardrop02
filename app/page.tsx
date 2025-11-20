@@ -18,6 +18,8 @@ export default function Home() {
   const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [essenceIndex, setEssenceIndex] = useState(0)
   const [fragmentIndex, setFragmentIndex] = useState(0)
+  const [essenceDelay, setEssenceDelay] = useState(3000)
+  const [fragmentDelay, setFragmentDelay] = useState(3000)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -48,6 +50,10 @@ export default function Home() {
           setEssenceImages(essence?.images || [])
           setFragmentImages(fragment?.images || [])
           setRecodeImages(recode?.images || [])
+          
+          // Set auto-rotate delays
+          setEssenceDelay(essence?.autoRotateDelay || 3000)
+          setFragmentDelay(fragment?.autoRotateDelay || 3000)
         }
       } catch (error) {
         console.error('Error fetching collections:', error)
@@ -130,6 +136,24 @@ export default function Home() {
     }, currentDuration)
     return () => clearTimeout(timer)
   }, [heroSlides, currentSlide])
+
+  // Auto-rotate ESSENCE collection
+  useEffect(() => {
+    if (essenceImages.length <= 1) return
+    const timer = setInterval(() => {
+      setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+    }, essenceDelay)
+    return () => clearInterval(timer)
+  }, [essenceImages.length, essenceDelay])
+
+  // Auto-rotate FRAGMENT collection
+  useEffect(() => {
+    if (fragmentImages.length <= 1) return
+    const timer = setInterval(() => {
+      setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
+    }, fragmentDelay)
+    return () => clearInterval(timer)
+  }, [fragmentImages.length, fragmentDelay])
 
   // Color map for variant display
   const colorMap: Record<string, string> = {
@@ -420,14 +444,7 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Interactive 4-Card Stack */}
                 <div className="relative order-2 md:order-1 px-8 md:px-0">
-                  <div 
-                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => {
-                      if (essenceImages.length > 0) {
-                        setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
-                      }
-                    }}
-                  >
+                  <div className="relative aspect-[3/4] cursor-grab active:cursor-grabbing perspective-1000 max-w-md mx-auto">
                     <div className="relative w-full h-full">
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
@@ -449,6 +466,14 @@ export default function Home() {
                             transition={{ 
                               duration: 0.5,
                               ease: "easeInOut"
+                            }}
+                            drag={offset === 0}
+                            dragConstraints={{ left: -100, right: 100, top: 0, bottom: 0 }}
+                            dragElastic={0.7}
+                            onDragEnd={(e, info) => {
+                              if (offset === 0 && Math.abs(info.offset.x) > 50) {
+                                setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+                              }
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -498,13 +523,13 @@ export default function Home() {
                           viewBox="0 0 24 24" 
                           stroke="currentColor"
                           animate={{ 
-                            scale: [1, 0.9, 1],
+                            x: [0, 5, 0],
                           }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                         </motion.svg>
-                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Click</p>
+                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Drag</p>
                       </div>
                     </motion.div>
                   </div>
@@ -584,14 +609,7 @@ export default function Home() {
                             
                 {/* Right: Interactive 4-Card Stack */}
                 <div className="relative px-8 md:px-0">
-                  <div 
-                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => {
-                      if (fragmentImages.length > 0) {
-                        setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
-                      }
-                    }}
-                  >
+                  <div className="relative aspect-[3/4] cursor-grab active:cursor-grabbing perspective-1000 max-w-md mx-auto">
                     <div className="relative w-full h-full">
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
@@ -613,6 +631,14 @@ export default function Home() {
                             transition={{ 
                               duration: 0.5,
                               ease: "easeInOut"
+                            }}
+                            drag={offset === 0}
+                            dragConstraints={{ left: -100, right: 100, top: 0, bottom: 0 }}
+                            dragElastic={0.7}
+                            onDragEnd={(e, info) => {
+                              if (offset === 0 && Math.abs(info.offset.x) > 50) {
+                                setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
+                              }
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -662,13 +688,13 @@ export default function Home() {
                           viewBox="0 0 24 24" 
                           stroke="currentColor"
                           animate={{ 
-                            scale: [1, 0.9, 1],
+                            x: [0, 5, 0],
                           }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                         </motion.svg>
-                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Click</p>
+                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Drag</p>
                       </div>
                     </motion.div>
                   </div>

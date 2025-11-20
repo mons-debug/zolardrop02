@@ -133,13 +133,14 @@ model HeroSlide {
 }
 
 model CollectionStack {
-  id             String   @id @default(uuid())
-  collectionName String   @unique // ESSENCE, FRAGMENT, RECODE
-  title          String   // Display title
-  description    String?  // Optional description
-  images         String   // JSON array of image URLs for the stack
-  linkUrl        String?  // Link when clicking "See Collection"
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default(uuid())
+  collectionName  String   @unique // ESSENCE, FRAGMENT, RECODE
+  title           String   // Display title
+  description     String?  // Optional description
+  images          String   // JSON array of image URLs for the stack
+  linkUrl         String?  // Link when clicking "See Collection"
+  autoRotateDelay Int      @default(3000) // Auto-rotate delay in milliseconds (default 3 seconds)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

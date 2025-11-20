@@ -10,6 +10,7 @@ interface CollectionStack {
   description?: string
   images: string[]
   linkUrl?: string
+  autoRotateDelay: number
   isActive: boolean
 }
 
@@ -48,6 +49,7 @@ export default function CollectionStacksManagementPage() {
     description: '',
     images: [] as string[],
     linkUrl: '',
+    autoRotateDelay: 3000,
     isActive: true
   })
 
@@ -166,6 +168,7 @@ export default function CollectionStacksManagementPage() {
       description: existingStack?.description || collection.defaultDescription,
       images: existingStack?.images || [],
       linkUrl: existingStack?.linkUrl || collection.defaultLinkUrl,
+      autoRotateDelay: existingStack?.autoRotateDelay || 3000,
       isActive: existingStack?.isActive ?? true
     })
     setShowModal(true)
@@ -180,6 +183,7 @@ export default function CollectionStacksManagementPage() {
       description: '',
       images: [],
       linkUrl: '',
+      autoRotateDelay: 3000,
       isActive: true
     })
   }
@@ -468,6 +472,26 @@ export default function CollectionStacksManagementPage() {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Auto-Rotate Delay */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Auto-Rotate Delay (seconds)
+                </label>
+                <input
+                  type="number"
+                  value={formData.autoRotateDelay / 1000}
+                  onChange={(e) => setFormData(prev => ({ ...prev, autoRotateDelay: parseFloat(e.target.value) * 1000 }))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+                  min="1"
+                  max="30"
+                  step="0.5"
+                  placeholder="3"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  How long before automatically switching to the next card (1-30 seconds)
+                </p>
               </div>
 
               {/* Status */}

@@ -38,7 +38,7 @@ export default async function handler(
 
   if (req.method === 'PUT') {
     try {
-      const { collectionName, title, description, images, linkUrl, isActive } = req.body
+      const { collectionName, title, description, images, linkUrl, autoRotateDelay, isActive } = req.body
 
       const updateData: any = {}
       if (collectionName !== undefined) updateData.collectionName = collectionName
@@ -46,6 +46,7 @@ export default async function handler(
       if (description !== undefined) updateData.description = description
       if (images !== undefined) updateData.images = JSON.stringify(images)
       if (linkUrl !== undefined) updateData.linkUrl = linkUrl
+      if (autoRotateDelay !== undefined) updateData.autoRotateDelay = autoRotateDelay
       if (isActive !== undefined) updateData.isActive = isActive
 
       const stack = await prisma.collectionStack.update({
