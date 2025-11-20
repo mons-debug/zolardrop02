@@ -190,10 +190,27 @@ export default async function handler(
       console.error('❌ Error checking/sending low stock alerts:', error)
     }
 
-    // Broadcast new order to admin dashboard via Pusher
+    // Send success response FIRST
+    res.status(201).json({
+      success: true,
+      orderId: order.id,
+      message: 'Order placed successfully',
+      order: {
+        id: order.id,
+        subtotalCents,
+        taxCents,
+        shippingCents,
+        totalCents,
+        status: order.status,
+        paymentMethod: order.paymentMethod
+      }
+    })
+
+    // Broadcast new order to admin dashboard via Pusher (non-blocking)
+    // Do this AFTER sending the response so it doesn't block the checkout
     try {
       console.log('📤 Triggering Pusher event: new-order for', order.id)
-      const result = await pusherServer.trigger('admin-orders', 'new-order', {
+      await pusherServer.trigger('admin-orders', 'new-order', {
         id: order.id,
         totalCents: order.totalCents,
         paymentMethod: 'COD',
@@ -210,24 +227,9 @@ export default async function handler(
       })
       console.log('✅ Pusher event sent successfully')
     } catch (pusherError) {
-      console.error('❌ Failed to send Pusher notification:', pusherError)
-      // Continue anyway - order was created successfully
+      console.error('❌ Failed to send Pusher notification (non-critical):', pusherError)
+      // Don't fail the request - order was already saved and response sent
     }
-
-    res.status(201).json({
-      success: true,
-      orderId: order.id,
-      message: 'Order placed successfully',
-      order: {
-        id: order.id,
-        subtotalCents,
-        taxCents,
-        shippingCents,
-        totalCents,
-        status: order.status,
-        paymentMethod: order.paymentMethod
-      }
-    })
   } catch (error) {
     console.error('Error creating COD order:', error)
 
