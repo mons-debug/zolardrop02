@@ -59,6 +59,8 @@ export default function ProductPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [zoomedImageUrl, setZoomedImageUrl] = useState('')
 
   useEffect(() => {
     if (slug) {
@@ -128,7 +130,7 @@ export default function ProductPage() {
   }
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
   }
 
   const handleAddToCart = () => {
@@ -164,16 +166,34 @@ export default function ProductPage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
           {/* Image Gallery */}
           <div className="space-y-3">
-            <div className="aspect-[3/4] relative bg-gray-50 overflow-hidden">
+            <div 
+              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group cursor-zoom-in"
+              onClick={() => {
+                if (allImages.length > 0 && !imageError) {
+                  setZoomedImageUrl(allImages[currentImageIndex])
+                  setIsZoomed(true)
+                }
+              }}
+            >
               {allImages.length > 0 && !imageError ? (
-                <Image
-                  src={allImages[currentImageIndex]}
-                  alt={product.title}
-                  fill
-                  className="object-cover"
-                  onError={() => setImageError(true)}
-                  unoptimized
-                />
+                <>
+                  <Image
+                    src={allImages[currentImageIndex]}
+                    alt={product.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={() => setImageError(true)}
+                    unoptimized
+                  />
+                  {/* Zoom Icon Overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
+                      <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                      </svg>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
                   <div className="text-center p-8">
@@ -189,11 +209,14 @@ export default function ProductPage() {
 
               {/* Image indicators */}
               {allImages.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
                   {allImages.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => setCurrentImageIndex(index)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCurrentImageIndex(index)
+                      }}
                       className={`transition-all ${
                         index === currentImageIndex ? 'bg-black w-8 h-0.5' : 'bg-gray-300 w-8 h-0.5'
                       }`}
@@ -257,18 +280,18 @@ export default function ProductPage() {
               </p>
             </div>
 
-            {/* Color Selection */}
+            {/* Tune Selection */}
             <div>
-              <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Color</h3>
-              <div className="flex flex-wrap gap-2">
+              <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Tune</h3>
+              <div className="flex flex-wrap gap-3">
                 {product.variants.map((variant) => (
                   <button
                     key={variant.id}
                     onClick={() => handleVariantChange(variant)}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider border-2 transition-all ${
+                    className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
                       selectedVariant?.id === variant.id
-                        ? 'border-black bg-black text-white'
-                        : 'border-gray-300 text-black hover:border-black'
+                        ? 'border-orange-500 bg-orange-500 text-white shadow-md'
+                        : 'border-gray-300 text-black hover:border-orange-500 hover:text-orange-500'
                     }`}
                     disabled={variant.stock === 0}
                   >
@@ -284,7 +307,7 @@ export default function ProductPage() {
               <div className="border-t border-b border-gray-200 py-4">
                 <div className="grid grid-cols-2 gap-4 text-xs uppercase tracking-wider">
                   <div>
-                    <span className="text-gray-500">Selected</span>
+                    <span className="text-gray-500">Selected Tune</span>
                     <div className="text-black mt-1">{selectedVariant.color}</div>
                   </div>
                   <div>
@@ -332,6 +355,80 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
+
+      {/* Zoom Modal */}
+      {isZoomed && (
+        <div 
+          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out"
+          onClick={() => setIsZoomed(false)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setIsZoomed(false)}
+            className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
+            aria-label="Close zoom"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Navigation Arrows */}
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : allImages.length - 1
+                  setCurrentImageIndex(newIndex)
+                  setZoomedImageUrl(allImages[newIndex])
+                }}
+                className="absolute left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
+                aria-label="Previous image"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const newIndex = currentImageIndex < allImages.length - 1 ? currentImageIndex + 1 : 0
+                  setCurrentImageIndex(newIndex)
+                  setZoomedImageUrl(allImages[newIndex])
+                }}
+                className="absolute right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
+                aria-label="Next image"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Zoomed Image */}
+          <div className="relative w-full h-full flex items-center justify-center">
+            <div className="relative max-w-7xl max-h-full w-full h-full">
+              <Image
+                src={zoomedImageUrl}
+                alt={product.title}
+                fill
+                className="object-contain"
+                unoptimized
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+
+          {/* Image Counter */}
+          {allImages.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+              {currentImageIndex + 1} / {allImages.length}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -194,7 +194,7 @@ export default function SearchPage() {
                               {product.title}
                             </h3>
                             <p className="text-sm sm:text-base font-normal text-gray-600 mb-3">
-                              ${(product.priceCents / 100).toFixed(2)}
+                              {(product.priceCents / 100).toFixed(2)} MAD
                             </p>
                             
                             {product.variants && product.variants.length > 0 && (

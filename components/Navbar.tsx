@@ -76,6 +76,14 @@ export default function Navbar({ className = '' }: NavbarProps) {
       ],
     },
     {
+      title: 'COLLECTIONS',
+      links: [
+        { href: '/#essence', label: 'ESSENCE' },
+        { href: '/#fragment', label: 'FRAGMENT' },
+        { href: '/#recode', label: 'RECODE' },
+      ],
+    },
+    {
       title: 'EXPLORE',
       links: [
         { href: '/about', label: 'ABOUT' },
@@ -168,6 +176,19 @@ export default function Navbar({ className = '' }: NavbarProps) {
             {/* Center Navigation - Desktop Only - Clean Design */}
             <div className="hidden lg:flex items-center space-x-2">
               <Link
+                href="/"
+                className="group relative px-6 py-2.5"
+              >
+                <span 
+                  className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
+                    shouldBeBlack ? 'text-black' : 'text-white'
+                  }`}
+                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
+                >
+                  HOME
+                </span>
+              </Link>
+              <Link
                 href="/products"
                 className="group relative px-6 py-2.5"
               >
@@ -178,19 +199,6 @@ export default function Navbar({ className = '' }: NavbarProps) {
                   style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
                 >
                   SHOP
-                </span>
-              </Link>
-              <Link
-                href="/category/sweatshirts"
-                className="group relative px-6 py-2.5"
-              >
-                <span 
-                  className={`relative text-xs font-medium tracking-widest transition-all duration-300 uppercase group-hover:text-orange-500 ${
-                    shouldBeBlack ? 'text-black' : 'text-white'
-                  }`}
-                  style={{ filter: shouldBeBlack ? 'none' : 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))' }}
-                >
-                  SWEATSHIRTS
                 </span>
               </Link>
               <Link

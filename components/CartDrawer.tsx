@@ -18,7 +18,7 @@ export default function CartDrawer() {
   })
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

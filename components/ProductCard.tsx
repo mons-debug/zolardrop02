@@ -93,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   const formatPrice = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`
+    return `${(cents / 100).toFixed(2)} MAD`
   }
 
   const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
