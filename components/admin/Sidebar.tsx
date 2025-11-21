@@ -19,6 +19,12 @@ export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [showSectionsMenu, setShowSectionsMenu] = useState(
+    pathname.includes('/admin/hero') || 
+    pathname.includes('/admin/carousel') || 
+    pathname.includes('/admin/archive') || 
+    pathname.includes('/admin/collection-stacks')
+  )
 
   const handleLogout = async () => {
     try {
@@ -28,6 +34,29 @@ export default function Sidebar({ user }: SidebarProps) {
       console.error('Logout error:', error)
     }
   }
+
+  const sectionsSubmenu = [
+    {
+      name: 'Hero Carousel',
+      href: '/admin/hero',
+      icon: '🎬'
+    },
+    {
+      name: 'Fashion Carousel',
+      href: '/admin/carousel',
+      icon: '🎠'
+    },
+    {
+      name: 'Collection Stacks',
+      href: '/admin/collection-stacks',
+      icon: '📚'
+    },
+    {
+      name: 'Archive',
+      href: '/admin/archive',
+      icon: '🗄️'
+    }
+  ]
 
   const navigation = [
     {
@@ -86,46 +115,6 @@ export default function Sidebar({ user }: SidebarProps) {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
-      show: true
-    },
-    {
-      name: 'Archive',
-      href: '/admin/archive',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-        </svg>
-      ),
-      show: true
-    },
-    {
-      name: 'Hero Carousel',
-      href: '/admin/hero',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-        </svg>
-      ),
-      show: true
-    },
-    {
-      name: 'Fashion Carousel',
-      href: '/admin/carousel',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      ),
-      show: true
-    },
-    {
-      name: 'Collection Stacks',
-      href: '/admin/collection-stacks',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
         </svg>
       ),
       show: true
@@ -204,6 +193,53 @@ export default function Sidebar({ user }: SidebarProps) {
             <span className="font-medium">{item.name}</span>
           </Link>
         ))}
+
+        {/* Edit Sections (Homepage) - Expandable Menu */}
+        <div className="space-y-1">
+          <button
+            onClick={() => setShowSectionsMenu(!showSectionsMenu)}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
+              showSectionsMenu
+                ? 'bg-gray-800 text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span className="font-medium">Edit Sections</span>
+            </div>
+            <svg 
+              className={`w-4 h-4 transition-transform ${showSectionsMenu ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Submenu */}
+          {showSectionsMenu && (
+            <div className="ml-4 space-y-1 border-l-2 border-gray-700 pl-2">
+              {sectionsSubmenu.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-all text-sm ${
+                    isActive(item.href)
+                      ? 'bg-orange-500 text-white'
+                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                  }`}
+                >
+                  <span className="text-base">{item.icon}</span>
+                  <span className="font-medium">{item.name}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
       </nav>
 
       {/* View Store Link */}
