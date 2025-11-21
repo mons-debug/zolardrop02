@@ -340,10 +340,11 @@ export default function Home() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="mb-6"
+                  className="mb-6 flex items-center gap-3"
                 >
+                  <div className="h-12 w-0.5 bg-orange-500"></div>
                   <span className="inline-block text-sm sm:text-base font-bold uppercase tracking-widest text-orange-500">
-                    __ NEW RELEASE
+                    NEW RELEASE
                   </span>
                 </motion.div>
                 
@@ -973,9 +974,9 @@ export default function Home() {
 
         {/* Slow Moving Gradient Background */}
         <div className="absolute inset-0 bg-white">
-          {/* Animated Orange Orb */}
+          {/* Animated Orange Orb - Smaller on mobile */}
           <motion.div 
-            className="absolute top-[10%] right-[15%] w-[600px] h-[600px] bg-gradient-radial from-orange-400/40 via-orange-300/20 to-transparent rounded-full blur-3xl"
+            className="absolute top-[10%] right-[15%] w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-gradient-radial from-orange-400/30 via-orange-300/15 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
               x: [0, 50, 0],
@@ -984,9 +985,9 @@ export default function Home() {
             transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
           
-          {/* Animated Pink/Red Orb */}
+          {/* Animated Pink/Red Orb - Smaller on mobile */}
           <motion.div 
-            className="absolute bottom-[10%] left-[20%] w-[700px] h-[700px] bg-gradient-radial from-red-400/35 via-pink-300/15 to-transparent rounded-full blur-3xl"
+            className="absolute bottom-[10%] left-[20%] w-[300px] h-[300px] md:w-[700px] md:h-[700px] bg-gradient-radial from-red-400/25 via-pink-300/12 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1.2, 1, 1.2],
               x: [0, -40, 0],
@@ -1042,15 +1043,10 @@ export default function Home() {
                   </p>
           </div>
 
-                <div className="relative py-8">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-200"></div>
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="px-8 text-2xl sm:text-3xl lg:text-4xl font-medium text-black whitespace-nowrap">
-                      Wear what moves you forward.
-                    </span>
-                  </div>
+                <div className="py-8">
+                  <p className="text-2xl sm:text-3xl lg:text-4xl font-medium text-black">
+                    Wear what moves you forward.
+                  </p>
                 </div>
               </div>
             </motion.div>
