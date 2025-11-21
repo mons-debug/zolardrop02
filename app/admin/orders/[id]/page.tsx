@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import CustomerBadge from '@/components/admin/CustomerBadge'
+import OrderTimeline from '@/components/admin/OrderTimeline'
 
 interface Product {
   id: string
@@ -664,6 +665,11 @@ export default function OrderDetailPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Order Timeline */}
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <OrderTimeline orderId={orderId} />
         </div>
       </main>
     </div>

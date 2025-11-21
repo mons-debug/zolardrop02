@@ -57,6 +57,10 @@ model Customer {
   notes       String? // Admin notes about customer
   isBlocked   Boolean  @default(false)
   orders      Order[]
+  // Audit fields
+  blockedBy   String? // User ID who blocked/unblocked
+  blockedAt   DateTime?
+  updatedBy   String? // User ID of last admin who updated
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -76,22 +80,38 @@ model Order {
   paymentId     String?
   refundReason  String?
   adminNotes    String?
+  // Audit fields
+  confirmedBy   String? // User ID who confirmed
+  confirmedAt   DateTime?
+  shippedBy     String? // User ID who marked as shipped
+  shippedAt     DateTime?
+  deliveredBy   String? // User ID who marked as delivered
+  deliveredAt   DateTime?
+  cancelledBy   String? // User ID who cancelled
+  cancelledAt   DateTime?
+  refundedBy    String? // User ID who refunded
+  refundedAt    DateTime?
+  updatedBy     String? // User ID of last admin who updated
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model User {
-  id               String    @id @default(uuid())
-  email            String    @unique
+  id               String        @id @default(uuid())
+  email            String        @unique
   name             String?
-  role             String    @default("customer") // customer, VIEWER, MANAGER, ADMIN, SUPER_ADMIN
+  role             String        @default("customer") // customer, VIEWER, MANAGER, ADMIN, SUPER_ADMIN
   passwordHash     String
-  isActive         Boolean   @default(true)
+  isActive         Boolean       @default(true)
   lastLogin        DateTime?
   resetToken       String?
   resetTokenExpiry DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  // Activity tracking
+  totalActions     Int           @default(0) // Total admin actions performed
+  lastActivity     DateTime?
+  actions          AdminAction[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }
 
 model ArchiveCollection {
@@ -184,4 +204,23 @@ model AdminNotification {
 
   @@index([createdAt])
   @@index([isRead, createdAt])
+}
+
+model AdminAction {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String // 'order.confirm', 'order.ship', 'order.cancel', 'customer.block', 'product.update', etc.
+  entityType  String // 'order', 'customer', 'product', etc.
+  entityId    String // ID of the affected entity
+  oldValue    String? // JSON: previous state
+  newValue    String? // JSON: new state
+  metadata    String? // JSON: extra context (IP, user agent, etc.)
+  description String? // Human-readable description
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId, createdAt])
+  @@index([action, createdAt])
+  @@index([createdAt])
 }

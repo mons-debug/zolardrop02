@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { logAdminAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
@@ -43,6 +44,30 @@ export default async function handler(
           })
         }
         updateData.status = status
+        
+        // Add audit fields for status changes
+        switch (status) {
+          case 'confirmed':
+            updateData.confirmedBy = user.id
+            updateData.confirmedAt = new Date()
+            break
+          case 'shipped':
+            updateData.shippedBy = user.id
+            updateData.shippedAt = new Date()
+            break
+          case 'delivered':
+            updateData.deliveredBy = user.id
+            updateData.deliveredAt = new Date()
+            break
+          case 'cancelled':
+            updateData.cancelledBy = user.id
+            updateData.cancelledAt = new Date()
+            break
+          case 'refunded':
+            updateData.refundedBy = user.id
+            updateData.refundedAt = new Date()
+            break
+        }
       }
 
       if (adminNotes !== undefined) {
@@ -53,6 +78,9 @@ export default async function handler(
         updateData.refundReason = refundReason
       }
 
+      // Always track who updated
+      updateData.updatedBy = user.id
+
       // Update order
       const updatedOrder = await prisma.order.update({
         where: { id },
@@ -61,6 +89,31 @@ export default async function handler(
           customer: true
         }
       })
+
+      // Log the action
+      if (status !== undefined && existingOrder.status !== status) {
+        await logAdminAction({
+          userId: user.id,
+          action: `order.${status}`,
+          entityType: 'order',
+          entityId: id,
+          oldValue: { status: existingOrder.status },
+          newValue: { status },
+          description: `Changed order ${id} status from ${existingOrder.status} to ${status}`
+        })
+      }
+
+      if (adminNotes !== undefined && existingOrder.adminNotes !== adminNotes) {
+        await logAdminAction({
+          userId: user.id,
+          action: 'order.update',
+          entityType: 'order',
+          entityId: id,
+          oldValue: { adminNotes: existingOrder.adminNotes },
+          newValue: { adminNotes },
+          description: `Updated admin notes for order ${id}`
+        })
+      }
 
       res.status(200).json({ 
         success: true,
