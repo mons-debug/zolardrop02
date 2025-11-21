@@ -468,7 +468,7 @@ export default function Home() {
       <div className="border-t border-gray-100" />
 
       {/* 🔵 SECTION 2 — COLLECTIONS SHOWCASE (SPLIT SCREEN DESIGN) */}
-      <section className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 overflow-hidden">
+      <section className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-8 md:pb-12 lg:pb-16 overflow-hidden">
         {/* Clean White Background */}
         <div className="absolute inset-0 bg-white" />
         
@@ -957,7 +957,7 @@ export default function Home() {
       </section>
 
       {/* 🟠 SECTION 4 — BRAND PHILOSOPHY BLOCK */}
-      <section className="relative pt-16 md:pt-20 lg:pt-24 pb-32 md:pb-40 lg:pb-48 bg-white overflow-hidden">
+      <section className="relative pt-8 md:pt-12 lg:pt-16 pb-32 md:pb-40 lg:pb-48 bg-white overflow-hidden">
         {/* ZOLAR Logo Watermark - Subtle & Large */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none overflow-hidden">
           <motion.div
