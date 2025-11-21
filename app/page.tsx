@@ -12,6 +12,12 @@ const ArchiveCollection = dynamic(() => import('@/components/ArchiveCollection')
   loading: () => <div className="py-32 text-center">Loading...</div>
 })
 
+// Lazy load ShatteredBackground for performance
+const ShatteredBackground = dynamic(() => import('@/components/ShatteredBackground'), {
+  ssr: false,
+  loading: () => null
+})
+
 export default function Home() {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
@@ -476,6 +482,9 @@ export default function Home() {
               {/* Background Panel */}
               <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
               
+              {/* Shattered fragments for ESSENCE */}
+              <ShatteredBackground variant="essence" intensity="medium" />
+              
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Interactive 4-Card Stack */}
                 <div className="relative order-2 md:order-1 px-8 md:px-0">
@@ -612,6 +621,9 @@ export default function Home() {
             >
               {/* Background Panel */}
               <div className="absolute inset-0 bg-gradient-to-bl from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
+              
+              {/* Shattered fragments for FRAGMENT */}
+              <ShatteredBackground variant="fragment" intensity="high" />
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Content */}
@@ -751,6 +763,9 @@ export default function Home() {
             {/* Background Panel */}
             <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
             
+            {/* Shattered fragments for RECODE */}
+            <ShatteredBackground variant="recode" intensity="low" />
+            
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
               {/* Left: Locked 4-Card Stack */}
               <div className="relative px-8 md:px-0 order-2 md:order-1">
@@ -887,6 +902,9 @@ export default function Home() {
 
       {/* 🟠 SECTION 4 — BRAND PHILOSOPHY BLOCK */}
       <section className="relative pt-16 md:pt-20 lg:pt-24 pb-32 md:pb-40 lg:pb-48 bg-white overflow-hidden">
+        {/* Shattered fragments for Brand Philosophy */}
+        <ShatteredBackground variant="general" intensity="medium" />
+        
         {/* ZOLAR Logo Watermark - Subtle & Large */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none overflow-hidden">
           <motion.div
@@ -1205,6 +1223,9 @@ export default function Home() {
 
       {/* Newsletter Section */}
       <section className="relative py-32 bg-white text-black overflow-hidden">
+        {/* Shattered fragments for Newsletter */}
+        <ShatteredBackground variant="essence" intensity="low" />
+        
         <div className="absolute inset-0">
           <motion.div 
             className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500/15 rounded-full blur-3xl"

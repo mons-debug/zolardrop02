@@ -297,6 +297,27 @@ export async function POST(request: NextRequest) {
       // Don't fail the order if Pusher fails
     }
 
+    // Send push notification to admin devices
+    try {
+      await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/push/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: '🎉 New Order Received!',
+          body: `Order from ${dbCustomer.name} - ${(totalCents / 100).toFixed(2)} MAD`,
+          url: `/admin/orders/${order.id}`,
+          orderId: order.id
+        })
+      })
+    } catch (pushError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to send push notification:', pushError)
+      }
+      // Don't fail the order if push fails
+    }
+
     // Send success response
     return NextResponse.json({
       success: true,

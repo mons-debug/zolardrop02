@@ -30,7 +30,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   const [pusherConnected, setPusherConnected] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(false)
   const [showSoundPrompt, setShowSoundPrompt] = useState(false)
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [showPushPrompt, setShowPushPrompt] = useState(false)
   const audioContextRef = useRef<AudioContext | null>(null)
+  const swRegistrationRef = useRef<ServiceWorkerRegistration | null>(null)
 
   // Fetch notifications from database
   const fetchNotifications = async () => {
@@ -59,6 +62,46 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     }
   }
 
+  // Register Service Worker
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          swRegistrationRef.current = registration
+          if (process.env.NODE_ENV === 'development') {
+            console.log('✅ Service Worker registered')
+          }
+          
+          // Check if push is already enabled
+          registration.pushManager.getSubscription()
+            .then(subscription => {
+              if (subscription) {
+                setPushEnabled(true)
+                if (process.env.NODE_ENV === 'development') {
+                  console.log('✅ Push notifications already enabled')
+                }
+              }
+            })
+        })
+        .catch(err => {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('❌ Service Worker registration failed:', err)
+          }
+        })
+      
+      // Listen for messages from service worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data.type === 'PLAY_SOUND') {
+          if (soundEnabled) {
+            playNotificationSound()
+          }
+        } else if (event.data.type === 'NAVIGATE') {
+          router.push(event.data.url)
+        }
+      })
+    }
+  }, [])
+
   // Initial fetch on mount
   useEffect(() => {
     fetchNotifications()
@@ -74,6 +117,16 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
           setShowSoundPrompt(true)
         }
       }, 3000)
+    }
+
+    // Check if push should be prompted
+    const pushPref = localStorage.getItem('zolar-push-prompted')
+    if (!pushPref && 'Notification' in window) {
+      setTimeout(() => {
+        if (Notification.permission === 'default') {
+          setShowPushPrompt(true)
+        }
+      }, 5000)
     }
   }, [])
 
@@ -204,6 +257,105 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       if (process.env.NODE_ENV === 'development') {
         console.warn('Could not test play audio:', err)
       }
+    }
+  }
+
+  // Enable push notifications
+  const enablePushNotifications = async () => {
+    try {
+      // Request notification permission
+      const permission = await Notification.requestPermission()
+      
+      if (permission !== 'granted') {
+        alert('Push notifications permission denied')
+        localStorage.setItem('zolar-push-prompted', 'true')
+        setShowPushPrompt(false)
+        return
+      }
+
+      if (!swRegistrationRef.current) {
+        throw new Error('Service Worker not registered')
+      }
+
+      // Get VAPID public key from environment
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      if (!vapidPublicKey) {
+        console.warn('VAPID public key not configured')
+        return
+      }
+
+      // Subscribe to push notifications
+      const subscription = await swRegistrationRef.current.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+      })
+
+      // Send subscription to server
+      const response = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subscription })
+      })
+
+      if (response.ok) {
+        setPushEnabled(true)
+        setShowPushPrompt(false)
+        localStorage.setItem('zolar-push-prompted', 'true')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Push notifications enabled')
+        }
+      } else {
+        throw new Error('Failed to save subscription')
+      }
+    } catch (error) {
+      console.error('Failed to enable push notifications:', error)
+      alert('Failed to enable push notifications. Please try again.')
+    }
+  }
+
+  // Helper function to convert VAPID key
+  const urlBase64ToUint8Array = (base64String: string) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4)
+    const base64 = (base64String + padding)
+      .replace(/\-/g, '+')
+      .replace(/_/g, '/')
+    
+    const rawData = window.atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
+    
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i)
+    }
+    return outputArray
+  }
+
+  // Disable push notifications
+  const disablePushNotifications = async () => {
+    try {
+      if (!swRegistrationRef.current) return
+
+      const subscription = await swRegistrationRef.current.pushManager.getSubscription()
+      if (subscription) {
+        await subscription.unsubscribe()
+        
+        // Remove from server
+        await fetch('/api/push/subscribe', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ endpoint: subscription.endpoint })
+        })
+
+        setPushEnabled(false)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Push notifications disabled')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to disable push notifications:', error)
     }
   }
 
@@ -345,28 +497,62 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     <>
       {/* Sound Prompt */}
       {showSoundPrompt && !soundEnabled && (
-        <div className="fixed top-20 right-4 bg-white border-2 border-orange-500 shadow-2xl rounded-lg p-6 z-50 max-w-sm animate-slide-in">
-          <div className="flex items-start space-x-4">
+        <div className="fixed top-20 right-4 left-4 sm:left-auto bg-white border-2 border-orange-500 shadow-2xl rounded-lg p-4 sm:p-6 z-50 max-w-sm animate-slide-in">
+          <div className="flex items-start space-x-3 sm:space-x-4">
             <div className="flex-shrink-0">
-              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m8-10a9 9 0 00-12.728 0" />
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Enable Order Sounds?</h3>
-              <p className="text-xs text-gray-600 mb-4">Hear a notification sound when new orders arrive</p>
-              <div className="flex space-x-2">
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Enable Order Sounds?</h3>
+              <p className="text-xs text-gray-600 mb-3 sm:mb-4">Hear a notification sound when new orders arrive</p>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <button
                   onClick={enableSound}
-                  className="px-4 py-2 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600 transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600 transition-colors"
               >
                   Enable Sound
               </button>
               <button
                   onClick={() => setShowSoundPrompt(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
+                  className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
               >
                   Maybe Later
+              </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Push Notification Prompt */}
+      {showPushPrompt && !pushEnabled && (
+        <div className="fixed top-40 right-4 left-4 sm:left-auto bg-white border-2 border-blue-500 shadow-2xl rounded-lg p-4 sm:p-6 z-50 max-w-sm animate-slide-in">
+          <div className="flex items-start space-x-3 sm:space-x-4">
+            <div className="flex-shrink-0">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Get Push Notifications?</h3>
+              <p className="text-xs text-gray-600 mb-3 sm:mb-4">Receive order alerts even when the browser is closed or in background</p>
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+              <button
+                  onClick={enablePushNotifications}
+                  className="px-3 sm:px-4 py-2 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600 transition-colors"
+              >
+                  Enable Push
+              </button>
+              <button
+                  onClick={() => {
+                    setShowPushPrompt(false)
+                    localStorage.setItem('zolar-push-prompted', 'true')
+                  }}
+                  className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
+              >
+                  No Thanks
               </button>
               </div>
             </div>
@@ -397,7 +583,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
             <div className="p-4 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 flex-wrap">
                   <span className={`text-xs px-2 py-1 rounded-full ${pusherConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                     {pusherConnected ? '● Live' : '○ Offline'}
                   </span>
@@ -406,9 +592,26 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                       onClick={() => playNotificationSound()}
                       className="text-xs text-orange-600 hover:text-orange-800 font-medium underline"
                       >
-                      Test 🔊
+                      🔊
                       </button>
                     )}
+                  {pushEnabled ? (
+                    <button
+                      onClick={disablePushNotifications}
+                      className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
+                      title="Push notifications enabled"
+                    >
+                      🔔 Push ON
+                    </button>
+                  ) : (
+                    <button
+                      onClick={enablePushNotifications}
+                      className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
+                      title="Enable push notifications"
+                    >
+                      🔕 Push OFF
+                    </button>
+                  )}
                 </div>
               </div>
 

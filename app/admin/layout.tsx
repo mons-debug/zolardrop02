@@ -17,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Login page doesn't need auth check
   const isLoginPage = pathname === '/admin/login'
@@ -54,6 +55,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     checkAuth()
   }, [router, isLoginPage, pathname])
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
+
   // Show login page without layout
   if (isLoginPage) {
     return <>{children}</>
@@ -78,13 +84,47 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Sidebar */}
-      <Sidebar user={user} />
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+          <span className="text-xl font-serif italic font-bold">ZOLAR</span>
+          <div className="w-10" /> {/* Spacer for centering */}
+        </div>
+      </div>
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Desktop always visible, Mobile slides in */}
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-40
+        transform lg:transform-none transition-transform duration-300 ease-in-out
+        ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <Sidebar user={user} />
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto pt-16 lg:pt-0">
         {/* Notification Bell - Fixed in top right */}
-        <div className="fixed top-4 right-8 z-50">
+        <div className="fixed top-4 right-4 lg:right-8 z-50">
           <NotificationSystem 
             userId={user.id}
             onNewOrder={(data) => {
