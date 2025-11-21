@@ -52,7 +52,7 @@ export default function CustomerDetailPage() {
     try {
       setLoading(true)
       const response = await fetch(`/api/admin/customers/${customerId}`)
-      
+
       if (response.ok) {
         const data = await response.json()
         setCustomer(data.customer)
@@ -140,7 +140,8 @@ export default function CustomerDetailPage() {
     }
     
     const newTags = [...currentTags, 'VIP']
-    await updateCustomer({ tags: newTags })
+    await updateCustomer({ tags: JSON.stringify(newTags) })
+    showToast('Customer marked as VIP')
   }
 
   const showToast = (message: string) => {
@@ -233,7 +234,7 @@ export default function CustomerDetailPage() {
         <div className="px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link 
+              <Link
                 href="/admin/customers"
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
@@ -282,7 +283,7 @@ export default function CustomerDetailPage() {
                     </a>
                   </div>
                 </div>
-                
+
                 {customer.email && (
                   <div>
                     <label className="text-xs text-gray-500 uppercase">Email</label>
@@ -293,14 +294,14 @@ export default function CustomerDetailPage() {
                     </div>
                   </div>
                 )}
-                
+
                 {customer.city && (
                   <div>
                     <label className="text-xs text-gray-500 uppercase">City</label>
                     <p className="text-sm font-medium text-gray-900 mt-1">{customer.city}</p>
                   </div>
                 )}
-                
+
                 <div>
                   <label className="text-xs text-gray-500 uppercase">Customer Since</label>
                   <p className="text-sm font-medium text-gray-900 mt-1">
@@ -313,7 +314,7 @@ export default function CustomerDetailPage() {
                 </div>
 
                 {customerTags.length > 0 && (
-                  <div>
+                <div>
                     <label className="text-xs text-gray-500 uppercase">Tags</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {customerTags.map((tag: string, index: number) => (
@@ -327,10 +328,10 @@ export default function CustomerDetailPage() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
-            </div>
 
-            {/* Stats */}
+              {/* Stats */}
             <div className="bg-white rounded-lg shadow border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Statistics</h2>
@@ -406,10 +407,10 @@ export default function CustomerDetailPage() {
                 >
                   {customer.isBlocked ? '✓ Unblock Customer' : '🚫 Block Customer'}
                 </button>
+                </div>
               </div>
-            </div>
 
-            {/* Admin Notes */}
+              {/* Admin Notes */}
             <div className="bg-white rounded-lg shadow border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Admin Notes</h2>
@@ -421,7 +422,7 @@ export default function CustomerDetailPage() {
                     Edit
                   </button>
                 )}
-              </div>
+                </div>
               <div className="px-6 py-4">
                 {editingNotes ? (
                   <div className="space-y-3">
@@ -433,13 +434,13 @@ export default function CustomerDetailPage() {
                       rows={4}
                     />
                     <div className="flex space-x-3">
-                      <button
-                        onClick={saveNotes}
+                    <button
+                      onClick={saveNotes}
                         disabled={updating}
                         className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 font-medium"
-                      >
-                        Save Notes
-                      </button>
+                    >
+                      Save Notes
+                    </button>
                       <button
                         onClick={() => {
                           setEditingNotes(false)
@@ -466,7 +467,7 @@ export default function CustomerDetailPage() {
               <div className="px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">Order History ({customer.orders.length})</h2>
               </div>
-              
+
               {customer.orders.length === 0 ? (
                 <div className="text-center py-12">
                   <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -130,10 +130,10 @@ export default function CustomersPage() {
     
     if (hasVIP) {
       const newTags = currentTags.filter((tag: string) => tag !== 'VIP')
-      await updateCustomer(customer.id, { tags: newTags })
+      await updateCustomer(customer.id, { tags: JSON.stringify(newTags) })
     } else {
       const newTags = [...currentTags, 'VIP']
-      await updateCustomer(customer.id, { tags: newTags })
+      await updateCustomer(customer.id, { tags: JSON.stringify(newTags) })
     }
   }
 

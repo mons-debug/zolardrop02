@@ -224,7 +224,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       
       // Refresh notifications from database
       fetchNotifications()
-      
+
       // Play sound
       if (soundEnabled) {
         playNotificationSound().catch(() => {
@@ -356,18 +356,18 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               <h3 className="text-sm font-semibold text-gray-900 mb-2">Enable Order Sounds?</h3>
               <p className="text-xs text-gray-600 mb-4">Hear a notification sound when new orders arrive</p>
               <div className="flex space-x-2">
-                <button
+              <button
                   onClick={enableSound}
                   className="px-4 py-2 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600 transition-colors"
-                >
+              >
                   Enable Sound
-                </button>
-                <button
+              </button>
+              <button
                   onClick={() => setShowSoundPrompt(false)}
                   className="px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
-                >
+              >
                   Maybe Later
-                </button>
+              </button>
               </div>
             </div>
           </div>
@@ -393,27 +393,27 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         {/* Dropdown */}
         {showDropdown && (
           <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-[600px] overflow-hidden flex flex-col">
-            {/* Header */}
+              {/* Header */}
             <div className="p-4 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 <div className="flex items-center space-x-2">
                   <span className={`text-xs px-2 py-1 rounded-full ${pusherConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                     {pusherConnected ? '● Live' : '○ Offline'}
                   </span>
                   {soundEnabled && (
-                    <button
+                      <button
                       onClick={() => playNotificationSound()}
                       className="text-xs text-orange-600 hover:text-orange-800 font-medium underline"
-                    >
+                      >
                       Test 🔊
-                    </button>
-                  )}
+                      </button>
+                    )}
                 </div>
               </div>
 
               {/* Filters */}
-              <div className="flex space-x-2">
+                  <div className="flex space-x-2">
                 {(['all', 'unread', 'orders', 'stock'] as const).map((f) => (
                   <button
                     key={f}
@@ -433,14 +433,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               </div>
 
               {filteredNotifications.length > 0 && (
-                <button
-                  onClick={markAllAsRead}
+                    <button
+                      onClick={markAllAsRead}
                   className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Mark all read
-                </button>
-              )}
-            </div>
+                    >
+                      Mark all read
+                    </button>
+                )}
+              </div>
 
             {/* Notifications List */}
             <div className="overflow-y-auto flex-1">
@@ -450,10 +450,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                 <div className="p-8 text-center text-gray-500">
                   <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
+                    </svg>
                   <p className="text-sm">No notifications</p>
-                </div>
-              ) : (
+                  </div>
+                ) : (
                 filteredNotifications.map((notif) => (
                   <button
                     key={notif.id}
@@ -473,7 +473,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                         <p className="text-sm text-gray-600">{notif.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(notif.createdAt)}</p>
                       </div>
-                    </div>
+                  </div>
                   </button>
                 ))
               )}
