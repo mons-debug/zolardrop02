@@ -33,7 +33,8 @@ self.addEventListener('push', (event) => {
     badge: '/icon-72x72.png',
     tag: 'default',
     requireInteraction: true,
-    vibrate: [200, 100, 200],
+    vibrate: [200, 100, 200, 100, 200], // Longer vibration pattern
+    silent: false, // Ensure notification is NOT silent
     data: {
       url: '/admin'
     }
@@ -57,6 +58,7 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
+    // Always show notification, even if app is open
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: data.icon,
@@ -64,6 +66,7 @@ self.addEventListener('push', (event) => {
       tag: data.tag,
       requireInteraction: data.requireInteraction,
       vibrate: data.vibrate,
+      silent: false, // Play system sound
       data: data.data,
       actions: [
         {
@@ -77,12 +80,12 @@ self.addEventListener('push', (event) => {
         }
       ]
     }).then(() => {
-      // Play notification sound by sending message to all clients
+      // Send message to all open clients (for in-app notification + sound)
       return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
         .then(clients => {
           clients.forEach(client => {
             client.postMessage({
-              type: 'PLAY_SOUND',
+              type: 'NEW_ORDER_NOTIFICATION',
               data: data
             })
           })

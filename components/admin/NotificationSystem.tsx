@@ -91,7 +91,30 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'PLAY_SOUND') {
+        if (event.data.type === 'NEW_ORDER_NOTIFICATION') {
+          // Show in-app notification when app is open
+          const notificationData = event.data.data
+          
+          // Play sound
+          if (soundEnabled) {
+            playNotificationSound().catch(() => {
+              console.log('Sound failed to play')
+            })
+          }
+          
+          // Fetch latest notifications to update UI
+          fetchNotifications()
+          
+          // Call parent callback if provided
+          if (onNewOrder) {
+            onNewOrder(notificationData)
+          }
+          
+          // Dispatch custom event for other components
+          const customEvent = new CustomEvent('new-order-event', { detail: notificationData })
+          window.dispatchEvent(customEvent)
+          
+        } else if (event.data.type === 'PLAY_SOUND') {
           if (soundEnabled) {
             playNotificationSound()
           }
@@ -100,7 +123,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         }
       })
     }
-  }, [])
+  }, [soundEnabled, onNewOrder])
 
   // Initial fetch on mount
   useEffect(() => {
@@ -110,13 +133,19 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     const soundPref = localStorage.getItem('zolar-sound-enabled')
     if (soundPref === 'true') {
       setSoundEnabled(true)
-    } else {
-      // Show sound prompt after a delay if not set
-      setTimeout(() => {
-        if (!soundPref) {
-          setShowSoundPrompt(true)
-        }
-      }, 3000)
+    } else if (soundPref === null) {
+      // Auto-enable sound for push notification users
+      if (pushEnabled || localStorage.getItem('zolar-push-prompted') === 'true') {
+        setSoundEnabled(true)
+        localStorage.setItem('zolar-sound-enabled', 'true')
+      } else {
+        // Show sound prompt after a delay if not set
+        setTimeout(() => {
+          if (!soundPref) {
+            setShowSoundPrompt(true)
+          }
+        }, 3000)
+      }
     }
 
     // Check if push should be prompted
@@ -128,7 +157,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         }
       }, 5000)
     }
-  }, [])
+  }, [pushEnabled])
 
   // Monitor Pusher connection
   useEffect(() => {
@@ -332,7 +361,12 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       setPushEnabled(true)
       setShowPushPrompt(false)
       localStorage.setItem('zolar-push-prompted', 'true')
-      alert('✅ Push notifications enabled! You will now receive order alerts.')
+      
+      // Auto-enable sound when push is enabled
+      setSoundEnabled(true)
+      localStorage.setItem('zolar-sound-enabled', 'true')
+      
+      alert('✅ Push notifications enabled! You will now receive order alerts with sound.')
     } catch (error: any) {
       console.error('❌ Failed to enable push notifications:', error)
       const errorMessage = error.message || 'Unknown error'
