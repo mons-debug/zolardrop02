@@ -151,8 +151,39 @@ export default function ProductPage() {
     })
   }
 
+  // JSON-LD Structured Data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "description": product.description || `${product.title} - Available at ZOLAR`,
+    "sku": product.sku,
+    "brand": {
+      "@type": "Brand",
+      "name": "ZOLAR"
+    },
+    "offers": {
+      "@type": "AggregateOffer",
+      "url": `https://zolar.ma/product/${product.sku}`,
+      "priceCurrency": "MAD",
+      "lowPrice": Math.min(...product.variants.map(v => v.priceCents / 100)),
+      "highPrice": Math.max(...product.variants.map(v => v.priceCents / 100)),
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "offerCount": product.variants.length
+    },
+    "image": allImages[0] || '/icon-192x192.png',
+    "category": product.category || "Apparel"
+  }
+
   return (
-    <div className="min-h-screen bg-white pt-24">
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <div className="min-h-screen bg-white pt-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Breadcrumb */}
         <nav className="text-xs uppercase tracking-wider text-gray-500 mb-8">
@@ -430,5 +461,6 @@ export default function ProductPage() {
         </div>
       )}
     </div>
+    </>
   )
 }
