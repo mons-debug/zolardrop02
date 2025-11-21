@@ -263,14 +263,34 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   // Enable push notifications
   const enablePushNotifications = async () => {
     try {
+      console.log('🔔 Starting push notification setup...')
+      
+      // Check if service worker is supported
+      if (!('serviceWorker' in navigator)) {
+        throw new Error('Service Workers are not supported in this browser')
+      }
+
+      if (!('PushManager' in window)) {
+        throw new Error('Push notifications are not supported in this browser')
+      }
+
       // Request notification permission
+      console.log('📝 Requesting notification permission...')
       const permission = await Notification.requestPermission()
+      console.log('Permission result:', permission)
       
       if (permission !== 'granted') {
-        alert('Push notifications permission denied')
+        alert('❌ Push notifications permission denied. Please allow notifications in your browser settings.')
         localStorage.setItem('zolar-push-prompted', 'true')
         setShowPushPrompt(false)
         return
+      }
+
+      // Wait for service worker if not ready
+      if (!swRegistrationRef.current) {
+        console.log('⏳ Waiting for service worker...')
+        const registration = await navigator.serviceWorker.ready
+        swRegistrationRef.current = registration
       }
 
       if (!swRegistrationRef.current) {
@@ -279,18 +299,22 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
       // Get VAPID public key from environment
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      console.log('🔑 VAPID key available:', !!vapidPublicKey)
+      
       if (!vapidPublicKey) {
-        console.warn('VAPID public key not configured')
-        return
+        throw new Error('VAPID public key not configured. Please contact administrator.')
       }
 
       // Subscribe to push notifications
+      console.log('📲 Subscribing to push manager...')
       const subscription = await swRegistrationRef.current.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       })
+      console.log('✅ Push subscription created')
 
       // Send subscription to server
+      console.log('💾 Saving subscription to server...')
       const response = await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: {
@@ -299,19 +323,20 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         body: JSON.stringify({ subscription })
       })
 
-      if (response.ok) {
-        setPushEnabled(true)
-        setShowPushPrompt(false)
-        localStorage.setItem('zolar-push-prompted', 'true')
-        if (process.env.NODE_ENV === 'development') {
-          console.log('✅ Push notifications enabled')
-        }
-      } else {
-        throw new Error('Failed to save subscription')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+        throw new Error(`Server error: ${errorData.message || response.statusText}`)
       }
-    } catch (error) {
-      console.error('Failed to enable push notifications:', error)
-      alert('Failed to enable push notifications. Please try again.')
+
+      console.log('✅ Subscription saved to server')
+      setPushEnabled(true)
+      setShowPushPrompt(false)
+      localStorage.setItem('zolar-push-prompted', 'true')
+      alert('✅ Push notifications enabled! You will now receive order alerts.')
+    } catch (error: any) {
+      console.error('❌ Failed to enable push notifications:', error)
+      const errorMessage = error.message || 'Unknown error'
+      alert(`Failed to enable push notifications:\n\n${errorMessage}\n\nPlease try again or contact support.`)
     }
   }
 

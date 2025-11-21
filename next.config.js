@@ -40,6 +40,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Explicitly expose environment variables to the client
+  env: {
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  },
 }
 
 module.exports = nextConfig
