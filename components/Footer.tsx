@@ -113,19 +113,19 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-gray-200 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
         <motion.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid md:grid-cols-5 gap-8 mb-12"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 md:gap-8 mb-8 md:mb-12"
         >
           {/* Brand Section */}
-          <motion.div variants={itemVariants} className="md:col-span-2">
-            <Link href="/" className="group inline-block mb-6">
+          <motion.div variants={itemVariants} className="col-span-1 sm:col-span-2 md:col-span-2">
+            <Link href="/" className="group inline-block mb-4 md:mb-6">
               <svg 
-                className="h-12 w-auto transition-all duration-300 group-hover:scale-105"
+                className="h-10 md:h-12 w-auto transition-all duration-300 group-hover:scale-105"
                 viewBox="0 0 1024 1024"
               >
                 <path 
@@ -134,7 +134,7 @@ export default function Footer() {
                 />
               </svg>
             </Link>
-            <p className="text-gray-600 max-w-md leading-relaxed mb-3">
+            <p className="text-sm md:text-base text-gray-600 max-w-md leading-relaxed mb-2 md:mb-3">
               Exclusive limited edition products for those who appreciate quality and uniqueness.
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider">
@@ -144,13 +144,13 @@ export default function Footer() {
 
           {/* Quick Links */}
           <motion.div variants={itemVariants}>
-            <h4 className="font-semibold mb-4 text-gray-900">Quick Links</h4>
-            <ul className="space-y-3">
+            <h4 className="text-sm md:text-base font-semibold mb-3 md:mb-4 text-gray-900">Quick Links</h4>
+            <ul className="space-y-2 md:space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.href}>
                 <Link
                   href={link.href}
-                  className="text-gray-600 hover:text-brand"
+                  className="text-sm md:text-base text-gray-600 hover:text-brand"
                   style={{ transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
                 >
                   {link.label}
@@ -162,13 +162,13 @@ export default function Footer() {
 
           {/* Legal Links */}
           <motion.div variants={itemVariants}>
-            <h4 className="font-semibold mb-4 text-gray-900">Legal</h4>
-            <ul className="space-y-3">
+            <h4 className="text-sm md:text-base font-semibold mb-3 md:mb-4 text-gray-900">Legal</h4>
+            <ul className="space-y-2 md:space-y-3">
               {policyLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-gray-600 hover:text-brand"
+                    className="text-sm md:text-base text-gray-600 hover:text-brand"
                     style={{ transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }}
                   >
                     {link.label}
@@ -180,18 +180,18 @@ export default function Footer() {
 
           {/* Social Links */}
           <motion.div variants={itemVariants}>
-            <h4 className="font-semibold mb-4 text-gray-900">Follow Us</h4>
+            <h4 className="text-sm md:text-base font-semibold mb-3 md:mb-4 text-gray-900">Follow Us</h4>
             {loadingSocial ? (
               <div className="text-sm text-gray-500">Loading...</div>
             ) : socialLinks.length > 0 ? (
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 {socialLinks.map((social) => (
                   <a
                     key={social.id}
                     href={social.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-10 h-10 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center text-gray-700 transition-all duration-300"
+                    className="w-9 h-9 md:w-10 md:h-10 bg-gray-100 hover:bg-orange-500 hover:text-white rounded-full flex items-center justify-center text-gray-700 transition-all duration-300"
                     title={social.name}
                   >
                     {SocialIcons[social.platform] || (
@@ -209,14 +209,14 @@ export default function Footer() {
         {/* Copyright */}
         <motion.div
           variants={itemVariants}
-          className="pt-8 border-t border-gray-200"
+          className="pt-6 md:pt-8 border-t border-gray-200"
         >
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-600 text-sm">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-3 md:space-y-0">
+            <p className="text-gray-600 text-xs md:text-sm">
               &copy; {currentYear} ZOLAR. All rights reserved.
             </p>
 
-            <div className="flex space-x-6 text-sm">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6 text-xs md:text-sm">
               <Link
                 href="/privacy"
                 className="text-gray-600 hover:text-brand transition-colors"
