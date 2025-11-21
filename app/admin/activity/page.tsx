@@ -100,25 +100,74 @@ export default function ActivityFeedPage() {
   }
 
   const getActionIcon = (action: string) => {
+    // Order actions
     if (action.includes('confirm')) return '✅'
     if (action.includes('ship')) return '📦'
     if (action.includes('deliver')) return '🎉'
     if (action.includes('cancel')) return '❌'
     if (action.includes('refund')) return '💰'
+    
+    // Customer actions
     if (action.includes('block')) return '🚫'
     if (action.includes('unblock')) return '✅'
     if (action.includes('vip')) return '👑'
+    
+    // Product actions
+    if (action.includes('product.create')) return '➕'
+    if (action.includes('product.delete')) return '🗑️'
+    if (action.includes('product.price')) return '💵'
+    if (action.includes('product.stock')) return '📊'
+    if (action.includes('product')) return '🏷️'
+    
+    // Content actions
+    if (action.includes('hero')) return '🎬'
+    if (action.includes('carousel')) return '🎠'
+    if (action.includes('collection')) return '📚'
+    if (action.includes('archive')) return '🗄️'
+    
+    // Settings actions
+    if (action.includes('settings')) return '⚙️'
+    
+    // Newsletter actions
+    if (action.includes('newsletter')) return '📧'
+    
+    // External actions (WhatsApp, phone, email)
+    if (action.includes('whatsapp')) return '💬'
+    if (action.includes('phone')) return '📞'
+    if (action.includes('email')) return '✉️'
+    
     return '📝'
   }
 
   const getActionColor = (action: string) => {
+    // Order actions
     if (action.includes('confirm')) return 'text-green-600'
     if (action.includes('ship')) return 'text-blue-600'
     if (action.includes('deliver')) return 'text-purple-600'
     if (action.includes('cancel')) return 'text-red-600'
     if (action.includes('refund')) return 'text-orange-600'
+    
+    // Customer actions
     if (action.includes('block')) return 'text-red-600'
     if (action.includes('vip')) return 'text-yellow-600'
+    
+    // Product actions
+    if (action.includes('product.delete')) return 'text-red-600'
+    if (action.includes('product.price')) return 'text-green-600'
+    if (action.includes('product')) return 'text-blue-600'
+    
+    // Content actions
+    if (action.includes('hero') || action.includes('carousel') || action.includes('collection')) return 'text-indigo-600'
+    
+    // Settings
+    if (action.includes('settings')) return 'text-gray-700'
+    
+    // Newsletter
+    if (action.includes('newsletter')) return 'text-pink-600'
+    
+    // External actions
+    if (action.includes('whatsapp') || action.includes('phone') || action.includes('email')) return 'text-teal-600'
+    
     return 'text-gray-600'
   }
 
@@ -126,6 +175,12 @@ export default function ActivityFeedPage() {
     if (entityType === 'order') return `/admin/orders/${entityId}`
     if (entityType === 'customer') return `/admin/customers/${entityId}`
     if (entityType === 'product') return `/admin/products/${entityId}`
+    if (entityType === 'hero') return '/admin/hero'
+    if (entityType === 'carousel') return '/admin/carousel'
+    if (entityType === 'collection') return '/admin/collection-stacks'
+    if (entityType === 'archive') return '/admin/archive'
+    if (entityType === 'settings') return '/admin/settings'
+    if (entityType === 'newsletter') return '/admin/newsletter'
     return '#'
   }
 
@@ -185,17 +240,26 @@ export default function ActivityFeedPage() {
 
       {/* Filters */}
       <div className="mb-6 flex gap-2 flex-wrap">
-        {['all', 'order', 'customer', 'product'].map((filterOption) => (
+        {[
+          { value: 'all', label: 'All' },
+          { value: 'order', label: 'Orders' },
+          { value: 'customer', label: 'Customers' },
+          { value: 'product', label: 'Products' },
+          { value: 'hero', label: 'Hero Slides' },
+          { value: 'collection', label: 'Collections' },
+          { value: 'settings', label: 'Settings' },
+          { value: 'newsletter', label: 'Newsletter' }
+        ].map((filterOption) => (
           <button
-            key={filterOption}
-            onClick={() => setFilter(filterOption)}
+            key={filterOption.value}
+            onClick={() => setFilter(filterOption.value)}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === filterOption
+              filter === filterOption.value
                 ? 'bg-orange-500 text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            {filterOption.charAt(0).toUpperCase() + filterOption.slice(1)}s
+            {filterOption.label}
           </button>
         ))}
       </div>

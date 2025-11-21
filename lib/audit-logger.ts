@@ -223,3 +223,137 @@ export async function trackCustomerAction(
   })
 }
 
+/**
+ * Helper function to track product operations
+ */
+export async function trackProductAction(
+  productId: string,
+  userId: string,
+  action: 'create' | 'update' | 'delete' | 'price_change' | 'stock_change',
+  oldValue?: any,
+  newValue?: any,
+  metadata?: Record<string, any>
+) {
+  const descriptions: Record<string, string> = {
+    create: 'Created new product',
+    update: 'Updated product details',
+    delete: 'Deleted product',
+    price_change: 'Changed product price',
+    stock_change: 'Updated stock level'
+  }
+
+  return logAdminAction({
+    userId,
+    action: `product.${action}`,
+    entityType: 'product',
+    entityId: productId,
+    oldValue,
+    newValue,
+    metadata,
+    description: descriptions[action]
+  })
+}
+
+/**
+ * Helper function to track content management actions
+ */
+export async function trackContentAction(
+  entityType: 'hero' | 'carousel' | 'collection' | 'archive',
+  entityId: string,
+  userId: string,
+  action: 'create' | 'update' | 'delete' | 'activate' | 'deactivate',
+  oldValue?: any,
+  newValue?: any,
+  metadata?: Record<string, any>
+) {
+  const descriptions: Record<string, string> = {
+    create: `Created new ${entityType}`,
+    update: `Updated ${entityType}`,
+    delete: `Deleted ${entityType}`,
+    activate: `Activated ${entityType}`,
+    deactivate: `Deactivated ${entityType}`
+  }
+
+  return logAdminAction({
+    userId,
+    action: `${entityType}.${action}`,
+    entityType,
+    entityId,
+    oldValue,
+    newValue,
+    metadata,
+    description: descriptions[action]
+  })
+}
+
+/**
+ * Helper function to track settings changes
+ */
+export async function trackSettingsAction(
+  userId: string,
+  settingType: string,
+  oldValue?: any,
+  newValue?: any,
+  metadata?: Record<string, any>
+) {
+  return logAdminAction({
+    userId,
+    action: `settings.${settingType}`,
+    entityType: 'settings',
+    entityId: settingType,
+    oldValue,
+    newValue,
+    metadata,
+    description: `Updated ${settingType} settings`
+  })
+}
+
+/**
+ * Helper function to track newsletter actions
+ */
+export async function trackNewsletterAction(
+  userId: string,
+  action: 'export' | 'view',
+  metadata?: Record<string, any>
+) {
+  const descriptions: Record<string, string> = {
+    export: 'Exported newsletter subscribers',
+    view: 'Viewed newsletter subscribers'
+  }
+
+  return logAdminAction({
+    userId,
+    action: `newsletter.${action}`,
+    entityType: 'newsletter',
+    entityId: 'subscribers',
+    metadata,
+    description: descriptions[action]
+  })
+}
+
+/**
+ * Helper function to track external actions (WhatsApp, phone, email)
+ */
+export async function trackExternalAction(
+  userId: string,
+  actionType: 'whatsapp' | 'phone' | 'email',
+  entityType: 'order' | 'customer',
+  entityId: string,
+  metadata?: Record<string, any>
+) {
+  const descriptions: Record<string, string> = {
+    whatsapp: `Clicked WhatsApp for ${entityType}`,
+    phone: `Called ${entityType}`,
+    email: `Emailed ${entityType}`
+  }
+
+  return logAdminAction({
+    userId,
+    action: `${entityType}.${actionType}`,
+    entityType,
+    entityId,
+    metadata,
+    description: descriptions[actionType]
+  })
+}
+

@@ -1,5 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import { requireAdmin } from '@/lib/auth'
+import { trackContentAction } from '@/lib/audit-logger'
 
 const prisma = new PrismaClient()
 
@@ -13,6 +15,7 @@ export default async function handler(
     return res.status(400).json({ message: 'Invalid ID' })
   }
 
+  // GET is public, others need auth
   if (req.method === 'GET') {
     try {
       const stack = await prisma.collectionStack.findUnique({
@@ -37,8 +40,18 @@ export default async function handler(
   }
 
   if (req.method === 'PUT') {
+    // Require auth
+    const user = await requireAdmin(req, res)
+    if (!user) return
+
     try {
       const { collectionName, title, description, images, linkUrl, autoRotateDelay, isActive } = req.body
+
+      // Get existing for audit log
+      const existing = await prisma.collectionStack.findUnique({ where: { id } })
+      if (!existing) {
+        return res.status(404).json({ message: 'Collection stack not found' })
+      }
 
       const updateData: any = {}
       if (collectionName !== undefined) updateData.collectionName = collectionName
@@ -54,6 +67,21 @@ export default async function handler(
         data: updateData
       })
 
+      // Log the update
+      const actionType = (isActive !== undefined && isActive !== existing.isActive) 
+        ? (isActive ? 'activate' : 'deactivate')
+        : 'update'
+
+      await trackContentAction(
+        'collection',
+        stack.id,
+        user.id,
+        actionType,
+        { title: existing.title, collectionName: existing.collectionName },
+        { title: stack.title, collectionName: stack.collectionName },
+        { fieldsUpdated: Object.keys(updateData) }
+      )
+
       return res.status(200).json({ 
         success: true, 
         stack: {
@@ -68,10 +96,30 @@ export default async function handler(
   }
 
   if (req.method === 'DELETE') {
+    // Require auth
+    const user = await requireAdmin(req, res)
+    if (!user) return
+
     try {
+      // Get for audit log
+      const stackToDelete = await prisma.collectionStack.findUnique({ where: { id } })
+      if (!stackToDelete) {
+        return res.status(404).json({ message: 'Collection stack not found' })
+      }
+
       await prisma.collectionStack.delete({
         where: { id }
       })
+
+      // Log the deletion
+      await trackContentAction(
+        'collection',
+        id,
+        user.id,
+        'delete',
+        { title: stackToDelete.title, collectionName: stackToDelete.collectionName },
+        null
+      )
 
       return res.status(200).json({ 
         success: true, 

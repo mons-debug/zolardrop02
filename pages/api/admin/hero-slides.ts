@@ -1,14 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import prisma from '@/lib/prisma'
+import { requireAdmin } from '@/lib/auth'
+import { trackContentAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // Simple auth check
-  const token = req.headers.authorization?.replace('Bearer ', '')
-  if (!token || token !== 'admin-token-123') {
-    return res.status(401).json({ message: 'Unauthorized' })
+  // Check authentication
+  const user = await requireAdmin(req, res)
+  if (!user) {
+    return // requireAdmin already sent the error response
   }
 
   try {
@@ -51,6 +53,17 @@ export default async function handler(
         }
       })
 
+      // Log the creation
+      await trackContentAction(
+        'hero',
+        slide.id,
+        user.id,
+        'create',
+        null,
+        { title: slide.title, mediaUrl: slide.mediaUrl, order: slide.order },
+        { isActive: slide.isActive }
+      )
+
       return res.status(201).json({ slide })
     }
 
@@ -59,6 +72,15 @@ export default async function handler(
 
       if (!id) {
         return res.status(400).json({ message: 'Slide ID is required' })
+      }
+
+      // Get existing slide for audit log
+      const existingSlide = await prisma.heroSlide.findUnique({
+        where: { id }
+      })
+
+      if (!existingSlide) {
+        return res.status(404).json({ message: 'Slide not found' })
       }
 
       const slide = await prisma.heroSlide.update({
@@ -78,6 +100,23 @@ export default async function handler(
         }
       })
 
+      // Determine action type (activate/deactivate or update)
+      let actionType: 'activate' | 'deactivate' | 'update' = 'update'
+      if (isActive !== undefined && isActive !== existingSlide.isActive) {
+        actionType = isActive ? 'activate' : 'deactivate'
+      }
+
+      // Log the update
+      await trackContentAction(
+        'hero',
+        slide.id,
+        user.id,
+        actionType,
+        { title: existingSlide.title, isActive: existingSlide.isActive },
+        { title: slide.title, isActive: slide.isActive },
+        { fieldsUpdated: Object.keys(req.body).filter(k => k !== 'id') }
+      )
+
       return res.status(200).json({ slide })
     }
 
@@ -88,9 +127,28 @@ export default async function handler(
         return res.status(400).json({ message: 'Slide ID is required' })
       }
 
+      // Get slide for audit log
+      const slideToDelete = await prisma.heroSlide.findUnique({
+        where: { id }
+      })
+
+      if (!slideToDelete) {
+        return res.status(404).json({ message: 'Slide not found' })
+      }
+
       await prisma.heroSlide.delete({
         where: { id }
       })
+
+      // Log the deletion
+      await trackContentAction(
+        'hero',
+        id,
+        user.id,
+        'delete',
+        { title: slideToDelete.title, mediaUrl: slideToDelete.mediaUrl },
+        null
+      )
 
       return res.status(200).json({ message: 'Slide deleted successfully' })
     }

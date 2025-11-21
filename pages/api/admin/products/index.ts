@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { trackProductAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
@@ -74,6 +75,24 @@ export default async function handler(
         variants: true
       }
     })
+
+    // Log the product creation
+    await trackProductAction(
+      product.id,
+      user.id,
+      'create',
+      null,
+      {
+        title: product.title,
+        sku: product.sku,
+        priceCents: product.priceCents,
+        stock: product.stock
+      },
+      { 
+        variantCount: product.variants.length,
+        category: product.category
+      }
+    )
 
     res.status(201).json({ product })
   } catch (error) {

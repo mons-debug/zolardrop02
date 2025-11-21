@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { trackNewsletterAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
@@ -36,6 +37,17 @@ export default async function handler(
       }).join('\n')
 
       const csv = csvHeaders + csvRows
+
+      // Log the export action
+      await trackNewsletterAction(
+        user.id,
+        'export',
+        { 
+          subscriberCount: subscribers.length,
+          status: status || 'all',
+          exportDate: new Date().toISOString()
+        }
+      )
 
       // Set headers for file download
       res.setHeader('Content-Type', 'text/csv')

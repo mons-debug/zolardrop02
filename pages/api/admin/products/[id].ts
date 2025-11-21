@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { trackProductAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
@@ -44,6 +45,21 @@ export default async function handler(
       await prisma.product.delete({
         where: { id }
       })
+
+      // Log the deletion
+      await trackProductAction(
+        id,
+        user.id,
+        'delete',
+        {
+          title: existingProduct.title,
+          sku: existingProduct.sku,
+          priceCents: existingProduct.priceCents,
+          stock: existingProduct.stock
+        },
+        null,
+        { variantCount: existingProduct.variants.length }
+      )
 
       return res.status(200).json({
         success: true,
@@ -137,6 +153,37 @@ export default async function handler(
         variants: true
       }
     })
+
+    // Determine the type of update for audit logging
+    let actionType: 'update' | 'price_change' | 'stock_change' = 'update'
+    if (priceCents !== undefined && priceCents !== existingProduct.priceCents) {
+      actionType = 'price_change'
+    } else if (stock !== undefined && stock !== existingProduct.stock) {
+      actionType = 'stock_change'
+    }
+
+    // Log the update
+    await trackProductAction(
+      id,
+      user.id,
+      actionType,
+      {
+        title: existingProduct.title,
+        priceCents: existingProduct.priceCents,
+        stock: existingProduct.stock,
+        salePriceCents: existingProduct.salePriceCents
+      },
+      {
+        title: product.title,
+        priceCents: product.priceCents,
+        stock: product.stock,
+        salePriceCents: product.salePriceCents
+      },
+      { 
+        fieldsUpdated: Object.keys(updateData),
+        variantsUpdated: variants !== undefined
+      }
+    )
 
     res.status(200).json({ product })
   } catch (error) {

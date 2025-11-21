@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import { getCacheHeader } from '@/lib/api-cache'
+import { requireAdmin } from '@/lib/auth'
+import { trackContentAction } from '@/lib/audit-logger'
 
 const prisma = new PrismaClient()
 
@@ -36,6 +38,10 @@ export default async function handler(
   }
 
   if (req.method === 'POST') {
+    // Require auth
+    const user = await requireAdmin(req, res)
+    if (!user) return
+
     try {
       const { collectionName, title, description, images, linkUrl, autoRotateDelay, isActive } = req.body
 
@@ -57,6 +63,17 @@ export default async function handler(
           isActive: isActive ?? true
         }
       })
+
+      // Log the creation
+      await trackContentAction(
+        'collection',
+        stack.id,
+        user.id,
+        'create',
+        null,
+        { title: stack.title, collectionName: stack.collectionName },
+        { imageCount: images.length }
+      )
 
       return res.status(201).json({ 
         success: true, 

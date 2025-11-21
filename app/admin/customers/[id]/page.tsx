@@ -96,6 +96,24 @@ export default function CustomerDetailPage() {
     }
   }
 
+  const trackExternalAction = async (actionType: 'whatsapp' | 'phone' | 'email') => {
+    try {
+      await fetch('/api/admin/actions/external', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType,
+          entityType: 'customer',
+          entityId: customerId,
+          metadata: { customerPhone: customer?.phone, customerEmail: customer?.email }
+        })
+      })
+    } catch (error) {
+      // Silent fail - don't interrupt user action
+      console.error('Failed to track external action:', error)
+    }
+  }
+
   const saveNotes = async () => {
     const success = await updateCustomer({ notes })
     if (success) {
@@ -343,6 +361,7 @@ export default function CustomerDetailPage() {
               <div className="px-6 py-4 space-y-2">
                 <a
                   href={`tel:${customer.phone}`}
+                  onClick={() => trackExternalAction('phone')}
                   className="block w-full px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition-colors font-medium"
                 >
                   📞 Call Customer
@@ -352,6 +371,7 @@ export default function CustomerDetailPage() {
                   href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackExternalAction('whatsapp')}
                   className="block w-full px-4 py-2 bg-green-600 text-white text-center rounded-lg hover:bg-green-700 transition-colors font-medium"
                 >
                   💬 WhatsApp
@@ -360,6 +380,7 @@ export default function CustomerDetailPage() {
                 {customer.email && (
                   <a
                     href={`mailto:${customer.email}`}
+                    onClick={() => trackExternalAction('email')}
                     className="block w-full px-4 py-2 border border-gray-300 text-center text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                   >
                     ✉️ Send Email

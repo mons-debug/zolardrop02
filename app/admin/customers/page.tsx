@@ -52,6 +52,24 @@ export default function CustomersPage() {
     }
   }
 
+  const trackExternalAction = async (actionType: 'whatsapp' | 'phone', customerId: string, customerPhone: string) => {
+    try {
+      await fetch('/api/admin/actions/external', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType,
+          entityType: 'customer',
+          entityId: customerId,
+          metadata: { customerPhone }
+        })
+      })
+    } catch (error) {
+      // Silent fail - don't interrupt user action
+      console.error('Failed to track external action:', error)
+    }
+  }
+
   const applyFilters = () => {
     let filtered = [...customers]
 
@@ -356,6 +374,7 @@ export default function CustomersPage() {
                           <span className="text-gray-300">|</span>
                           <a
                             href={`tel:${customer.phone}`}
+                            onClick={() => trackExternalAction('phone', customer.id, customer.phone)}
                             className="text-green-600 hover:text-green-900 font-medium"
                             title="Call"
                           >
@@ -365,6 +384,7 @@ export default function CustomersPage() {
                             href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => trackExternalAction('whatsapp', customer.id, customer.phone)}
                             className="text-green-600 hover:text-green-900 font-medium"
                             title="WhatsApp"
                           >

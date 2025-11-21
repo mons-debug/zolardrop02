@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { trackSettingsAction } from '@/lib/audit-logger'
 
 export default async function handler(
   req: NextApiRequest,
@@ -52,6 +53,29 @@ export default async function handler(
             isActive
           }
         })
+
+        // Log tracking settings update
+        await trackSettingsAction(
+          user.id,
+          'tracking',
+          {
+            googleAdsId: existing.googleAdsId,
+            googleAnalyticsId: existing.googleAnalyticsId,
+            facebookPixelId: existing.facebookPixelId,
+            tiktokPixelId: existing.tiktokPixelId,
+            snapchatPixelId: existing.snapchatPixelId,
+            isActive: existing.isActive
+          },
+          {
+            googleAdsId: settings.googleAdsId,
+            googleAnalyticsId: settings.googleAnalyticsId,
+            facebookPixelId: settings.facebookPixelId,
+            tiktokPixelId: settings.tiktokPixelId,
+            snapchatPixelId: settings.snapchatPixelId,
+            isActive: settings.isActive
+          },
+          { action: 'update' }
+        )
       } else {
         // Create new settings
         settings = await prisma.trackingSettings.create({
@@ -65,6 +89,22 @@ export default async function handler(
             isActive
           }
         })
+
+        // Log tracking settings creation
+        await trackSettingsAction(
+          user.id,
+          'tracking',
+          null,
+          {
+            googleAdsId: settings.googleAdsId,
+            googleAnalyticsId: settings.googleAnalyticsId,
+            facebookPixelId: settings.facebookPixelId,
+            tiktokPixelId: settings.tiktokPixelId,
+            snapchatPixelId: settings.snapchatPixelId,
+            isActive: settings.isActive
+          },
+          { action: 'create' }
+        )
       }
 
       res.status(200).json({ settings, message: 'Settings saved successfully' })

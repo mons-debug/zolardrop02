@@ -142,6 +142,24 @@ export default function OrderDetailPage() {
     }
   }
 
+  const trackExternalAction = async (actionType: 'whatsapp' | 'phone' | 'email') => {
+    try {
+      await fetch('/api/admin/actions/external', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType,
+          entityType: 'order',
+          entityId: orderId,
+          metadata: { customerPhone: order?.customer?.phone }
+        })
+      })
+    } catch (error) {
+      // Silent fail - don't interrupt user action
+      console.error('Failed to track external action:', error)
+    }
+  }
+
   const saveAdminNotes = async () => {
     try {
       setUpdating(true)
@@ -647,6 +665,7 @@ export default function OrderDetailPage() {
                   <>
                     <a
                       href={`tel:${order.customer.phone}`}
+                      onClick={() => trackExternalAction('phone')}
                       className="block w-full px-4 py-2 border border-gray-300 text-center text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
                     >
                       📞 Call Customer
@@ -656,6 +675,7 @@ export default function OrderDetailPage() {
                       href={`https://wa.me/${order.customer.phone.replace(/[^0-9]/g, '')}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackExternalAction('whatsapp')}
                       className="block w-full px-4 py-2 border border-green-300 text-center text-green-600 rounded-lg hover:bg-green-50 transition-colors font-medium"
                     >
                       💬 WhatsApp
