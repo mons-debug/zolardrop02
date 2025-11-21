@@ -1085,7 +1085,7 @@ export default function Home() {
       </section>
 
       {/* Modern Action Gallery / Reel Section */}
-      <section className="relative py-16 md:py-20 bg-white overflow-hidden">
+      <section className="relative py-8 md:py-12 bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <motion.div
