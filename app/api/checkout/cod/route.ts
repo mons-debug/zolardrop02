@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { pusherServer } from '@/lib/pusher'
+import { rateLimit, getClientIdentifier } from '@/lib/rate-limit'
 
 interface CheckoutItem {
   productId: string
@@ -22,6 +23,24 @@ interface CheckoutRequest {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting: 5 checkouts per minute per IP
+  const identifier = getClientIdentifier(request)
+  const rateLimitResult = rateLimit(identifier, { limit: 5, windowSeconds: 60 })
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { message: 'Too many checkout attempts. Please try again later.' },
+      { 
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': '5',
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': rateLimitResult.resetTime.toString()
+        }
+      }
+    )
+  }
+
   try {
     const body: CheckoutRequest = await request.json()
     const { items, customer, shippingCents = 0 } = body

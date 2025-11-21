@@ -64,7 +64,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       query: q,
     })
   } catch (error) {
-    console.error('Search error:', error)
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Search error:', error)
+    }
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
