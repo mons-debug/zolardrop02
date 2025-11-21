@@ -38,13 +38,22 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       const response = await fetch('/api/admin/notifications')
       if (response.ok) {
         const data = await response.json()
-        setNotifications(data.notifications || [])
-        setUnreadCount(data.unreadCount || 0)
+        const notifs = data.notifications || []
+        const count = data.unreadCount || 0
+        
+        setNotifications(notifs)
+        setUnreadCount(count)
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`✅ Fetched ${notifs.length} notifications (${count} unread)`)
+        }
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Failed to fetch notifications:', response.status, response.statusText)
+        }
       }
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching notifications:', error)
-      }
+      console.error('❌ Error fetching notifications:', error)
     } finally {
       setLoading(false)
     }
@@ -58,26 +67,51 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     const soundPref = localStorage.getItem('zolar-sound-enabled')
     if (soundPref === 'true') {
       setSoundEnabled(true)
+    } else {
+      // Show sound prompt after a delay if not set
+      setTimeout(() => {
+        if (!soundPref) {
+          setShowSoundPrompt(true)
+        }
+      }, 3000)
     }
   }, [])
 
   // Monitor Pusher connection
   useEffect(() => {
-    const handleConnected = () => setPusherConnected(true)
-    const handleDisconnected = () => setPusherConnected(false)
-    const handleError = (err: any) => {
+    const handleConnected = () => {
+      setPusherConnected(true)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Pusher connected')
+      }
+    }
+    
+    const handleDisconnected = () => {
       setPusherConnected(false)
       if (process.env.NODE_ENV === 'development') {
-        console.error('Pusher connection error:', err)
+        console.log('⚠️ Pusher disconnected')
       }
+    }
+    
+    const handleError = (err: any) => {
+      setPusherConnected(false)
+      console.error('❌ Pusher connection error:', err)
     }
 
     pusherClient.connection.bind('connected', handleConnected)
     pusherClient.connection.bind('disconnected', handleDisconnected)
     pusherClient.connection.bind('error', handleError)
 
+    // Check initial state
     if (pusherClient.connection.state === 'connected') {
       setPusherConnected(true)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Pusher already connected')
+      }
+    } else {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⏳ Pusher connecting...')
+      }
     }
 
     return () => {
@@ -184,6 +218,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     })
 
     channel.bind('new-order', (data: any) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔔 New order event received via Pusher', data)
+      }
+      
       // Refresh notifications from database
       fetchNotifications()
       
@@ -192,6 +230,9 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         playNotificationSound().catch(() => {
           setShowSoundPrompt(true)
         })
+      } else if (process.env.NODE_ENV === 'development') {
+        console.log('🔕 Sound disabled, showing prompt')
+        setShowSoundPrompt(true)
       }
 
       // Callback to parent

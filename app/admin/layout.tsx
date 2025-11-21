@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <NotificationSystem 
             userId={user.id}
             onNewOrder={(data) => {
-              console.log('🔔 Layout: New order callback triggered', data)
+              // Callback when new order arrives
             }}
           />
         </div>
