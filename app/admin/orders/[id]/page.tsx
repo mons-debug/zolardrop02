@@ -65,6 +65,8 @@ export default function OrderDetailPage() {
   const [editingNotes, setEditingNotes] = useState(false)
   const [adminNotes, setAdminNotes] = useState('')
   const [toast, setToast] = useState<string | null>(null)
+  const [showStatusChange, setShowStatusChange] = useState(false)
+  const [newStatusSelection, setNewStatusSelection] = useState('')
 
   useEffect(() => {
     if (orderId) {
@@ -130,6 +132,8 @@ export default function OrderDetailPage() {
         const data = await response.json()
         setOrder(data.order)
         showToast(`Order marked as ${newStatus}`)
+        setShowStatusChange(false)
+        setNewStatusSelection('')
       } else {
         const error = await response.json()
         showToast(error.message || 'Failed to update order')
@@ -140,6 +144,14 @@ export default function OrderDetailPage() {
     } finally {
       setUpdating(false)
     }
+  }
+
+  const handleStatusChange = () => {
+    if (!newStatusSelection) {
+      showToast('Please select a status')
+      return
+    }
+    updateOrderStatus(newStatusSelection)
   }
 
   const trackExternalAction = async (actionType: 'whatsapp' | 'phone' | 'email') => {
@@ -660,6 +672,62 @@ export default function OrderDetailPage() {
                     </button>
                   </>
                 )}
+
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-4"></div>
+
+                {/* Advanced Status Change (Admin/Super Admin) */}
+                <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-3">⚡ Change Status (Admin)</h3>
+                  {!showStatusChange ? (
+                    <button
+                      onClick={() => setShowStatusChange(true)}
+                      className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium text-sm"
+                    >
+                      🔄 Change to Any Status
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      <select
+                        value={newStatusSelection}
+                        onChange={(e) => setNewStatusSelection(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                      >
+                        <option value="">Select New Status...</option>
+                        <option value="pending">📋 Pending</option>
+                        <option value="confirmed">✅ Confirmed</option>
+                        <option value="shipped">📦 Shipped</option>
+                        <option value="delivered">🎉 Delivered</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                        <option value="refunded">💰 Refunded</option>
+                      </select>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleStatusChange}
+                          disabled={updating || !newStatusSelection}
+                          className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 font-medium text-sm"
+                        >
+                          Apply
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowStatusChange(false)
+                            setNewStatusSelection('')
+                          }}
+                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      <p className="text-xs text-orange-800">
+                        ⚠️ This allows changing to any status, including reversing completed statuses.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-gray-200 my-4"></div>
                 
                 {order.customer && (
                   <>
