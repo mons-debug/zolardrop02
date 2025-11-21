@@ -7,7 +7,6 @@ import { CartProvider } from '@/components/CartContext'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CustomCursor from '@/components/CustomCursor'
-import FloatingActions from '@/components/FloatingActions'
 import TrackingScripts from '@/components/TrackingScripts'
 
 // Lazy load CartDrawer since it's only needed when cart is opened
@@ -48,7 +47,6 @@ export default function RootLayoutClient({
     <CartProvider>
       <TrackingScripts />
       <CustomCursor />
-      <FloatingActions />
       <div className="min-h-screen flex flex-col bg-white">
         <Navbar />
         <main className="flex-1">

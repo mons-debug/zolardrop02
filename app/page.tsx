@@ -333,9 +333,19 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="mb-6 lg:mb-8"
+                className="mb-6 lg:mb-8 mt-20 lg:mt-24"
               >
-                {/* Removed Drop 02 label as requested */}
+                {/* NEW RELEASE Badge */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="mb-6"
+                >
+                  <span className="inline-block text-sm sm:text-base font-bold uppercase tracking-widest text-orange-500">
+                    __ NEW RELEASE
+                  </span>
+                </motion.div>
                 
                 {/* Main Headline - NEW */}
                 <motion.h1
@@ -383,19 +393,10 @@ export default function Home() {
               >
                 <Link
                   href="/products"
-                  className="inline-block px-10 lg:px-14 py-4 lg:py-5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
+                  className="inline-block px-8 lg:px-10 py-3 lg:py-3.5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
                 >
                   <span className="text-xs lg:text-sm font-semibold tracking-widest uppercase">
                     Explore Current Drop
-                  </span>
-                </Link>
-
-                <Link
-                  href="/products"
-                  className="inline-block px-10 lg:px-14 py-4 lg:py-5 border-2 border-white/40 text-white hover:bg-white hover:text-black transition-all duration-300 group"
-                >
-                  <span className="text-xs lg:text-sm font-medium tracking-widest uppercase">
-                    Shop Collections
                   </span>
                 </Link>
 
@@ -467,18 +468,8 @@ export default function Home() {
 
       {/* 🔵 SECTION 2 — COLLECTIONS SHOWCASE (SPLIT SCREEN DESIGN) */}
       <section className="relative bg-white pt-16 md:pt-20 lg:pt-24 pb-16 md:pb-20 lg:pb-24 overflow-hidden">
-        {/* Subtle Background */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
-          <motion.div 
-            className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/5 rounded-full blur-[120px]"
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-            }}
-            transition={{ duration: 8, repeat: Infinity }}
-          />
-        </div>
+        {/* Clean White Background */}
+        <div className="absolute inset-0 bg-white" />
         
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Section Header */}
@@ -517,45 +508,55 @@ export default function Home() {
               className="relative"
             >
               {/* Background Panel */}
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
-              
-              {/* Shattered fragments for ESSENCE */}
-              <ShatteredBackground variant="essence" intensity="medium" />
+              <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Interactive 4-Card Stack */}
                 <div className="relative order-2 md:order-1 px-8 md:px-0">
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => setEssenceIndex((prev) => (prev + 1) % essenceImages.length)}
+                    onClick={() => {
+                      setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+                      // Navigate after short delay to show animation
+                      setTimeout(() => {
+                        window.location.href = essenceLinkUrl
+                      }, 600)
+                    }}
                   >
                     <div className="relative w-full h-full">
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
                         const zIndex = 40 - offset * 10
-                        // Half-slide hint: show next card partially visible
-                        const translateX = offset === 0 ? 0 : offset === 1 ? 12 : offset * 8
-                        const translateY = offset * 8
-                        const rotate = offset * 2
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
-                        const scale = 1 - offset * 0.03
+                        // Enhanced 3D depth effect
+                        const translateX = offset === 0 ? 0 : offset === 1 ? 16 : offset === 2 ? 12 : 8
+                        const translateY = offset * 10
+                        const translateZ = -offset * 20 // Add depth
+                        const rotate = offset * 3
+                        const rotateY = offset * 2 // Add Y-axis rotation for 3D effect
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
+                        const scale = 1 - offset * 0.05
                         
                         return (
                           <motion.div
                             key={`essence-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ zIndex }}
+                            style={{ 
+                              zIndex,
+                              transformStyle: 'preserve-3d'
+                            }}
                             initial={false}
                             animate={{ 
                               x: translateX,
                               y: translateY,
-                              rotate,
+                              z: translateZ,
+                              rotateZ: rotate,
+                              rotateY: rotateY,
                               opacity,
                               scale
                             }}
                             transition={{ 
-                              duration: 0.6,
-                              ease: [0.25, 0.1, 0.25, 1]
+                              duration: 0.7,
+                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -623,10 +624,7 @@ export default function Home() {
               className="relative md:mt-8"
             >
               {/* Background Panel */}
-              <div className="absolute inset-0 bg-gradient-to-bl from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
-              
-              {/* Shattered fragments for FRAGMENT */}
-              <ShatteredBackground variant="fragment" intensity="high" />
+              <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Content */}
@@ -661,35 +659,48 @@ export default function Home() {
                 <div className="relative px-8 md:px-0">
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)}
+                    onClick={() => {
+                      setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
+                      // Navigate after short delay to show animation
+                      setTimeout(() => {
+                        window.location.href = fragmentLinkUrl
+                      }, 600)
+                    }}
                   >
                     <div className="relative w-full h-full">
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
                         const zIndex = 40 - offset * 10
-                        // Half-slide hint: show next card partially visible (mirrored for FRAGMENT)
-                        const translateX = offset === 0 ? 0 : offset === 1 ? -12 : -offset * 8
-                        const translateY = offset * 8
-                        const rotate = -offset * 2
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
-                        const scale = 1 - offset * 0.03
+                        // Enhanced 3D depth effect (mirrored for FRAGMENT)
+                        const translateX = offset === 0 ? 0 : offset === 1 ? -16 : offset === 2 ? -12 : -8
+                        const translateY = offset * 10
+                        const translateZ = -offset * 20 // Add depth
+                        const rotate = -offset * 3
+                        const rotateY = -offset * 2 // Add Y-axis rotation for 3D effect (mirrored)
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
+                        const scale = 1 - offset * 0.05
                         
                         return (
                           <motion.div
                             key={`fragment-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ zIndex }}
+                            style={{ 
+                              zIndex,
+                              transformStyle: 'preserve-3d'
+                            }}
                             initial={false}
                             animate={{ 
                               x: translateX,
                               y: translateY,
-                              rotate,
+                              z: translateZ,
+                              rotateZ: rotate,
+                              rotateY: rotateY,
                               opacity,
                               scale
                             }}
                             transition={{ 
-                              duration: 0.6,
-                              ease: [0.25, 0.1, 0.25, 1]
+                              duration: 0.7,
+                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -730,10 +741,7 @@ export default function Home() {
             className="relative md:mt-8"
           >
             {/* Background Panel */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50/50 rounded-lg md:rounded-2xl -z-10" />
-            
-            {/* Shattered fragments for RECODE */}
-            <ShatteredBackground variant="recode" intensity="low" />
+            <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
             
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
               {/* Left: Interactive 4-Card Stack */}
@@ -741,35 +749,48 @@ export default function Home() {
                 {recodeImages.length > 0 ? (
                   <div 
                     className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => setRecodeIndex((prev) => (prev + 1) % recodeImages.length)}
+                    onClick={() => {
+                      setRecodeIndex((prev) => (prev + 1) % recodeImages.length)
+                      // Navigate after short delay to show animation
+                      setTimeout(() => {
+                        window.location.href = recodeLinkUrl
+                      }, 600)
+                    }}
                   >
                     <div className="relative w-full h-full">
                       {[0, 1, 2, 3].map((offset) => {
                         const imageIndex = (recodeIndex + offset) % recodeImages.length
                         const zIndex = 40 - offset * 10
-                        // Half-slide hint: show next card partially visible
-                        const translateX = offset === 0 ? 0 : offset === 1 ? 12 : offset * 8
-                        const translateY = offset * 8
-                        const rotate = offset * 2
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
-                        const scale = 1 - offset * 0.03
+                        // Enhanced 3D depth effect
+                        const translateX = offset === 0 ? 0 : offset === 1 ? 16 : offset === 2 ? 12 : 8
+                        const translateY = offset * 10
+                        const translateZ = -offset * 20 // Add depth
+                        const rotate = offset * 3
+                        const rotateY = offset * 2 // Add Y-axis rotation for 3D effect
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
+                        const scale = 1 - offset * 0.05
                         
                         return (
                           <motion.div
                             key={`recode-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
-                            style={{ zIndex }}
+                            style={{ 
+                              zIndex,
+                              transformStyle: 'preserve-3d'
+                            }}
                             initial={false}
                             animate={{ 
                               x: translateX,
                               y: translateY,
-                              rotate,
+                              z: translateZ,
+                              rotateZ: rotate,
+                              rotateY: rotateY,
                               opacity,
                               scale
                             }}
                             transition={{ 
-                              duration: 0.6,
-                              ease: [0.25, 0.1, 0.25, 1]
+                              duration: 0.7,
+                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -873,9 +894,6 @@ export default function Home() {
 
       {/* 🟠 SECTION 4 — BRAND PHILOSOPHY BLOCK */}
       <section className="relative pt-16 md:pt-20 lg:pt-24 pb-32 md:pb-40 lg:pb-48 bg-white overflow-hidden">
-        {/* Shattered fragments for Brand Philosophy */}
-        <ShatteredBackground variant="general" intensity="medium" />
-        
         {/* ZOLAR Logo Watermark - Subtle & Large */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none overflow-hidden">
           <motion.div
@@ -888,28 +906,32 @@ export default function Home() {
           >
             ZOLAR
           </motion.div>
-              </div>
+        </div>
 
-        {/* Enhanced Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-50 via-white to-gray-50" />
+        {/* Slow Moving Gradient Background */}
+        <div className="absolute inset-0 bg-white">
+          {/* Animated Orange Orb */}
           <motion.div 
-            className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-orange-500/5 rounded-full blur-3xl"
+            className="absolute top-[10%] right-[15%] w-[600px] h-[600px] bg-gradient-radial from-orange-400/40 via-orange-300/20 to-transparent rounded-full blur-3xl"
             animate={{
               scale: [1, 1.3, 1],
-              opacity: [0.3, 0.5, 0.3],
+              x: [0, 50, 0],
+              y: [0, -30, 0],
             }}
-            transition={{ duration: 8, repeat: Infinity }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
           />
+          
+          {/* Animated Pink/Red Orb */}
           <motion.div 
-            className="absolute bottom-0 right-1/4 w-[800px] h-[800px] bg-orange-600/5 rounded-full blur-3xl"
+            className="absolute bottom-[10%] left-[20%] w-[700px] h-[700px] bg-gradient-radial from-red-400/35 via-pink-300/15 to-transparent rounded-full blur-3xl"
             animate={{
-              scale: [1.3, 1, 1.3],
-              opacity: [0.5, 0.3, 0.5],
+              scale: [1.2, 1, 1.2],
+              x: [0, -40, 0],
+              y: [0, 40, 0],
             }}
-            transition={{ duration: 10, repeat: Infinity }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
           />
-              </div>
+        </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -962,7 +984,7 @@ export default function Home() {
                     <div className="w-full border-t border-gray-200"></div>
                   </div>
                   <div className="relative flex justify-center">
-                    <span className="bg-white px-8 text-2xl sm:text-3xl lg:text-4xl font-medium text-orange-500">
+                    <span className="bg-white px-8 text-2xl sm:text-3xl lg:text-4xl font-medium text-orange-500 whitespace-nowrap">
                       Wear what moves you forward.
                     </span>
                   </div>
