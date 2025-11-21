@@ -172,7 +172,6 @@ export async function POST(request: NextRequest) {
       const lowStockItems = updatedVariants.filter(v => v.stock < 5 && v.stock > 0)
       
       if (lowStockItems.length > 0) {
-        console.log(`⚠️ Low stock detected for ${lowStockItems.length} item(s)`)
         for (const item of lowStockItems) {
           try {
             await pusherServer.trigger('admin-orders', 'low-stock', {
@@ -183,25 +182,20 @@ export async function POST(request: NextRequest) {
               stock: item.stock,
               message: `Low stock alert: ${item.product.title} (${item.color}) - Only ${item.stock} left`
             })
-            console.log(`📤 Low stock alert sent for: ${item.product.title} (${item.color})`)
           } catch (stockError) {
-            console.error('❌ Failed to send low stock alert:', stockError)
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Failed to send low stock alert:', stockError)
+            }
           }
         }
       }
     } catch (error) {
-      console.error('❌ Error checking/sending low stock alerts:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error checking/sending low stock alerts:', error)
+      }
     }
 
     // Broadcast new order to admin dashboard via Pusher
-    console.log('🔔 Attempting to send Pusher notification...')
-    console.log('📍 Pusher Config Check:', {
-      hasAppId: !!process.env.PUSHER_APP_ID,
-      hasKey: !!process.env.PUSHER_KEY,
-      hasSecret: !!process.env.PUSHER_SECRET,
-      cluster: process.env.PUSHER_CLUSTER
-    })
-    
     try {
       const pusherPayload = {
         id: order.id,
@@ -219,12 +213,11 @@ export async function POST(request: NextRequest) {
         itemCount: items.length
       }
       
-      console.log('📤 Triggering Pusher event with payload:', JSON.stringify(pusherPayload, null, 2))
-      
       await pusherServer.trigger('admin-orders', 'new-order', pusherPayload)
-      console.log('✅ Pusher event sent successfully!')
     } catch (pusherError) {
-      console.error('❌ Failed to send Pusher notification:', pusherError)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to send Pusher notification:', pusherError)
+      }
       // Don't fail the order if Pusher fails
     }
 

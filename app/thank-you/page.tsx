@@ -47,7 +47,9 @@ export default function ThankYouPage() {
         }
       }
     } catch (error) {
-      console.error('Error fetching tracking settings:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching tracking settings:', error)
+      }
     }
   }
 
@@ -69,10 +71,11 @@ export default function ThankYouPage() {
             'currency': currency,
             'transaction_id': orderId
           })
-          console.log('Google Ads conversion tracked')
         }
       } catch (error) {
-        console.error('Google Ads tracking error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Google Ads tracking error:', error)
+        }
       }
     }
 
@@ -88,10 +91,11 @@ export default function ThankYouPage() {
             'currency': currency,
             'items': items ? parseInt(items) : 1
           })
-          console.log('Google Analytics purchase tracked')
         }
       } catch (error) {
-        console.error('Google Analytics tracking error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Google Analytics tracking error:', error)
+        }
       }
     }
 
@@ -106,10 +110,11 @@ export default function ThankYouPage() {
             currency: currency,
             content_type: 'product'
           })
-          console.log('Facebook Pixel purchase tracked')
         }
       } catch (error) {
-        console.error('Facebook Pixel tracking error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Facebook Pixel tracking error:', error)
+        }
       }
     }
 
@@ -124,10 +129,11 @@ export default function ThankYouPage() {
             currency: currency,
             content_type: 'product'
           })
-          console.log('TikTok Pixel purchase tracked')
         }
       } catch (error) {
-        console.error('TikTok Pixel tracking error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('TikTok Pixel tracking error:', error)
+        }
       }
     }
 
@@ -141,10 +147,11 @@ export default function ThankYouPage() {
             price: totalValue,
             currency: currency
           })
-          console.log('Snapchat Pixel purchase tracked')
         }
       } catch (error) {
-        console.error('Snapchat Pixel tracking error:', error)
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Snapchat Pixel tracking error:', error)
+        }
       }
     }
   }

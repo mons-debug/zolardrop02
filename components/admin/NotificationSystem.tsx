@@ -53,21 +53,19 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
   // Monitor Pusher connection state
   useEffect(() => {
-    console.log('🔌 Setting up Pusher connection monitoring...')
-    
     const handleConnected = () => {
-      console.log('✅ Pusher connected!')
       setPusherConnected(true)
     }
 
     const handleDisconnected = () => {
-      console.warn('⚠️ Pusher disconnected')
       setPusherConnected(false)
     }
 
     const handleError = (err: any) => {
-      console.error('❌ Pusher connection error:', err)
       setPusherConnected(false)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Pusher connection error:', err)
+      }
     }
 
     pusherClient.connection.bind('connected', handleConnected)
@@ -92,30 +90,25 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext
       if (AudioContext) {
         audioContextRef.current = new AudioContext()
-        console.log('🔊 Audio Context initialized for notifications')
-      } else {
-        console.error('❌ Web Audio API not supported in this browser')
       }
     } catch (error) {
-      console.error('❌ Failed to initialize Audio Context:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to initialize Audio Context:', error)
+      }
     }
   }, [])
   
   // Function to play notification sound - Cash register "cha-ching"
   const playNotificationSound = async () => {
     try {
-      console.log('🔊 Attempting to play notification sound...')
-      
       if (!audioContextRef.current) {
         throw new Error('Audio Context not initialized')
       }
       
       const audioContext = audioContextRef.current
-      console.log('🎵 AudioContext state:', audioContext.state)
       
       // Resume context if suspended (required by browsers)
       if (audioContext.state === 'suspended') {
-        console.log('▶️ Resuming audio context...')
         await audioContext.resume()
       }
       
@@ -169,10 +162,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       
       // Add a subtle low "ding" for depth - C4 note (261.63 Hz)
       createBellTone(523.25, now + 0.12, 0.3, 0.15)
-      
-      console.log('✅ Cash register sound played successfully!')
     } catch (error) {
-      console.error('❌ Failed to play sound:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to play sound:', error)
+      }
       throw error
     }
   }
@@ -182,31 +175,28 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     setSoundEnabled(true)
     setShowSoundPrompt(false)
     localStorage.setItem('zolar-sound-enabled', 'true')
-    console.log('🔊 Sound enabled for notifications')
     
     // Test play
     try {
       await playNotificationSound()
     } catch (err) {
-      console.warn('Could not test play audio:', err)
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Could not test play audio:', err)
+      }
     }
   }
 
   // Listen for real-time orders via Pusher
   useEffect(() => {
-    console.log('📡 Subscribing to Pusher channel: admin-orders')
     const channel = pusherClient.subscribe('admin-orders')
 
-    channel.bind('pusher:subscription_succeeded', () => {
-      console.log('✅ Successfully subscribed to admin-orders channel')
-    })
-
     channel.bind('pusher:subscription_error', (error: any) => {
-      console.error('❌ Failed to subscribe to admin-orders:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to subscribe to admin-orders:', error)
+      }
     })
 
     channel.bind('new-order', (data: any) => {
-      console.log('🎉 NEW ORDER received via Pusher:', data)
       
       // Extract customer info from data
       const customerName = data.customer?.name || data.customer || 'Customer'
@@ -231,13 +221,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
       // Play sound if enabled
       if (soundEnabled) {
-        console.log('🔊 Playing notification sound...')
-        playNotificationSound().catch((err: any) => {
-          console.warn('⚠️ Could not play notification sound (user interaction may be required):', err)
+        playNotificationSound().catch(() => {
           setShowSoundPrompt(true)
         })
       } else {
-        console.log('🔇 Sound is disabled. Showing sound prompt...')
         setShowSoundPrompt(true)
       }
 
@@ -270,7 +257,6 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
 
     // Listen for low stock alerts
     channel.bind('low-stock', (data: any) => {
-      console.log('⚠️ LOW STOCK alert received via Pusher:', data)
       const notification: Notification = {
         id: 'stock-' + (data.id || Date.now().toString()),
         title: '⚠️ Low Stock Alert',
@@ -294,10 +280,8 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     })
 
     return () => {
-      console.log('🔌 Unsubscribing from Pusher channel: admin-orders')
       channel.unbind('new-order')
       channel.unbind('low-stock')
-      channel.unbind('pusher:subscription_succeeded')
       channel.unbind('pusher:subscription_error')
       pusherClient.unsubscribe('admin-orders')
     }
@@ -353,7 +337,9 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         }
       }
     } catch (error) {
-      console.error('Failed to register push notification:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to register push notification:', error)
+      }
     }
   }
 
@@ -543,8 +529,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                             console.log('✅ Sound played!')
                             alert('✅ Sound test successful!')
                           } catch (err: any) {
-                            console.error('❌ Sound failed:', err)
-                            alert('❌ Sound test failed: ' + err.message)
+                            if (process.env.NODE_ENV === 'development') {
+                              console.error('Sound failed:', err)
+                            }
+                            alert('❌ Sound test failed')
                           }
                         }}
                         className="text-xs text-orange-600 hover:text-orange-800 font-medium underline cursor-pointer"

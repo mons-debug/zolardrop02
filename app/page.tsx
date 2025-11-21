@@ -406,11 +406,10 @@ export default function Home() {
               <Image
                 src={heroSlides[currentSlide]?.image || ''}
                 alt={heroSlides[currentSlide]?.title || ''}
-                priority
                 fill
-                className="object-cover object-center"
                 priority
-                unoptimized
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover object-center"
               />
             )}
         </motion.div>

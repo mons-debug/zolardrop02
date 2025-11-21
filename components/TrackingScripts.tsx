@@ -29,7 +29,9 @@ export default function TrackingScripts() {
         setSettings(data)
       }
     } catch (error) {
-      console.error('Error loading tracking settings:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error loading tracking settings:', error)
+      }
     } finally {
       setLoading(false)
     }

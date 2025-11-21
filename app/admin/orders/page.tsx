@@ -58,7 +58,9 @@ export default function OrdersPage() {
         setOrders(data.orders || [])
       }
     } catch (error) {
-      console.error('Error fetching orders:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching orders:', error)
+      }
     } finally {
       setLoading(false)
     }
@@ -68,7 +70,6 @@ export default function OrdersPage() {
   // We listen for a custom event to refresh data
   useEffect(() => {
     const handleNewOrder = () => {
-      console.log('📱 New order event received - refreshing orders')
       setToast('New order received!')
       fetchOrders()
       setTimeout(() => setToast(null), 5000)
@@ -104,7 +105,9 @@ export default function OrdersPage() {
         alert(error.message || 'Failed to update order status')
       }
     } catch (error) {
-      console.error('Error updating order status:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating order status:', error)
+      }
       alert('Failed to update order status')
     } finally {
       setUpdatingOrderId(null)

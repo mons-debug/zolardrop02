@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import { getCacheHeader } from '@/lib/api-cache'
 
 const prisma = new PrismaClient()
 
@@ -8,6 +9,9 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === 'GET') {
+    // Set cache headers for dynamic content
+    res.setHeader('Cache-Control', getCacheHeader('dynamic'))
+    
     try {
       const stacks = await prisma.collectionStack.findMany({
         orderBy: { collectionName: 'asc' }
@@ -21,7 +25,9 @@ export default async function handler(
         }))
       })
     } catch (error) {
-      console.error('Error fetching collection stacks:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching collection stacks:', error)
+      }
       return res.status(500).json({ 
         success: false, 
         message: 'Failed to fetch collection stacks' 
@@ -60,7 +66,9 @@ export default async function handler(
         }
       })
     } catch (error) {
-      console.error('Error creating collection stack:', error)
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating collection stack:', error)
+      }
       return res.status(500).json({ 
         success: false, 
         message: 'Failed to create collection stack' 
