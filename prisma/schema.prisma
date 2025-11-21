@@ -32,11 +32,11 @@ model Product {
 }
 
 model Variant {
-  id         String  @id @default(uuid())
-  product    Product @relation(fields: [productId], references: [id])
+  id         String   @id @default(uuid())
+  product    Product  @relation(fields: [productId], references: [id])
   productId  String
   color      String
-  sku        String  @unique
+  sku        String   @unique
   priceCents Int
   stock      Int
   images     String?
@@ -52,9 +52,9 @@ model Customer {
   city        String?
   email       String?
   totalOrders Int      @default(0)
-  totalSpent  Int      @default(0)  // in cents
-  tags        String?  // JSON: ["VIP", "Loyal", "New"]
-  notes       String?  // Admin notes about customer
+  totalSpent  Int      @default(0) // in cents
+  tags        String? // JSON: ["VIP", "Loyal", "New"]
+  notes       String? // Admin notes about customer
   isBlocked   Boolean  @default(false)
   orders      Order[]
   createdAt   DateTime @default(now())
@@ -66,12 +66,12 @@ model Order {
   customerId    String?
   customer      Customer? @relation(fields: [customerId], references: [id])
   userId        String?
-  items         String     // store [{ productId, variantId, qty, priceCents }]
+  items         String // store [{ productId, variantId, qty, priceCents }]
   subtotalCents Int
   taxCents      Int
   shippingCents Int
   totalCents    Int
-  status        String    @default("pending")  // pending, confirmed, shipped, delivered, cancelled, refunded
+  status        String    @default("pending") // pending, confirmed, shipped, delivered, cancelled, refunded
   paymentMethod String    @default("COD")
   paymentId     String?
   refundReason  String?
@@ -96,7 +96,7 @@ model User {
 
 model ArchiveCollection {
   id        String   @id @default(uuid())
-  images    String   // JSON array of image URLs
+  images    String // JSON array of image URLs
   title     String   @default("BORDERLINE")
   subtitle  String   @default("DROP 01")
   isActive  Boolean  @default(true)
@@ -108,8 +108,8 @@ model FashionCarousel {
   id        String   @id @default(uuid())
   url       String
   alt       String
-  size      String   // 'small', 'medium', 'large'
-  order     Int      // Display order
+  size      String // 'small', 'medium', 'large'
+  order     Int // Display order
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,14 +119,14 @@ model HeroSlide {
   id              String   @id @default(uuid())
   title           String
   subtitle        String?
-  mediaUrl        String   // URL to image or video
+  mediaUrl        String // URL to image or video
   mediaType       String   @default("image") // 'image' or 'video'
-  linkUrl         String?  // Optional link when user clicks the slide
+  linkUrl         String? // Optional link when user clicks the slide
   backgroundColor String   @default("#000000") // Hex color for left side background
   textColor       String   @default("#FFFFFF") // Text color for contrast
   accentColor     String   @default("#ff5b00") // Accent color for gradients
   duration        Int      @default(5000) // Duration in milliseconds (5000 = 5 seconds)
-  order           Int      // Display order
+  order           Int // Display order
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -135,10 +135,10 @@ model HeroSlide {
 model CollectionStack {
   id              String   @id @default(uuid())
   collectionName  String   @unique // ESSENCE, FRAGMENT, RECODE
-  title           String   // Display title
-  description     String?  // Optional description
-  images          String   // JSON array of image URLs for the stack
-  linkUrl         String?  // Link when clicking "See Collection"
+  title           String // Display title
+  description     String? // Optional description
+  images          String // JSON array of image URLs for the stack
+  linkUrl         String? // Link when clicking "See Collection"
   autoRotateDelay Int      @default(3000) // Auto-rotate delay in milliseconds (default 3 seconds)
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
@@ -152,7 +152,7 @@ model Newsletter {
   source         String?   @default("homepage") // Track where they signed up
   ipAddress      String?
   userAgent      String?
-  metadata       String?   // JSON for future integration data (Mailchimp ID, etc.)
+  metadata       String? // JSON for future integration data (Mailchimp ID, etc.)
   subscribedAt   DateTime  @default(now())
   unsubscribedAt DateTime?
   createdAt      DateTime  @default(now())
@@ -160,14 +160,28 @@ model Newsletter {
 }
 
 model TrackingSettings {
-  id                    String   @id @default(uuid())
-  googleAdsId           String?  // Google Ads Conversion ID (AW-XXXXXXXXX)
-  googleAdsLabel        String?  // Conversion Label
-  googleAnalyticsId     String?  // GA4 Measurement ID (G-XXXXXXXXX)
-  facebookPixelId       String?  // Meta Pixel ID
-  tiktokPixelId         String?  // TikTok Pixel ID
-  snapchatPixelId       String?  // Snapchat Pixel ID
-  isActive              Boolean  @default(true)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id                String   @id @default(uuid())
+  googleAdsId       String? // Google Ads Conversion ID (AW-XXXXXXXXX)
+  googleAdsLabel    String? // Conversion Label
+  googleAnalyticsId String? // GA4 Measurement ID (G-XXXXXXXXX)
+  facebookPixelId   String? // Meta Pixel ID
+  tiktokPixelId     String? // TikTok Pixel ID
+  snapchatPixelId   String? // Snapchat Pixel ID
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model AdminNotification {
+  id        String    @id @default(uuid())
+  type      String // 'new-order', 'low-stock', 'system'
+  title     String
+  message   String
+  data      String? // JSON data for the notification
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([isRead, createdAt])
 }

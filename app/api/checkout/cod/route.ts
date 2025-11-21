@@ -192,6 +192,29 @@ export async function POST(request: NextRequest) {
       
       if (lowStockItems.length > 0) {
         for (const item of lowStockItems) {
+          // Store low stock notification in database
+          try {
+            await prisma.adminNotification.create({
+              data: {
+                type: 'low-stock',
+                title: '⚠️ Low Stock Alert',
+                message: `${item.product.title} (${item.color}) - Only ${item.stock} left`,
+                data: JSON.stringify({
+                  id: item.id,
+                  productTitle: item.product.title,
+                  productSku: item.product.sku,
+                  variantColor: item.color,
+                  stock: item.stock
+                })
+              }
+            })
+          } catch (dbError) {
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Failed to store low stock notification:', dbError)
+            }
+          }
+
+          // Send real-time Pusher notification
           try {
             await pusherServer.trigger('admin-orders', 'low-stock', {
               id: item.id,
@@ -214,7 +237,41 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Broadcast new order to admin dashboard via Pusher
+    // Store notification in database (persists even if admin is offline)
+    const loyaltyBadge = dbCustomer.totalOrders >= 10 ? '👑' : 
+                        dbCustomer.totalOrders >= 5 ? '💎' : 
+                        dbCustomer.totalOrders >= 2 ? '⭐' : '🆕'
+    
+    try {
+      await prisma.adminNotification.create({
+        data: {
+          type: 'new-order',
+          title: `${loyaltyBadge} New Order from ${dbCustomer.name}`,
+          message: `${dbCustomer.phone} • ${dbCustomer.city || 'N/A'} • ${(order.totalCents / 100).toFixed(2)} MAD`,
+          data: JSON.stringify({
+            id: order.id,
+            totalCents: order.totalCents,
+            paymentMethod: 'COD',
+            customer: {
+              id: dbCustomer.id,
+              name: dbCustomer.name,
+              phone: dbCustomer.phone,
+              city: dbCustomer.city,
+              totalOrders: dbCustomer.totalOrders,
+              tags: dbCustomer.tags
+            },
+            createdAt: order.createdAt,
+            itemCount: items.length
+          })
+        }
+      })
+    } catch (dbError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to store notification in database:', dbError)
+      }
+    }
+
+    // Broadcast new order to admin dashboard via Pusher (for real-time updates)
     try {
       const pusherPayload = {
         id: order.id,
