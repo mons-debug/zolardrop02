@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CustomCursor from '@/components/CustomCursor'
 import FloatingActions from '@/components/FloatingActions'
+import TrackingScripts from '@/components/TrackingScripts'
 
 // Lazy load CartDrawer since it's only needed when cart is opened
 const CartDrawer = dynamic(() => import('@/components/CartDrawer'), {
@@ -45,6 +46,7 @@ export default function RootLayoutClient({
   // For regular pages, render with Navbar and Footer
   return (
     <CartProvider>
+      <TrackingScripts />
       <CustomCursor />
       <FloatingActions />
       <div className="min-h-screen flex flex-col bg-white">

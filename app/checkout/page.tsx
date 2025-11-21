@@ -68,9 +68,9 @@ export default function CheckoutPage() {
       const data = await response.json()
 
       if (response.ok && data.success) {
-        setOrderId(data.orderId)
-        setOrderSuccess(true)
         clearCart()
+        // Redirect to thank you page with order details
+        router.push(`/thank-you?orderId=${data.orderId}&total=${total}&items=${items.length}`)
       } else {
         alert(data.message || data.error || 'Order failed. Please try again.')
       }

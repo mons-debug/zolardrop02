@@ -158,3 +158,16 @@ model Newsletter {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 }
+
+model TrackingSettings {
+  id                    String   @id @default(uuid())
+  googleAdsId           String?  // Google Ads Conversion ID (AW-XXXXXXXXX)
+  googleAdsLabel        String?  // Conversion Label
+  googleAnalyticsId     String?  // GA4 Measurement ID (G-XXXXXXXXX)
+  facebookPixelId       String?  // Meta Pixel ID
+  tiktokPixelId         String?  // TikTok Pixel ID
+  snapchatPixelId       String?  // Snapchat Pixel ID
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
