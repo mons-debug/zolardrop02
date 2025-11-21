@@ -36,6 +36,7 @@ model Variant {
   product    Product  @relation(fields: [productId], references: [id])
   productId  String
   color      String
+  size       String?  // e.g., "S", "M", "L", "XL", "XXL", "One Size"
   sku        String   @unique
   priceCents Int
   stock      Int
@@ -250,4 +251,13 @@ model SocialMedia {
   updatedAt DateTime @updatedAt
 
   @@index([order, isActive])
+}
+
+model PageContent {
+  id        String   @id @default(uuid())
+  page      String   @unique // 'privacy', 'refund', 'terms'
+  title     String // Page title
+  content   String   @db.Text // HTML or plain text content
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
