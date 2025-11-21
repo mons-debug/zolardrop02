@@ -162,14 +162,14 @@ export default function ThankYouPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-gray-50">
       <section className="pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="bg-black text-white p-8 md:p-12 text-center"
+            className="bg-white shadow-2xl rounded-2xl p-8 md:p-12 text-center border border-gray-100"
           >
             {/* Success Icon */}
             <motion.div
@@ -177,19 +177,21 @@ export default function ThankYouPage() {
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
             >
-              <svg
-                className="w-20 h-20 mx-auto mb-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-14 h-14 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
             </motion.div>
 
             {/* Heading */}
@@ -197,27 +199,36 @@ export default function ThankYouPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-3xl md:text-4xl font-light tracking-tight mb-4"
+              className="text-3xl md:text-4xl font-bold tracking-tight mb-3 text-gray-900"
             >
-              Thank You for Your Order!
+              Order Confirmed!
             </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="text-lg text-gray-600 mb-8"
+            >
+              Thank you for your purchase
+            </motion.p>
 
             {/* Order Details */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="mb-8"
+              className="mb-8 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-6 border border-orange-200"
             >
-              <p className="text-gray-300 text-sm mb-2">
-                Order ID: <span className="font-mono text-white">{orderId?.slice(0, 8)}</span>
+              <p className="text-gray-700 text-sm mb-2 font-medium">
+                Order ID: <span className="font-mono text-orange-600 font-bold">{orderId?.slice(0, 8).toUpperCase()}</span>
               </p>
               {total && (
-                <p className="text-gray-300 text-sm mb-2">
-                  Total: <span className="text-white font-medium">{formatPrice(total)}</span>
+                <p className="text-2xl font-bold text-gray-900 mt-3">
+                  {formatPrice(total)}
                 </p>
               )}
-              <p className="text-gray-300 text-base mt-4">
+              <p className="text-gray-600 text-sm mt-4 leading-relaxed">
                 Your order has been successfully placed and is being processed.
               </p>
             </motion.div>
@@ -227,35 +238,35 @@ export default function ThankYouPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gray-900 p-6 mb-8 text-left"
+              className="bg-gray-50 rounded-xl p-6 mb-8 text-left border border-gray-200"
             >
-              <h2 className="text-xl font-semibold mb-4 text-center">What Happens Next?</h2>
-              <div className="space-y-3 text-sm text-gray-300">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+              <h2 className="text-xl font-bold mb-5 text-center text-gray-900">What Happens Next?</h2>
+              <div className="space-y-4 text-sm">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                     1
                   </div>
                   <div>
-                    <p className="font-medium text-white">Order Confirmation</p>
-                    <p>We'll send you a confirmation message shortly</p>
+                    <p className="font-semibold text-gray-900 mb-1">Order Confirmation</p>
+                    <p className="text-gray-600 leading-relaxed">We'll send you a confirmation message shortly</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                     2
                   </div>
                   <div>
-                    <p className="font-medium text-white">Processing</p>
-                    <p>Our team will prepare your order carefully</p>
+                    <p className="font-semibold text-gray-900 mb-1">Processing</p>
+                    <p className="text-gray-600 leading-relaxed">Our team will prepare your order carefully</p>
                   </div>
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
                     3
                   </div>
                   <div>
-                    <p className="font-medium text-white">Delivery</p>
-                    <p>We'll contact you to arrange delivery</p>
+                    <p className="font-semibold text-gray-900 mb-1">Delivery</p>
+                    <p className="text-gray-600 leading-relaxed">We'll contact you to arrange delivery</p>
                   </div>
                 </div>
               </div>
@@ -270,13 +281,13 @@ export default function ThankYouPage() {
             >
               <Link
                 href="/"
-                className="px-8 py-3 bg-white text-black text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors duration-300 font-medium"
+                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm uppercase tracking-widest hover:from-orange-600 hover:to-orange-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl rounded-lg"
               >
                 Back to Home
               </Link>
               <Link
                 href="/products"
-                className="px-8 py-3 border-2 border-white text-white text-sm uppercase tracking-widest hover:bg-white hover:text-black transition-colors duration-300 font-medium"
+                className="px-8 py-4 border-2 border-gray-900 text-gray-900 text-sm uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all duration-300 font-bold rounded-lg"
               >
                 Continue Shopping
               </Link>
@@ -288,9 +299,9 @@ export default function ThankYouPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="mt-8 text-center text-gray-600 text-sm"
+            className="mt-8 text-center text-gray-700 text-sm"
           >
-            <p>Need help? <Link href="/contact" className="text-black underline hover:text-gray-700">Contact us</Link></p>
+            <p>Need help? <Link href="/contact" className="text-orange-600 font-semibold underline hover:text-orange-700">Contact us</Link></p>
           </motion.div>
         </div>
       </section>
