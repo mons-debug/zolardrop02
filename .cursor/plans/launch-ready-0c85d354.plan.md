@@ -1,100 +1,166 @@
-<!-- 0c85d354-e32e-4090-8f44-5c859541d19e 806fd92d-2d31-4414-82e4-c6ef1f8d309c -->
-# Dashboard Notifications Fix & Pro Enhancement
+<!-- 0c85d354-e32e-4090-8f44-5c859541d19e 5cd6145d-cb25-4401-8373-305c5b781f86 -->
+# Admin Audit & Activity Tracking System
 
-## The Problem
+## What You'll Get
 
-When dashboard is closed and orders come in, notifications are lost. When user returns, they don't see what they missed.
+### 1. Order Activity Log
 
-## The Solution
+- **Who confirmed** each order (with timestamp)
+- **Who changed status** (pending → confirmed → shipped)
+- **Who added notes** to the order
+- **Who marked as delivered/refunded**
+- Full history timeline for each order
 
-### 1. Missed Notifications System
+### 2. Admin User Analytics (Super Admin Only)
 
-- Store "last seen" timestamp in localStorage
-- On dashboard open, fetch orders created since last visit
-- Show missed notifications with visual indicator (NEW badge)
-- Notification bell shows count of missed items
-- Play catch-up sound for missed orders
+- **Dashboard showing:**
+  - Each admin user's activity stats
+  - Orders they've handled
+  - Last login time
+  - Actions performed today/week/month
 
-### 2. Better Notification Management
+### 3. Customer CRM Enhancements
 
-- Persistent notification history (doesn't disappear)
-- Mark as read/unread functionality
-- Filter: All / Unread / Orders / Low Stock
-- Clear individual notifications
-- Timestamp showing "5 mins ago", "2 hours ago"
+- **Show who:**
+  - Marked customer as VIP
+  - Blocked/unblocked customer
+  - Added notes to customer
+  - Last contacted customer
 
-### 3. Professional Dashboard UI
+### 4. System Activity Feed
 
-- Stats cards with trend indicators (↑ ↓)
-- Quick action buttons (Filter by status, Export)
-- Better notification dropdown with sections
-- Loading states for better UX
-- Empty states with helpful messages
+- Real-time feed of all admin actions
+- Filter by: User, Action Type, Date
+- Export to CSV for auditing
 
-### 4. Sound & Visual Improvements
+## Database Changes
 
-- Different sound for missed vs live notifications
-- Badge animation when new items arrive
-- Smooth transitions for notification panel
-- Professional color scheme (orange accents)
+### New Table: `AdminAction`
 
-## Technical Approach - Multi-Device Support
+```
+- id: unique ID
+- userId: which admin did it
+- actionType: 'order-confirm', 'order-edit', 'customer-vip', etc.
+- targetType: 'order', 'customer', 'product'
+- targetId: ID of the affected item
+- details: JSON with before/after values
+- ipAddress: where action was performed
+- createdAt: when it happened
+```
 
-### Database Solution (Proper Way)
+### Update Existing Tables:
 
-1. **New Table: `AdminNotification`**
+- **Order**: Add fields
+  - `confirmedBy` (userId)
+  - `shippedBy` (userId)
+  - `lastEditedBy` (userId)
 
-- Tracks all notification events (orders, low stock)
-- Each notification has unique ID
-- Timestamp when created
+- **Customer**: Add fields
+  - `markedVipBy` (userId)
+  - `blockedBy` (userId)
 
-2. **New Table: `AdminNotificationRead`**
+## UI Additions
 
-- Tracks which notifications the admin has seen
-- Links notification ID to admin user
-- Timestamp when marked as read
+### 1. Order Details Page
 
-3. **On Dashboard Open (Any Device):**
+Show activity timeline:
 
-- Fetch all notifications
-- Check which ones user has already seen
-- Show unread count on bell icon
-- Display unread notifications prominently
+```
+┌─────────────────────────────────┐
+│ ORDER ACTIVITY                  │
+├─────────────────────────────────┤
+│ ✓ Delivered by Ahmed            │
+│   Today at 3:45 PM              │
+│                                 │
+│ 📦 Shipped by Sara              │
+│   Yesterday at 10:20 AM         │
+│                                 │
+│ ✓ Confirmed by Mohammed         │
+│   2 days ago at 9:15 AM         │
+│                                 │
+│ 📝 Created (COD Checkout)       │
+│   3 days ago at 2:30 PM         │
+└─────────────────────────────────┘
+```
 
-4. **Real-time Updates:**
+### 2. Super Admin Dashboard
 
-- Pusher delivers new notifications to ALL open tabs
-- Database stores them for devices that are closed
-- When user marks as read on one device → syncs to all devices
+New section: "Team Activity"
 
-5. **Benefits:**
+```
+┌──────────────────────────────────┐
+│ ADMIN USERS                      │
+├──────────────────────────────────┤
+│ Ahmed (You)                      │
+│ • 45 orders this week            │
+│ • Last active: Just now          │
+│                                  │
+│ Sara (Manager)                   │
+│ • 23 orders this week            │
+│ • Last active: 2 hours ago       │
+│                                  │
+│ Mohammed (Viewer)                │
+│ • 5 orders viewed this week      │
+│ • Last active: Yesterday         │
+└──────────────────────────────────┘
+```
 
-- Works across multiple devices/tabs
-- Notification history persists
-- Can track which admin saw which notification
-- Can add "unread" filter
+### 3. Activity Feed Page
 
-### Fallback: Hybrid Approach (Simpler)
+New page: `/admin/activity`
 
-If you want to avoid database changes:
+- Shows all actions across the system
+- Filter by user, date, action type
+- Search functionality
 
-- Use localStorage + timestamp
-- Each tab checks for orders since last localStorage update
-- Real-time works for open tabs
-- Closed tabs show missed orders on reopen
-- **Limitation:** Marking as "read" doesn't sync across devices
+## Technical Implementation
 
-## Files to Modify
+### Automatic Logging
 
-- `prisma/schema.prisma` - Add notification tables (if using database approach)
-- `pages/api/admin/notifications.ts` - New API for fetching/marking read
-- `components/admin/NotificationSystem.tsx` - Enhanced notification logic
-- `app/admin/page.tsx` - Dashboard integration
+Every time an admin:
 
-## Which Approach Do You Prefer?
+- Updates order status → Log it
+- Adds notes → Log it
+- Marks customer as VIP → Log it
+- Blocks customer → Log it
+- Changes product → Log it
 
-**Option A (Recommended):** Database tracking - proper multi-device support
-**Option B (Simpler):** localStorage - works but no cross-device sync
+### Who's Logged In?
+
+Track current admin user:
+
+- Store in session/JWT
+- Pass to all API calls
+- Log with every action
+
+### Permissions
+
+- **Super Admin**: See all activity, all users
+- **Admin/Manager**: See own activity only
+- **Viewer**: No access to activity logs
+
+## Files to Create/Modify
+
+### Database:
+
+- `prisma/schema.prisma` - Add AdminAction table
+
+### API:
+
+- `pages/api/admin/activity/index.ts` - Fetch activity logs
+- `pages/api/admin/users/stats.ts` - User analytics
+- `lib/audit-log.ts` - Helper to log actions
+
+### Pages:
+
+- `app/admin/activity/page.tsx` - Activity feed page
+- `app/admin/users/page.tsx` - Team management (super admin only)
+
+### Updates:
+
+- `pages/api/admin/orders/[id].ts` - Log when status changes
+- `pages/api/admin/customers/[id].ts` - Log customer actions
+- `components/admin/OrderTimeline.tsx` - Show activity on orders
 
 ### To-dos
 
