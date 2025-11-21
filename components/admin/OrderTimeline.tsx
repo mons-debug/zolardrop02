@@ -22,6 +22,10 @@ export default function OrderTimeline({ orderId }: { orderId: string }) {
 
   useEffect(() => {
     fetchTimeline()
+    
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchTimeline, 5000)
+    return () => clearInterval(interval)
   }, [orderId])
 
   const fetchTimeline = async () => {
