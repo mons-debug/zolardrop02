@@ -333,7 +333,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className="mb-6 lg:mb-8 mt-20 lg:mt-24"
+                className="mb-6 lg:mb-8 mt-8 lg:mt-12"
               >
                 {/* NEW RELEASE Badge */}
                 <motion.div
