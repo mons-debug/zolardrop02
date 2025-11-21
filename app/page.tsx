@@ -27,13 +27,24 @@ export default function Home() {
   const [essenceImages, setEssenceImages] = useState<string[]>([])
   const [fragmentImages, setFragmentImages] = useState<string[]>([])
   const [recodeImages, setRecodeImages] = useState<string[]>([])
+  const [essenceTitle, setEssenceTitle] = useState('ESSENCE')
+  const [fragmentTitle, setFragmentTitle] = useState('FRAGMENT')
+  const [recodeTitle, setRecodeTitle] = useState('RECODE')
+  const [essenceDescription, setEssenceDescription] = useState('Simple. Clean. Easy to wear.\nEveryday essentials built for your rhythm.')
+  const [fragmentDescription, setFragmentDescription] = useState('Bold without trying.\nShattered graphics for a confident, effortless look.')
+  const [recodeDescription, setRecodeDescription] = useState('Made for the new you.\nText-driven pieces that reflect your direction.')
+  const [essenceLinkUrl, setEssenceLinkUrl] = useState('/products?collection=essence')
+  const [fragmentLinkUrl, setFragmentLinkUrl] = useState('/products?collection=fragment')
+  const [recodeLinkUrl, setRecodeLinkUrl] = useState('/products?collection=recode')
   const [products, setProducts] = useState<any[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [collectionsLoading, setCollectionsLoading] = useState(true)
   const [essenceIndex, setEssenceIndex] = useState(0)
   const [fragmentIndex, setFragmentIndex] = useState(0)
+  const [recodeIndex, setRecodeIndex] = useState(0)
   const [essenceDelay, setEssenceDelay] = useState(3000)
   const [fragmentDelay, setFragmentDelay] = useState(3000)
+  const [recodeDelay, setRecodeDelay] = useState(3000)
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
@@ -61,13 +72,30 @@ export default function Home() {
           const fragment = stacks.find((s: any) => s.collectionName === 'FRAGMENT')
           const recode = stacks.find((s: any) => s.collectionName === 'RECODE')
           
+          // Set images
           setEssenceImages(essence?.images || [])
           setFragmentImages(fragment?.images || [])
           setRecodeImages(recode?.images || [])
           
+          // Set titles
+          setEssenceTitle(essence?.title || 'ESSENCE')
+          setFragmentTitle(fragment?.title || 'FRAGMENT')
+          setRecodeTitle(recode?.title || 'RECODE')
+          
+          // Set descriptions
+          setEssenceDescription(essence?.description || 'Simple. Clean. Easy to wear.\nEveryday essentials built for your rhythm.')
+          setFragmentDescription(fragment?.description || 'Bold without trying.\nShattered graphics for a confident, effortless look.')
+          setRecodeDescription(recode?.description || 'Made for the new you.\nText-driven pieces that reflect your direction.')
+          
+          // Set link URLs
+          setEssenceLinkUrl(essence?.linkUrl || '/products?collection=essence')
+          setFragmentLinkUrl(fragment?.linkUrl || '/products?collection=fragment')
+          setRecodeLinkUrl(recode?.linkUrl || '/products?collection=recode')
+          
           // Set auto-rotate delays
           setEssenceDelay(essence?.autoRotateDelay || 3000)
           setFragmentDelay(fragment?.autoRotateDelay || 3000)
+          setRecodeDelay(recode?.autoRotateDelay || 3000)
         }
       } catch (error) {
         // Silently handle error
@@ -168,6 +196,15 @@ export default function Home() {
     }, fragmentDelay)
     return () => clearInterval(timer)
   }, [fragmentImages.length, fragmentDelay])
+
+  // Auto-rotate RECODE collection
+  useEffect(() => {
+    if (recodeImages.length <= 1) return
+    const timer = setInterval(() => {
+      setRecodeIndex((prev) => (prev + 1) % recodeImages.length)
+    }, recodeDelay)
+    return () => clearInterval(timer)
+  }, [recodeImages.length, recodeDelay])
 
   // Color map for variant display
   const colorMap: Record<string, string> = {
@@ -488,36 +525,37 @@ export default function Home() {
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Interactive 4-Card Stack */}
                 <div className="relative order-2 md:order-1 px-8 md:px-0">
-                  <div className="relative aspect-[3/4] cursor-grab active:cursor-grabbing perspective-1000 max-w-md mx-auto">
+                  <div 
+                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
+                    onClick={() => setEssenceIndex((prev) => (prev + 1) % essenceImages.length)}
+                  >
                     <div className="relative w-full h-full">
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
                         const zIndex = 40 - offset * 10
-                        const transform = `translateX(${offset * 8}px) translateY(${offset * 8}px) rotate(${offset * 2}deg)`
-                        const opacity = 1 - offset * 0.2
+                        // Half-slide hint: show next card partially visible
+                        const translateX = offset === 0 ? 0 : offset === 1 ? 12 : offset * 8
+                        const translateY = offset * 8
+                        const rotate = offset * 2
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
+                        const scale = 1 - offset * 0.03
                         
                         return (
                           <motion.div
-                            key={`essence-${offset}`}
+                            key={`essence-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
                             style={{ zIndex }}
                             initial={false}
                             animate={{ 
-                              transform,
+                              x: translateX,
+                              y: translateY,
+                              rotate,
                               opacity,
-                              scale: 1 - offset * 0.02
+                              scale
                             }}
                             transition={{ 
-                              duration: 0.5,
-                              ease: "easeInOut"
-                            }}
-                            drag={offset === 0}
-                            dragConstraints={{ left: -100, right: 100, top: 0, bottom: 0 }}
-                            dragElastic={0.7}
-                            onDragEnd={(e, info) => {
-                              if (offset === 0 && Math.abs(info.offset.x) > 50) {
-                                setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
-                              }
+                              duration: 0.6,
+                              ease: [0.25, 0.1, 0.25, 1]
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -543,40 +581,6 @@ export default function Home() {
                         )
                       })}
                     </div>
-                    
-                    {/* Animated click indicator */}
-                    <motion.div 
-                      className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-full z-50 border border-white/20"
-                      animate={{ 
-                        scale: [1, 1.15, 1],
-                        boxShadow: [
-                          '0 0 0 0 rgba(255,255,255,0.4)',
-                          '0 0 0 8px rgba(255,255,255,0)',
-                          '0 0 0 0 rgba(255,255,255,0)'
-                        ]
-                      }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity, 
-                        repeatDelay: 0.5
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <motion.svg 
-                          className="w-5 h-5 text-white" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                          animate={{ 
-                            x: [0, 5, 0],
-                          }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                        </motion.svg>
-                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Drag</p>
-                      </div>
-                    </motion.div>
                   </div>
                 </div>
 
@@ -590,16 +594,15 @@ export default function Home() {
                       </div>
 
                   <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
-                    ESSENCE
+                    {essenceTitle}
                   </h3>
                   
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    Simple. Clean. Easy to wear.<br />
-                    Everyday essentials built for your rhythm.
+                  <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
+                    {essenceDescription}
                   </p>
                   
                   <Link
-                    href="/products?collection=essence"
+                    href={essenceLinkUrl}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
                   >
                     <span>See Collection</span>
@@ -636,16 +639,15 @@ export default function Home() {
                     </div>
                     
                   <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
-                    FRAGMENT
+                    {fragmentTitle}
                       </h3>
                   
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    Bold without trying.<br />
-                    Shattered graphics for a confident, effortless look.
+                  <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
+                    {fragmentDescription}
                   </p>
                   
                   <Link
-                    href="/products?collection=fragment"
+                    href={fragmentLinkUrl}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
                   >
                     <span>See Collection</span>
@@ -657,36 +659,37 @@ export default function Home() {
                             
                 {/* Right: Interactive 4-Card Stack */}
                 <div className="relative px-8 md:px-0">
-                  <div className="relative aspect-[3/4] cursor-grab active:cursor-grabbing perspective-1000 max-w-md mx-auto">
+                  <div 
+                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
+                    onClick={() => setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)}
+                  >
                     <div className="relative w-full h-full">
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
                         const zIndex = 40 - offset * 10
-                        const transform = `translateX(${-offset * 8}px) translateY(${offset * 8}px) rotate(${-offset * 2}deg)`
-                        const opacity = 1 - offset * 0.2
+                        // Half-slide hint: show next card partially visible (mirrored for FRAGMENT)
+                        const translateX = offset === 0 ? 0 : offset === 1 ? -12 : -offset * 8
+                        const translateY = offset * 8
+                        const rotate = -offset * 2
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
+                        const scale = 1 - offset * 0.03
                         
                         return (
                           <motion.div
-                            key={`fragment-${offset}`}
+                            key={`fragment-${imageIndex}-${offset}`}
                             className="card-stack absolute inset-0"
                             style={{ zIndex }}
                             initial={false}
                             animate={{ 
-                              transform,
+                              x: translateX,
+                              y: translateY,
+                              rotate,
                               opacity,
-                              scale: 1 - offset * 0.02
+                              scale
                             }}
                             transition={{ 
-                              duration: 0.5,
-                              ease: "easeInOut"
-                            }}
-                            drag={offset === 0}
-                            dragConstraints={{ left: -100, right: 100, top: 0, bottom: 0 }}
-                            dragElastic={0.7}
-                            onDragEnd={(e, info) => {
-                              if (offset === 0 && Math.abs(info.offset.x) > 50) {
-                                setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
-                              }
+                              duration: 0.6,
+                              ease: [0.25, 0.1, 0.25, 1]
                             }}
                           >
                             <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
@@ -712,47 +715,13 @@ export default function Home() {
                         )
                       })}
                     </div>
-                    
-                    {/* Animated click indicator */}
-                    <motion.div 
-                      className="absolute bottom-4 right-4 bg-black/80 backdrop-blur-sm px-4 py-2.5 rounded-full z-50 border border-white/20"
-                      animate={{ 
-                        scale: [1, 1.15, 1],
-                        boxShadow: [
-                          '0 0 0 0 rgba(255,255,255,0.4)',
-                          '0 0 0 8px rgba(255,255,255,0)',
-                          '0 0 0 0 rgba(255,255,255,0)'
-                        ]
-                      }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity, 
-                        repeatDelay: 0.5
-                      }}
-                    >
-                      <div className="flex items-center gap-2">
-                        <motion.svg 
-                          className="w-5 h-5 text-white" 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                          animate={{ 
-                            x: [0, 5, 0],
-                          }}
-                          transition={{ duration: 1.5, repeat: Infinity }}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                        </motion.svg>
-                        <p className="text-white text-xs font-semibold uppercase tracking-wider">Drag</p>
-                      </div>
-                    </motion.div>
                   </div>
                 </div>
               </div>
             </motion.div>
           </div>
                     
-          {/* RECODE COLLECTION - LOCKED WITH CARD STACK */}
+          {/* RECODE COLLECTION - INTERACTIVE CARD STACK */}
                     <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -767,135 +736,137 @@ export default function Home() {
             <ShatteredBackground variant="recode" intensity="low" />
             
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
-              {/* Left: Locked 4-Card Stack */}
+              {/* Left: Interactive 4-Card Stack */}
               <div className="relative px-8 md:px-0 order-2 md:order-1">
-                <div className="relative aspect-[3/4] max-w-md mx-auto cursor-not-allowed">
-                  <div className="relative w-full h-full">
-                    {/* Card 1 - Front (Locked/Blurred) */}
-                    <div className="absolute inset-0 z-40">
-                      <div className="relative w-full h-full overflow-hidden bg-gray-200 rounded-sm shadow-2xl">
-                        {recodeImages[0] && (
-                          <Image
-                            src={recodeImages[0]}
-                            alt="Recode Locked 1"
-                            loading="lazy"
-                            fill
-                            className="object-cover blur-md grayscale opacity-40"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            unoptimized
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/50" />
+                {recodeImages.length > 0 ? (
+                  <div 
+                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
+                    onClick={() => setRecodeIndex((prev) => (prev + 1) % recodeImages.length)}
+                  >
+                    <div className="relative w-full h-full">
+                      {[0, 1, 2, 3].map((offset) => {
+                        const imageIndex = (recodeIndex + offset) % recodeImages.length
+                        const zIndex = 40 - offset * 10
+                        // Half-slide hint: show next card partially visible
+                        const translateX = offset === 0 ? 0 : offset === 1 ? 12 : offset * 8
+                        const translateY = offset * 8
+                        const rotate = offset * 2
+                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.25
+                        const scale = 1 - offset * 0.03
                         
-                        {/* Lock Icon Overlay */}
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        return (
                           <motion.div
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                            className="w-20 h-20 rounded-full bg-gray-900/80 backdrop-blur-sm border-2 border-gray-600 flex items-center justify-center"
+                            key={`recode-${imageIndex}-${offset}`}
+                            className="card-stack absolute inset-0"
+                            style={{ zIndex }}
+                            initial={false}
+                            animate={{ 
+                              x: translateX,
+                              y: translateY,
+                              rotate,
+                              opacity,
+                              scale
+                            }}
+                            transition={{ 
+                              duration: 0.6,
+                              ease: [0.25, 0.1, 0.25, 1]
+                            }}
                           >
-                            <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
+                            <div className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm shadow-2xl">
+                              {recodeImages[imageIndex] && (
+                                <Image
+                                  src={recodeImages[imageIndex]}
+                                  alt={`Recode ${imageIndex + 1}`}
+                                  loading="lazy"
+                                  fill
+                                  className="object-cover"
+                                  sizes="(max-width: 768px) 100vw, 50vw"
+                                  unoptimized
+                                />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                                  {imageIndex + 1} / {recodeImages.length}
+                                </div>
+                              )}
+                            </div>
                           </motion.div>
-                                      </div>
-                        
-                        <div className="absolute bottom-4 left-4 text-white/60 text-sm font-medium">Locked</div>
-                                    </div>
-                                  </div>
-                    
-                    {/* Card 2 */}
-                    <div className="absolute inset-0 z-30" style={{ transform: 'translateX(8px) translateY(8px) rotate(2deg)' }}>
-                      <div className="relative w-full h-full overflow-hidden bg-gray-300 rounded-sm shadow-xl opacity-60">
-                        {recodeImages[1] && (
-                          <Image
-                            src={recodeImages[1]}
-                            alt="Recode Locked 2"
-                            loading="lazy"
-                            fill
-                            className="object-cover blur-sm grayscale opacity-50"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                                    unoptimized
-                          />
-                                )}
-                        <div className="absolute inset-0 bg-black/40" />
-                          </div>
-                        </div>
-                        
-                    {/* Card 3 */}
-                    <div className="absolute inset-0 z-20" style={{ transform: 'translateX(16px) translateY(16px) rotate(4deg)' }}>
-                      <div className="relative w-full h-full overflow-hidden bg-gray-400 rounded-sm shadow-lg opacity-40">
-                        {recodeImages[2] && (
-                          <Image
-                            src={recodeImages[2]}
-                            alt="Recode Locked 3"
-                            fill
-                            className="object-cover blur-sm grayscale opacity-30"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            unoptimized
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/50" />
-                      </div>
+                        )
+                      })}
                     </div>
-                    
-                    {/* Card 4 - Back */}
-                    <div className="absolute inset-0 z-10" style={{ transform: 'translateX(24px) translateY(24px) rotate(6deg)' }}>
-                      <div className="relative w-full h-full overflow-hidden bg-gray-500 rounded-sm shadow-md opacity-30">
-                        {recodeImages[3] && (
-                          <Image
-                            src={recodeImages[3]}
-                            alt="Recode Locked 4"
-                            fill
-                            className="object-cover blur-sm grayscale opacity-20"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            unoptimized
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-black/60" />
+                  </div>
+                ) : (
+                  <div className="relative aspect-[3/4] max-w-md mx-auto cursor-not-allowed">
+                    <div className="relative w-full h-full bg-gray-200 rounded-sm shadow-2xl flex items-center justify-center">
+                      <div className="text-center">
+                        <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <p className="text-gray-500 text-sm">Coming Soon</p>
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Locked indicator */}
-                  <div className="absolute bottom-4 right-4 bg-gray-800/70 backdrop-blur-sm px-3 py-2 rounded-full z-50">
-                    <p className="text-white text-xs uppercase tracking-wider flex items-center gap-2">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      Locked
-                    </p>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Right: Content */}
               <div className="space-y-4 order-1 md:order-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700 rounded-full">
-                  <svg className="w-3 h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span className="text-xs font-bold uppercase tracking-wider text-gray-300">Locked</span>
-                </div>
-                
-                <h3 className="text-4xl md:text-5xl font-light text-gray-400 tracking-tight leading-none">
-                  RECODE
-                          </h3>
-                
-                <p className="text-base text-gray-500 leading-relaxed">
-                  Made for the new you.<br />
-                  Text-driven pieces that reflect your direction.
-                </p>
-                
-                <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 font-medium uppercase tracking-wider text-xs cursor-not-allowed border border-gray-300">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <span>Coming Soon</span>
-                          </div>
-                        </div>
-                  </div>
-                    </motion.div>
+                {recodeImages.length > 0 ? (
+                  <>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
+                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
+                    </div>
+                    
+                    <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
+                      {recodeTitle}
+                    </h3>
+                    
+                    <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
+                      {recodeDescription}
+                    </p>
+                    
+                    <Link
+                      href={recodeLinkUrl}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
+                    >
+                      <span>See Collection</span>
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700 rounded-full">
+                      <svg className="w-3 h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span className="text-xs font-bold uppercase tracking-wider text-gray-300">Coming Soon</span>
+                    </div>
+                    
+                    <h3 className="text-4xl md:text-5xl font-light text-gray-400 tracking-tight leading-none">
+                      {recodeTitle}
+                    </h3>
+                    
+                    <p className="text-base text-gray-500 leading-relaxed whitespace-pre-line">
+                      {recodeDescription}
+                    </p>
+                    
+                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 font-medium uppercase tracking-wider text-xs cursor-not-allowed border border-gray-300">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                      <span>Coming Soon</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </motion.div>
 
                 </div>
       </section>

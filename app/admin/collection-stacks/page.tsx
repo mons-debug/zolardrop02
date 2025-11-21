@@ -300,7 +300,7 @@ export default function CollectionStacksManagementPage() {
 
                   {/* Content */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{collection.title}</h3>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{stack?.title || collection.title}</h3>
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                       {stack?.description || collection.defaultDescription}
                     </p>
