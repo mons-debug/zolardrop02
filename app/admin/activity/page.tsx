@@ -19,20 +19,33 @@ interface AdminAction {
   }
 }
 
+interface User {
+  id: string
+  name: string | null
+  email: string
+  role: string
+}
+
 export default function ActivityFeedPage() {
   const [actions, setActions] = useState<AdminAction[]>([])
+  const [users, setUsers] = useState<User[]>([])
   const [filter, setFilter] = useState<string>('all')
+  const [userFilter, setUserFilter] = useState<string>('all')
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [newActionsCount, setNewActionsCount] = useState(0)
 
   useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  useEffect(() => {
     fetchActions()
     // Auto-refresh every 5 seconds for real-time feel
     const interval = setInterval(fetchActions, 5000)
     return () => clearInterval(interval)
-  }, [filter])
+  }, [filter, userFilter])
 
   // Also refresh when window regains focus
   useEffect(() => {
@@ -41,7 +54,19 @@ export default function ActivityFeedPage() {
     }
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [filter])
+  }, [filter, userFilter])
+
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('/api/admin/users')
+      if (res.ok) {
+        const data = await res.json()
+        setUsers(data.users || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch users:', error)
+    }
+  }
 
   // Update the "last refresh" display every second
   useEffect(() => {
@@ -58,6 +83,7 @@ export default function ActivityFeedPage() {
     try {
       const params = new URLSearchParams()
       if (filter !== 'all') params.append('entityType', filter)
+      if (userFilter !== 'all') params.append('userId', userFilter)
       
       const res = await fetch(`/api/admin/activity?${params}`)
       if (res.ok) {
@@ -239,29 +265,62 @@ export default function ActivityFeedPage() {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex gap-2 flex-wrap">
-        {[
-          { value: 'all', label: 'All' },
-          { value: 'order', label: 'Orders' },
-          { value: 'customer', label: 'Customers' },
-          { value: 'product', label: 'Products' },
-          { value: 'hero', label: 'Hero Slides' },
-          { value: 'collection', label: 'Collections' },
-          { value: 'settings', label: 'Settings' },
-          { value: 'newsletter', label: 'Newsletter' }
-        ].map((filterOption) => (
-          <button
-            key={filterOption.value}
-            onClick={() => setFilter(filterOption.value)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              filter === filterOption.value
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {filterOption.label}
-          </button>
-        ))}
+      <div className="mb-6 space-y-4">
+        {/* Entity Type Filters */}
+        <div>
+          <label className="text-sm font-semibold text-gray-700 mb-2 block">Filter by Type</label>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { value: 'all', label: 'All' },
+              { value: 'order', label: 'Orders' },
+              { value: 'customer', label: 'Customers' },
+              { value: 'product', label: 'Products' },
+              { value: 'hero', label: 'Hero Slides' },
+              { value: 'collection', label: 'Collections' },
+              { value: 'settings', label: 'Settings' },
+              { value: 'newsletter', label: 'Newsletter' }
+            ].map((filterOption) => (
+              <button
+                key={filterOption.value}
+                onClick={() => setFilter(filterOption.value)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                  filter === filterOption.value
+                    ? 'bg-orange-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {filterOption.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* User Filter */}
+        <div>
+          <label className="text-sm font-semibold text-gray-700 mb-2 block">Filter by User</label>
+          <div className="flex gap-2 items-center">
+            <select
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg font-medium text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white"
+            >
+              <option value="all">All Users</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name || user.email} ({user.role})
+                </option>
+              ))}
+            </select>
+            {userFilter !== 'all' && (
+              <button
+                onClick={() => setUserFilter('all')}
+                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-900 font-medium"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* New Actions Badge */}

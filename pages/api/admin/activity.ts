@@ -17,13 +17,21 @@ export default async function handler(
   }
 
   try {
-    const { entityType, limit = '20' } = req.query
+    const { entityType, userId, limit = '20' } = req.query
     const actions = await getRecentActions(parseInt(limit as string))
 
+    // Apply filters
+    let filteredActions = actions
+
     // Filter by entity type if provided
-    const filteredActions = entityType && entityType !== 'all'
-      ? actions.filter(a => a.entityType === entityType)
-      : actions
+    if (entityType && entityType !== 'all') {
+      filteredActions = filteredActions.filter(a => a.entityType === entityType)
+    }
+
+    // Filter by user if provided
+    if (userId && userId !== 'all') {
+      filteredActions = filteredActions.filter(a => a.userId === userId)
+    }
 
     res.status(200).json({ actions: filteredActions })
   } catch (error) {
