@@ -353,7 +353,7 @@ export default function Home() {
 
             {/* Spotlight Effect */}
             <Spotlight
-              className="-top-40 left-0 md:left-20 md:-top-20"
+              className="-top-20 left-0 md:left-10 md:-top-32"
               fill="white"
             />
 
