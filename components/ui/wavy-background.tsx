@@ -52,13 +52,13 @@ export const WavyBackground = ({
     ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Get parent dimensions and add significant extra width for seamless effect
+    // Get parent dimensions and make canvas MUCH wider for truly seamless effect
     const parent = canvas.parentElement;
     const parentWidth = parent?.offsetWidth || window.innerWidth;
     const parentHeight = parent?.offsetHeight || window.innerHeight;
     
-    // Make canvas 200% wider to ensure waves extend far beyond visible edges
-    w = ctx.canvas.width = parentWidth * 2;
+    // Make canvas 400% wider to ensure waves extend far beyond any visible edges
+    w = ctx.canvas.width = parentWidth * 4;
     h = ctx.canvas.height = parentHeight;
     ctx.filter = `blur(${blur}px)`;
     nt = 0;
@@ -69,7 +69,7 @@ export const WavyBackground = ({
       const parentWidth = parent?.offsetWidth || window.innerWidth;
       const parentHeight = parent?.offsetHeight || window.innerHeight;
       
-      w = ctx.canvas.width = parentWidth * 2;
+      w = ctx.canvas.width = parentWidth * 4;
       h = ctx.canvas.height = parentHeight;
       ctx.filter = `blur(${blur}px)`;
     };
@@ -90,9 +90,9 @@ export const WavyBackground = ({
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
       
-      // Draw waves beyond canvas boundaries for seamless effect
-      // Start at -25% and end at 125% of canvas width
-      for (x = -w * 0.25; x < w * 1.25; x += 5) {
+      // Draw waves WAY beyond canvas boundaries for truly seamless effect
+      // Start at -50% and end at 150% of canvas width to cover all possible visible areas
+      for (x = -w * 0.5; x < w * 1.5; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
         ctx.lineTo(x, y + h * 0.5);
       }
@@ -139,9 +139,9 @@ export const WavyBackground = ({
         ref={canvasRef}
         id="canvas"
         style={{
-          left: '-50%',
+          left: '-150%',
           top: '0',
-          width: '200%',
+          width: '400%',
           height: '100%',
           transform: 'translateZ(0)',
           willChange: 'transform',
