@@ -18,6 +18,12 @@ const ShatteredBackground = dynamic(() => import('@/components/ShatteredBackgrou
   loading: () => null
 })
 
+// Lazy load WavyBackground for essence collection
+const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').then(mod => ({ default: mod.WavyBackground })), {
+  ssr: false,
+  loading: () => null
+})
+
 export default function Home() {
   const [email, setEmail] = useState('')
   const [subscribed, setSubscribed] = useState(false)
@@ -506,10 +512,23 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative"
+              className="relative overflow-hidden rounded-lg md:rounded-2xl"
             >
-              {/* Background Panel */}
-              <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
+              {/* Wavy Background */}
+              <div className="absolute inset-0 -z-10">
+                <WavyBackground
+                  containerClassName="absolute inset-0"
+                  className="absolute inset-0"
+                  colors={["#000000", "#ff5b00", "#1a1a1a", "#ff7b2e", "#2a2a2a"]}
+                  waveWidth={60}
+                  backgroundFill="white"
+                  blur={15}
+                  speed="slow"
+                  waveOpacity={0.15}
+                >
+                  <div />
+                </WavyBackground>
+              </div>
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
                 {/* Left: Interactive 4-Card Stack */}
