@@ -99,7 +99,7 @@ export const Cover = ({
         />
       ))}
       <motion.span
-        key={String(hovered)}
+        initial={{ scale: 1, x: 0, y: 0 }}
         animate={{
           scale: hovered ? 0.8 : 1,
           x: hovered ? [0, -30, 30, -30, 30, 0] : 0,
