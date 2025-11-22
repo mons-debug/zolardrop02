@@ -58,27 +58,14 @@ export const Cover = ({
     }
   };
 
-  const handleMouseDown = () => {
-    if (!isTouchDevice) {
-      setHovered(true);
-    }
-  };
-
-  const handleMouseUp = () => {
-    if (!isTouchDevice) {
-      setHovered(false);
-    }
-  };
-
   return (
     <div
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      onMouseEnter={() => !isTouchDevice && setHovered(true)}
       onMouseLeave={() => !isTouchDevice && setHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       ref={ref}
-      className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm cursor-pointer"
+      className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm"
     >
       <AnimatePresence>
         {hovered && (
