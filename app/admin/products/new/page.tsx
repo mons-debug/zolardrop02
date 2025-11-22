@@ -38,7 +38,6 @@ export default function NewProductPage() {
   const [variants, setVariants] = useState<Variant[]>([])
   const [showVariantForm, setShowVariantForm] = useState(false)
   const [variantColor, setVariantColor] = useState('')
-  const [variantSize, setVariantSize] = useState('')
   const [variantSku, setVariantSku] = useState('')
   const [variantPrice, setVariantPrice] = useState('')
   const [variantStock, setVariantStock] = useState('')
@@ -63,7 +62,6 @@ export default function NewProductPage() {
 
     const newVariant: Variant = {
       color: variantColor,
-      size: variantSize || undefined,
       sku: variantSku,
       priceCents: Math.round(parseFloat(variantPrice) * 100),
       stock: parseInt(variantStock),
@@ -77,7 +75,6 @@ export default function NewProductPage() {
     
     // Reset variant form
     setVariantColor('')
-    setVariantSize('')
     setVariantSku('')
     setVariantPrice('')
     setVariantStock('')
@@ -301,7 +298,7 @@ export default function NewProductPage() {
 
               {showVariantForm && (
                 <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg space-y-5 mb-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Color Name *
@@ -313,27 +310,6 @@ export default function NewProductPage() {
                         placeholder="e.g., Black, Navy"
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Size
-                      </label>
-                      <select
-                        value={variantSize}
-                        onChange={(e) => setVariantSize(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                      >
-                        <option value="">Select size...</option>
-                        <option value="One Size">One Size</option>
-                        <option value="XS">XS</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                        <option value="XXXL">XXXL</option>
-                      </select>
                     </div>
 
                     <div>
