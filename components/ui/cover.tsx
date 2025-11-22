@@ -45,10 +45,25 @@ export const Cover = ({
     }
   }, [ref.current]);
 
+  const handleTouchStart = () => {
+    if (isTouchDevice) {
+      setHovered(true);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (isTouchDevice) {
+      // Keep effect for a brief moment then turn off
+      setTimeout(() => setHovered(false), 300);
+    }
+  };
+
   return (
     <div
       onMouseEnter={() => !isTouchDevice && setHovered(true)}
       onMouseLeave={() => !isTouchDevice && setHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       ref={ref}
       className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm"
     >
