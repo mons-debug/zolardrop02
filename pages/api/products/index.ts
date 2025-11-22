@@ -28,6 +28,7 @@ export default async function handler(
       return res.status(400).json({ message: 'Invalid limit (1-100)' })
     }
 
+    // Fetch regular products
     const products = await prisma.product.findMany({
       where: {
         status: 'published'
@@ -42,14 +43,46 @@ export default async function handler(
       }
     })
 
-    const total = await prisma.product.count({
+    // Fetch standalone variants that should appear as separate products
+    const standaloneVariants = await prisma.variant.findMany({
       where: {
-        status: 'published'
+        showAsProduct: true,
+        product: {
+          status: 'published'
+        }
+      },
+      include: {
+        product: true
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     })
 
+    // Transform standalone variants to look like products
+    const variantProducts = standaloneVariants.map((variant: any) => ({
+      id: variant.id,
+      sku: variant.sku,
+      title: `${variant.product.title} - ${variant.color}`,
+      description: variant.description || variant.product.description,
+      images: variant.images,
+      priceCents: variant.priceCents,
+      stock: variant.stock,
+      sizeInventory: variant.sizeInventory,
+      category: variant.product.category,
+      variants: [variant],
+      _isVariantProduct: true,
+      _parentProductSku: variant.product.sku,
+      _variantId: variant.id,
+      createdAt: variant.createdAt
+    }))
+
+    // Combine regular products and variant products
+    const allProducts = [...products, ...variantProducts]
+    const total = products.length + variantProducts.length
+
     res.status(200).json({
-      products,
+      products: allProducts,
       pagination: {
         page: pageNum,
         limit: limitNum,

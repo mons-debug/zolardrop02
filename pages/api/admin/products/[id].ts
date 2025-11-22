@@ -145,6 +145,9 @@ export default async function handler(
           priceCents: variant.priceCents,
           stock: variant.stock,
           images: variant.images ? JSON.stringify(variant.images) : undefined,
+          sizeInventory: variant.sizeInventory || null,
+          description: variant.description || null,
+          showAsProduct: variant.showAsProduct || false,
           metadata: variant.metadata ? JSON.stringify(variant.metadata) : null
         }))
       }

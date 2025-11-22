@@ -33,18 +33,21 @@ model Product {
 }
 
 model Variant {
-  id         String   @id @default(uuid())
-  product    Product  @relation(fields: [productId], references: [id])
-  productId  String
-  color      String
-  size       String?  // e.g., "S", "M", "L", "XL", "XXL", "One Size"
-  sku        String   @unique
-  priceCents Int
-  stock      Int
-  images     String?
-  metadata   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default(uuid())
+  product       Product  @relation(fields: [productId], references: [id])
+  productId     String
+  color         String
+  size          String?  // e.g., "S", "M", "L", "XL", "XXL", "One Size"
+  sku           String   @unique
+  priceCents    Int
+  stock         Int
+  images        String?
+  sizeInventory String?  // Store sizes and quantities like "M=25, L=15, S=10"
+  description   String?  // Variant-specific description
+  showAsProduct Boolean  @default(false) // Display as separate product in shop
+  metadata      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Customer {

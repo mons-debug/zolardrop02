@@ -58,6 +58,11 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false)
   const { addItem } = useCart()
 
+  // Check if this is a variant product
+  const isVariantProduct = (product as any)._isVariantProduct || false
+  const parentSku = (product as any)._parentProductSku || product.sku
+  const variantId = (product as any)._variantId
+
   // Safely parse images with error handling
   const parseImages = (imageString: string): string[] => {
     try {
@@ -110,7 +115,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group h-full flex flex-col">
-      <Link href={`/product/${product.sku}`} className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col" style={{ willChange: 'transform' }}>
+      <Link 
+        href={isVariantProduct ? `/product/${parentSku}?variant=${variantId}` : `/product/${product.sku}`} 
+        className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col" 
+        style={{ willChange: 'transform' }}
+      >
         {/* Image Section */}
         <div className="relative aspect-[3/4] overflow-hidden bg-gray-50">
           {allImages.length > 0 && !imageError ? (

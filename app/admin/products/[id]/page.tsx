@@ -15,6 +15,9 @@ interface Variant {
   priceCents: number
   stock: number
   images: string[]
+  sizeInventory?: string
+  description?: string
+  showAsProduct?: boolean
 }
 
 interface Product {
@@ -57,6 +60,9 @@ export default function EditProductPage() {
   const [variantPrice, setVariantPrice] = useState('')
   const [variantStock, setVariantStock] = useState('')
   const [variantImages, setVariantImages] = useState<string[]>([])
+  const [variantSizeInventory, setVariantSizeInventory] = useState('')
+  const [variantDescription, setVariantDescription] = useState('')
+  const [variantShowAsProduct, setVariantShowAsProduct] = useState(false)
 
   useEffect(() => {
     if (productId) {
@@ -96,7 +102,10 @@ export default function EditProductPage() {
           sku: v.sku,
           priceCents: v.priceCents,
           stock: v.stock,
-          images: v.images ? JSON.parse(v.images) : []
+          images: v.images ? JSON.parse(v.images) : [],
+          sizeInventory: v.sizeInventory || undefined,
+          description: v.description || undefined,
+          showAsProduct: v.showAsProduct || false
         }))
         setVariants(parsedVariants)
       } else {
@@ -130,7 +139,10 @@ export default function EditProductPage() {
       sku: variantSku,
       priceCents: Math.round(parseFloat(variantPrice) * 100),
       stock: parseInt(variantStock),
-      images: variantImages
+      images: variantImages,
+      sizeInventory: variantSizeInventory || undefined,
+      description: variantDescription || undefined,
+      showAsProduct: variantShowAsProduct
     }
 
     setVariants([...variants, newVariant])
@@ -142,6 +154,9 @@ export default function EditProductPage() {
     setVariantPrice('')
     setVariantStock('')
     setVariantImages([])
+    setVariantSizeInventory('')
+    setVariantDescription('')
+    setVariantShowAsProduct(false)
     setShowVariantForm(false)
   }
 
@@ -504,6 +519,51 @@ export default function EditProductPage() {
                       onUpload={handleVariantImageUpload}
                       label=""
                     />
+                  </div>
+
+                  {/* Size Inventory */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Size Inventory (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={variantSizeInventory}
+                      onChange={(e) => setVariantSizeInventory(e.target.value)}
+                      placeholder="e.g. M=25, L=15, S=10, XL=5"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">
+                      Enter sizes and quantities for this variant
+                    </p>
+                  </div>
+
+                  {/* Variant Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Variant Description (Optional)
+                    </label>
+                    <textarea
+                      value={variantDescription}
+                      onChange={(e) => setVariantDescription(e.target.value)}
+                      placeholder="Unique description for this variant"
+                      rows={3}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
+
+                  {/* Show as Product Checkbox */}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="showAsProductEdit"
+                      checked={variantShowAsProduct}
+                      onChange={(e) => setVariantShowAsProduct(e.target.checked)}
+                      className="h-4 w-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500"
+                    />
+                    <label htmlFor="showAsProductEdit" className="text-sm font-medium text-gray-700">
+                      Show as separate product in shop
+                    </label>
                   </div>
 
                   <button

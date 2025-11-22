@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/CartContext'
@@ -27,6 +27,9 @@ interface Product {
     priceCents: number
     stock: number
     images: string
+    sizeInventory?: string | null
+    description?: string | null
+    showAsProduct?: boolean
   }>
 }
 
@@ -53,7 +56,9 @@ const colorMap: Record<string, string> = {
 
 export default function ProductPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const slug = params?.slug as string
+  const preSelectedVariantId = searchParams.get('variant')
   const { addItem } = useCart()
 
   const [product, setProduct] = useState<Product | null>(null)
@@ -102,6 +107,20 @@ export default function ProductPage() {
         })
     }
   }, [slug])
+
+  // Pre-select variant from URL parameter
+  useEffect(() => {
+    if (preSelectedVariantId && product?.variants) {
+      const variant = product.variants.find(v => v.id === preSelectedVariantId)
+      if (variant) {
+        setSelectedVariant(variant)
+        if (variant.size) {
+          setSelectedSize(variant.size)
+        }
+        setCurrentImageIndex(0)
+      }
+    }
+  }, [preSelectedVariantId, product])
 
   if (loading) {
     return (
@@ -153,6 +172,14 @@ export default function ProductPage() {
   }
 
   const sizeInventory = parseSizeInventory(product.sizeInventory)
+  
+  // Get variant sizeInventory if selected variant has it
+  const variantSizeInventory = selectedVariant?.sizeInventory 
+    ? parseSizeInventory(selectedVariant.sizeInventory) 
+    : []
+  
+  // Prioritize variant size inventory over product size inventory
+  const displaySizeInventory = variantSizeInventory.length > 0 ? variantSizeInventory : sizeInventory
 
   // Get available sizes from variants
   const getAvailableSizes = (): string[] => {
@@ -374,12 +401,12 @@ export default function ProductPage() {
               </p>
             </div>
 
-            {/* Product-Level Size Selection (from sizeInventory) */}
-            {sizeInventory.length > 0 && (
+            {/* Product-Level Size Selection (from sizeInventory or variant sizeInventory) */}
+            {displaySizeInventory.length > 0 && (
               <div>
                 <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
                 <div className="flex flex-wrap gap-3">
-                  {sizeInventory.map(({ size, quantity }) => (
+                  {displaySizeInventory.map(({ size, quantity }) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
@@ -401,7 +428,7 @@ export default function ProductPage() {
             )}
 
             {/* Size Selection (from variants) - fallback if no sizeInventory */}
-            {sizeInventory.length === 0 && getAvailableSizes().length > 0 && (
+            {displaySizeInventory.length === 0 && getAvailableSizes().length > 0 && (
               <div>
                 <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
                 <div className="flex flex-wrap gap-3">
