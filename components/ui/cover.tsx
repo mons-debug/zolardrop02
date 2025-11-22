@@ -53,8 +53,8 @@ export const Cover = ({
 
   const handleTouchEnd = () => {
     if (isTouchDevice) {
-      // Keep effect for a brief moment then turn off
-      setTimeout(() => setHovered(false), 600);
+      // Immediately turn off when finger is lifted
+      setHovered(false);
     }
   };
 
