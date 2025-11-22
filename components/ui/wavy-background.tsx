@@ -52,12 +52,11 @@ export const WavyBackground = ({
     ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Get parent dimensions and make canvas MUCH wider for truly seamless effect
     const parent = canvas.parentElement;
     const parentWidth = parent?.offsetWidth || window.innerWidth;
     const parentHeight = parent?.offsetHeight || window.innerHeight;
     
-    // Make canvas 400% wider to ensure waves extend far beyond any visible edges
+    // Make canvas 4x wider to ensure waves extend far beyond edges
     w = ctx.canvas.width = parentWidth * 4;
     h = ctx.canvas.height = parentHeight;
     ctx.filter = `blur(${blur}px)`;
@@ -89,12 +88,11 @@ export const WavyBackground = ({
       ctx.beginPath();
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
-      
       // Draw waves WAY beyond canvas boundaries for truly seamless effect
-      // Start at -50% and end at 150% of canvas width to cover all possible visible areas
+      // Start at -50% and end at 150% of canvas width
       for (x = -w * 0.5; x < w * 1.5; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
-        ctx.lineTo(x, y + h * 0.5);
+        ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
       }
       ctx.stroke();
       ctx.closePath();
@@ -130,7 +128,7 @@ export const WavyBackground = ({
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col items-center justify-center overflow-hidden",
+        "h-screen flex flex-col items-center justify-center",
         containerClassName
       )}
     >
@@ -154,4 +152,3 @@ export const WavyBackground = ({
     </div>
   );
 };
-
