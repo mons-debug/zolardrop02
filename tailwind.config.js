@@ -46,6 +46,7 @@ module.exports = {
         'slide-in-left': 'slideInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         'slide-in-right': 'slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         'scale-in': 'scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        'spotlight': 'spotlight 2s ease .75s 1 forwards',
       },
       keyframes: {
         fadeIn: {
@@ -71,6 +72,16 @@ module.exports = {
         glowPulse: {
           '0%, 100%': { boxShadow: '0 0 20px rgba(255, 85, 0, 0.5)' },
           '50%': { boxShadow: '0 0 40px rgba(255, 85, 0, 0.8)' },
+        },
+        spotlight: {
+          '0%': {
+            opacity: '0',
+            transform: 'translate(-72%, -62%) scale(0.5)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translate(-50%,-40%) scale(1)',
+          },
         },
       },
       transitionProperty: {

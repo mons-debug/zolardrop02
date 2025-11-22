@@ -26,6 +26,7 @@ const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').t
 
 // Import Cover directly for hero text effect (fix deployment issue)
 import { Cover } from '@/components/ui/cover'
+import { Spotlight } from '@/components/ui/spotlight'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -349,6 +350,12 @@ export default function Home() {
                     </motion.div>
               </motion.div>
             </AnimatePresence>
+
+            {/* Spotlight Effect */}
+            <Spotlight
+              className="-top-40 left-0 md:left-20 md:-top-20"
+              fill="white"
+            />
 
             {/* Main Content */}
             <div className="relative z-10">
