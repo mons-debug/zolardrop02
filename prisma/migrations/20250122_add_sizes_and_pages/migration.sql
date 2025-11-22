@@ -22,3 +22,4 @@ INSERT INTO "PageContent" ("id", "page", "title", "content", "createdAt", "updat
   (gen_random_uuid(), 'refund', 'Refund Policy', '<h1>Refund Policy</h1><p>This is the default refund policy content. Edit this content from the dashboard.</p>', NOW(), NOW()),
   (gen_random_uuid(), 'terms', 'Terms of Service', '<h1>Terms of Service</h1><p>This is the default terms of service content. Edit this content from the dashboard.</p>', NOW(), NOW());
 
+

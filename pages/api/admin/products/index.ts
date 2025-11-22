@@ -60,9 +60,11 @@ export default async function handler(
         currency: currency || 'USD',
         stock,
         category,
+        status: 'published',
         variants: variants ? {
           create: variants.map((variant: any) => ({
             color: variant.color,
+            size: variant.size || null,
             sku: variant.sku,
             priceCents: variant.priceCents,
             stock: variant.stock,

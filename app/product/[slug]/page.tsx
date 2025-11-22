@@ -21,6 +21,7 @@ interface Product {
   variants: Array<{
     id: string
     color: string
+    size?: string | null
     sku: string
     priceCents: number
     stock: number
@@ -56,6 +57,7 @@ export default function ProductPage() {
 
   const [product, setProduct] = useState<Product | null>(null)
   const [selectedVariant, setSelectedVariant] = useState<any>(null)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -75,7 +77,20 @@ export default function ProductPage() {
         .then(data => {
           setProduct(data.product)
           if (data.product && data.product.variants && data.product.variants.length > 0) {
-            setSelectedVariant(data.product.variants[0])
+            // Check if variants have sizes
+            const variantsWithSizes = data.product.variants.filter((v: any) => v.size)
+            if (variantsWithSizes.length > 0) {
+              // Set initial size to first available size
+              setSelectedSize(variantsWithSizes[0].size)
+              // Set initial variant to first variant with that size
+              const firstVariantWithSize = data.product.variants.find((v: any) => v.size === variantsWithSizes[0].size)
+              if (firstVariantWithSize) {
+                setSelectedVariant(firstVariantWithSize)
+              }
+            } else {
+              // No sizes, just select first variant
+              setSelectedVariant(data.product.variants[0])
+            }
           }
           setLoading(false)
         })
@@ -123,10 +138,42 @@ export default function ProductPage() {
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
   const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
 
+  // Get available sizes from variants
+  const getAvailableSizes = (): string[] => {
+    if (!product) return []
+    const sizes = new Set<string>()
+    product.variants.forEach((v: any) => {
+      if (v.size) sizes.add(v.size)
+    })
+    return Array.from(sizes).sort()
+  }
+
+  // Get variants filtered by selected size
+  const getFilteredVariants = () => {
+    if (!product) return []
+    if (!selectedSize) return product.variants
+    return product.variants.filter((v: any) => v.size === selectedSize)
+  }
+
+  // Handle size selection
+  const handleSizeChange = (size: string) => {
+    setSelectedSize(size)
+    // Select first variant with this size
+    const variantWithSize = product?.variants.find((v: any) => v.size === size)
+    if (variantWithSize) {
+      setSelectedVariant(variantWithSize)
+      setCurrentImageIndex(0)
+    }
+  }
+
   // Change image when variant changes
   const handleVariantChange = (variant: any) => {
     setSelectedVariant(variant)
     setCurrentImageIndex(0) // Reset to first image when changing variant
+    // Update selected size if variant has a size
+    if (variant.size) {
+      setSelectedSize(variant.size)
+    }
   }
 
   const formatPrice = (cents: number) => {
@@ -311,11 +358,33 @@ export default function ProductPage() {
               </p>
             </div>
 
+            {/* Size Selection */}
+            {getAvailableSizes().length > 0 && (
+              <div>
+                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
+                <div className="flex flex-wrap gap-3">
+                  {getAvailableSizes().map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => handleSizeChange(size)}
+                      className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
+                        selectedSize === size
+                          ? 'border-black bg-black text-white shadow-md'
+                          : 'border-gray-300 text-black hover:border-black hover:text-black'
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Tune Selection */}
             <div>
               <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Tune</h3>
               <div className="flex flex-wrap gap-3">
-                {product.variants.map((variant) => (
+                {getFilteredVariants().map((variant) => (
                   <button
                     key={variant.id}
                     onClick={() => handleVariantChange(variant)}
@@ -341,6 +410,12 @@ export default function ProductPage() {
                     <span className="text-gray-500">Selected Tune</span>
                     <div className="text-black mt-1">{selectedVariant.color}</div>
                   </div>
+                  {selectedVariant.size && (
+                    <div>
+                      <span className="text-gray-500">Size</span>
+                      <div className="text-black mt-1">{selectedVariant.size}</div>
+                    </div>
+                  )}
                   <div>
                     <span className="text-gray-500">SKU</span>
                     <div className="text-black mt-1">{selectedVariant.sku}</div>

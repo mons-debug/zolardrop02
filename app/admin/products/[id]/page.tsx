@@ -90,6 +90,7 @@ export default function EditProductPage() {
         const parsedVariants = product.variants.map((v: any) => ({
           id: v.id,
           color: v.color,
+          size: v.size || undefined,
           sku: v.sku,
           priceCents: v.priceCents,
           stock: v.stock,
@@ -513,6 +514,12 @@ export default function EditProductPage() {
                           </span>
                           <span>•</span>
                           <span>Stock: <span className="font-medium text-gray-900">{variant.stock}</span></span>
+                          {variant.size && (
+                            <>
+                              <span>•</span>
+                              <span>Size: <span className="font-medium text-gray-900">{variant.size}</span></span>
+                            </>
+                          )}
                         </div>
                         {variant.images && variant.images.length > 0 && (
                           <div className="flex gap-2">

@@ -137,10 +137,11 @@ export default async function handler(
       updateData.variants = {
         create: variants.map((variant: any) => ({
           color: variant.color,
+          size: variant.size || null,
           sku: variant.sku,
           priceCents: variant.priceCents,
           stock: variant.stock,
-            images: variant.images ? JSON.stringify(variant.images) : undefined,
+          images: variant.images ? JSON.stringify(variant.images) : undefined,
           metadata: variant.metadata ? JSON.stringify(variant.metadata) : null
         }))
       }

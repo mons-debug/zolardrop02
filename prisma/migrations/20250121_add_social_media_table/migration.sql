@@ -19,3 +19,4 @@ CREATE UNIQUE INDEX "SocialMedia_platform_key" ON "SocialMedia"("platform");
 -- CreateIndex
 CREATE INDEX "SocialMedia_order_isActive_idx" ON "SocialMedia"("order", "isActive");
 
+
