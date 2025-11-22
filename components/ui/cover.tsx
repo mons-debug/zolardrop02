@@ -54,7 +54,7 @@ export const Cover = ({
   const handleTouchEnd = () => {
     if (isTouchDevice) {
       // Keep effect for a brief moment then turn off
-      setTimeout(() => setHovered(false), 400);
+      setTimeout(() => setHovered(false), 600);
     }
   };
 
@@ -141,17 +141,17 @@ export const Cover = ({
         transition={{
           duration: 0.2,
           x: {
-            duration: isTouchDevice ? 0.08 : 0.1,
-            repeat: hovered ? (isTouchDevice ? 2 : Infinity) : 0,
+            duration: isTouchDevice ? 0.05 : 0.1,
+            repeat: hovered ? Infinity : 0,
             repeatType: "loop",
           },
           y: {
-            duration: isTouchDevice ? 0.08 : 0.1,
-            repeat: hovered ? (isTouchDevice ? 2 : Infinity) : 0,
+            duration: isTouchDevice ? 0.05 : 0.1,
+            repeat: hovered ? Infinity : 0,
             repeatType: "loop",
           },
           scale: {
-            duration: isTouchDevice ? 0.15 : 0.2,
+            duration: isTouchDevice ? 0.1 : 0.2,
             ease: "easeInOut",
           },
           filter: {
