@@ -235,8 +235,8 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="grid grid-cols-2 gap-2 mt-auto">
             <button
               onClick={(e) => {
-                e.preventDefault()
-                // This will be handled by the Link wrapper
+                // Don't prevent default - let the Link wrapper handle navigation
+                e.stopPropagation()
               }}
               className="px-3 py-2 border border-black text-black text-xs uppercase tracking-wider hover:bg-black hover:text-white transition-colors duration-300 text-center"
             >
