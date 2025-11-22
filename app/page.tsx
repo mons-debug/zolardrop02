@@ -527,12 +527,12 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative overflow-hidden rounded-lg md:rounded-2xl"
+              className="relative rounded-lg md:rounded-2xl"
             >
               {/* Wavy Background */}
-              <div className="absolute inset-0 -z-10">
+              <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
                 <WavyBackground
-                  containerClassName="w-full h-full absolute inset-0"
+                  containerClassName="w-full h-full"
                   className="w-full h-full"
                   colors={["#e5e5e5", "#d4d4d4", "#cccccc", "#e0e0e0", "#d8d8d8"]}
                   waveWidth={100}
