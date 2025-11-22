@@ -185,16 +185,19 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [heroSlides, currentSlide])
 
-  // Auto-rotate ESSENCE collection
+  // Auto-rotate ESSENCE collection with CardStack animation
   useEffect(() => {
     if (essenceImages.length <= 1) return
     const timer = setInterval(() => {
-      setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
+      setEssenceIndex((prev) => {
+        // Move last card to front (CardStack style)
+        return (prev + 1) % essenceImages.length
+      })
     }, essenceDelay)
     return () => clearInterval(timer)
   }, [essenceImages.length, essenceDelay])
 
-  // Auto-rotate FRAGMENT collection
+  // Auto-rotate FRAGMENT collection with CardStack animation
   useEffect(() => {
     if (fragmentImages.length <= 1) return
     const timer = setInterval(() => {
@@ -203,7 +206,7 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [fragmentImages.length, fragmentDelay])
 
-  // Auto-rotate RECODE collection
+  // Auto-rotate RECODE collection with CardStack animation
   useEffect(() => {
     if (recodeImages.length <= 1) return
     const timer = setInterval(() => {
@@ -590,6 +593,8 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
+                              {/* Glass reflection effect */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {essenceImages[imageIndex] && (
                                   <motion.div
@@ -755,6 +760,8 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
+                              {/* Glass reflection effect */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {fragmentImages[imageIndex] && (
                                   <motion.div
@@ -866,6 +873,8 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
+                              {/* Glass reflection effect */}
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {recodeImages[imageIndex] && (
                                   <motion.div
