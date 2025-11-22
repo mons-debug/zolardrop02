@@ -90,8 +90,9 @@ export const WavyBackground = ({
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
       
-      // Draw across full canvas width (which is now 140% of container)
-      for (x = 0; x < w; x += 5) {
+      // Draw waves beyond canvas boundaries for seamless effect
+      // Start at -25% and end at 125% of canvas width
+      for (x = -w * 0.25; x < w * 1.25; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
         ctx.lineTo(x, y + h * 0.5);
       }
