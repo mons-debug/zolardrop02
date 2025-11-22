@@ -52,24 +52,11 @@ const colorMap: Record<string, string> = {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const [selectedVariant, setSelectedVariant] = useState(product.variants?.[0] || null)
+  const hasVariants = product.variants && product.variants.length > 0
+  const [selectedVariant, setSelectedVariant] = useState(hasVariants ? product.variants[0] : null)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageError, setImageError] = useState(false)
   const { addItem } = useCart()
-
-  // Safety check: ensure product has variants
-  if (!product.variants || product.variants.length === 0 || !selectedVariant) {
-    return (
-      <div className="group h-full flex flex-col">
-        <div className="bg-white border border-gray-200 p-8 text-center">
-          <div className="w-full h-full flex items-center justify-center bg-gray-100 aspect-[3/4] mb-4">
-            <span className="text-gray-400 text-sm">No variants available</span>
-          </div>
-          <p className="text-sm text-gray-600">{product.title}</p>
-        </div>
-      </div>
-    )
-  }
 
   // Safely parse images with error handling
   const parseImages = (imageString: string): string[] => {
@@ -96,21 +83,28 @@ export default function ProductCard({ product }: ProductCardProps) {
     return `${(cents / 100).toFixed(2)} MAD`
   }
 
-  const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+  // Calculate total stock - handle products without variants
+  const totalStock = hasVariants 
+    ? product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+    : product.stock
+
+  // Get price - use variant price if available, otherwise product price
+  const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
+  const displayStock = selectedVariant ? selectedVariant.stock : product.stock
 
   const handleAddToCart = () => {
-    const variantImgs = parseImages(selectedVariant.images)
+    const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
     const productImgs = parseImages(product.images)
     const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
     
     addItem({
       productId: product.id,
-      variantId: selectedVariant.id,
+      variantId: selectedVariant?.id || product.id,
       qty: 1,
-      priceCents: selectedVariant.priceCents,
+      priceCents: displayPrice,
       title: product.title,
       image: firstImage,
-      variantName: selectedVariant.color
+      variantName: selectedVariant?.color || 'Default'
     })
   }
 
@@ -197,38 +191,46 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Price */}
           <div className="flex items-baseline gap-2 mb-3">
             <span className="text-sm sm:text-base font-normal text-gray-600">
-              {formatPrice(selectedVariant.priceCents)}
+              {formatPrice(displayPrice)}
             </span>
           </div>
 
-          {/* Color Variants */}
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-1.5">
-              {product.variants.map((variant) => (
-                <button
-                  key={variant.id}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    handleVariantChange(variant)
-                  }}
-                  className={`w-5 h-5 transition-all duration-300 border-2 ${
-                    selectedVariant.id === variant.id
-                      ? 'border-black ring-2 ring-offset-2 ring-black'
-                      : 'border-gray-300 hover:border-gray-600'
-                  } ${colorMap[variant.color] || 'bg-gray-200'}`}
-                  title={`${variant.color} - ${variant.stock} in stock`}
-                  aria-label={`Select ${variant.color} color`}
-                />
-              ))}
+          {/* Color Variants - Only show if product has variants */}
+          {hasVariants && (
+            <div className="mb-4">
+              <div className="flex flex-wrap gap-1.5">
+                {product.variants.map((variant) => (
+                  <button
+                    key={variant.id}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleVariantChange(variant)
+                    }}
+                    className={`w-5 h-5 transition-all duration-300 border-2 ${
+                      selectedVariant?.id === variant.id
+                        ? 'border-black ring-2 ring-offset-2 ring-black'
+                        : 'border-gray-300 hover:border-gray-600'
+                    } ${colorMap[variant.color] || 'bg-gray-200'}`}
+                    title={`${variant.color} - ${variant.stock} in stock`}
+                    aria-label={`Select ${variant.color} color`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Selected Variant Info */}
           <div className="text-xs text-gray-500 mb-4">
-            <span className="font-normal">{selectedVariant.color}</span>
-            <span className="mx-2">•</span>
-            <span>{selectedVariant.stock} in stock</span>
+            {hasVariants && selectedVariant ? (
+              <>
+                <span className="font-normal">{selectedVariant.color}</span>
+                <span className="mx-2">•</span>
+                <span>{selectedVariant.stock} in stock</span>
+              </>
+            ) : (
+              <span>{product.stock} in stock</span>
+            )}
           </div>
 
           {/* Action Buttons */}
@@ -247,14 +249,14 @@ export default function ProductCard({ product }: ProductCardProps) {
                 e.preventDefault()
                 handleAddToCart()
               }}
-              disabled={selectedVariant.stock === 0}
+              disabled={displayStock === 0}
               className={`px-3 py-2 text-xs uppercase tracking-wider transition-colors duration-300 ${
-                selectedVariant.stock > 0
+                displayStock > 0
                   ? 'bg-black text-white hover:bg-gray-800'
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {selectedVariant.stock > 0 ? 'Add' : 'Sold Out'}
+              {displayStock > 0 ? 'Add' : 'Sold Out'}
             </button>
           </div>
         </div>
