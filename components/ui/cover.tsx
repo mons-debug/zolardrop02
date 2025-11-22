@@ -13,11 +13,23 @@ export const Cover = ({
   className?: string;
 }) => {
   const [hovered, setHovered] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [beamPositions, setBeamPositions] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Detect if device supports touch
+    const checkTouchDevice = () => {
+      setIsTouchDevice(
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0
+      );
+    };
+    checkTouchDevice();
+  }, []);
 
   useEffect(() => {
     if (ref.current) {
@@ -35,8 +47,8 @@ export const Cover = ({
 
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => !isTouchDevice && setHovered(true)}
+      onMouseLeave={() => !isTouchDevice && setHovered(false)}
       ref={ref}
       className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm"
     >
