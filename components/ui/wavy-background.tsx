@@ -52,18 +52,25 @@ export const WavyBackground = ({
     ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Get parent dimensions for proper sizing
+    // Get parent dimensions and add extra width for seamless effect
     const parent = canvas.parentElement;
-    w = ctx.canvas.width = parent?.offsetWidth || window.innerWidth;
-    h = ctx.canvas.height = parent?.offsetHeight || window.innerHeight;
+    const parentWidth = parent?.offsetWidth || window.innerWidth;
+    const parentHeight = parent?.offsetHeight || window.innerHeight;
+    
+    // Add 20% extra width on each side for seamless wave effect
+    w = ctx.canvas.width = parentWidth * 1.4;
+    h = ctx.canvas.height = parentHeight;
     ctx.filter = `blur(${blur}px)`;
     nt = 0;
     
     window.onresize = function () {
       if (!ctx || !canvas) return;
       const parent = canvas.parentElement;
-      w = ctx.canvas.width = parent?.offsetWidth || window.innerWidth;
-      h = ctx.canvas.height = parent?.offsetHeight || window.innerHeight;
+      const parentWidth = parent?.offsetWidth || window.innerWidth;
+      const parentHeight = parent?.offsetHeight || window.innerHeight;
+      
+      w = ctx.canvas.width = parentWidth * 1.4;
+      h = ctx.canvas.height = parentHeight;
       ctx.filter = `blur(${blur}px)`;
     };
     render();
@@ -83,13 +90,10 @@ export const WavyBackground = ({
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
       
-      // Extend wave beyond canvas edges for seamless effect
-      const startX = -50;
-      const endX = w + 50;
-      
-      for (x = startX; x < endX; x += 5) {
+      // Draw across full canvas width (which is now 140% of container)
+      for (x = 0; x < w; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
-        ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
+        ctx.lineTo(x, y + h * 0.5);
       }
       ctx.stroke();
       ctx.closePath();
@@ -130,12 +134,14 @@ export const WavyBackground = ({
       )}
     >
       <canvas
-        className="absolute inset-0 z-0 w-full h-full"
+        className="absolute z-0"
         ref={canvasRef}
         id="canvas"
         style={{
-          minWidth: '100%',
-          minHeight: '100%',
+          left: '-20%',
+          top: '0',
+          width: '140%',
+          height: '100%',
           ...(isSafari ? { filter: `blur(${blur}px)` } : {}),
         }}
       ></canvas>
