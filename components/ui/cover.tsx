@@ -58,14 +58,27 @@ export const Cover = ({
     }
   };
 
+  const handleMouseDown = () => {
+    if (!isTouchDevice) {
+      setHovered(true);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!isTouchDevice) {
+      setHovered(false);
+    }
+  };
+
   return (
     <div
-      onMouseEnter={() => !isTouchDevice && setHovered(true)}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onMouseLeave={() => !isTouchDevice && setHovered(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       ref={ref}
-      className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm"
+      className="relative hover:bg-black/30 group/cover inline-block bg-transparent px-2 py-2 transition duration-200 rounded-sm cursor-pointer"
     >
       <AnimatePresence>
         {hovered && (
@@ -129,8 +142,8 @@ export const Cover = ({
         initial={{ scale: 1, x: 0, y: 0 }}
         animate={{
           scale: hovered ? 0.8 : 1,
-          x: hovered ? (isTouchDevice ? [0, -8, 8, -8, 8, 0] : [0, -30, 30, -30, 30, 0]) : 0,
-          y: hovered ? (isTouchDevice ? [0, 8, -8, 8, -8, 0] : [0, 30, -30, 30, -30, 0]) : 0,
+          x: hovered ? [0, -8, 8, -8, 8, 0] : 0,
+          y: hovered ? [0, 8, -8, 8, -8, 0] : 0,
         }}
         exit={{
           filter: "none",
@@ -141,17 +154,17 @@ export const Cover = ({
         transition={{
           duration: 0.2,
           x: {
-            duration: isTouchDevice ? 0.05 : 0.1,
+            duration: 0.05,
             repeat: hovered ? Infinity : 0,
             repeatType: "loop",
           },
           y: {
-            duration: isTouchDevice ? 0.05 : 0.1,
+            duration: 0.05,
             repeat: hovered ? Infinity : 0,
             repeatType: "loop",
           },
           scale: {
-            duration: isTouchDevice ? 0.1 : 0.2,
+            duration: 0.1,
             ease: "easeInOut",
           },
           filter: {
