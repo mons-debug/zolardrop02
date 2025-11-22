@@ -572,14 +572,12 @@ export default function Home() {
                       {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (essenceIndex + offset) % essenceImages.length
                         const zIndex = 40 - offset * 10
-                        // Enhanced 3D depth effect
-                        const translateX = offset === 0 ? 0 : offset === 1 ? 16 : offset === 2 ? 12 : 8
-                        const translateY = offset * 10
-                        const translateZ = -offset * 20 // Add depth
-                        const rotate = offset * 3
-                        const rotateY = offset * 2 // Add Y-axis rotation for 3D effect
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
-                        const scale = 1 - offset * 0.05
+                        // Vertical Stack Effect
+                        const translateY = offset * 16 // Vertical spacing
+                        const translateZ = -offset * 30 // Depth for 3D effect
+                        const rotateX = offset * 2 // Slight tilt for depth
+                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
+                        const scale = 1 - offset * 0.04 // Slight scale reduction
                         
                         return (
                           <motion.div
@@ -591,11 +589,10 @@ export default function Home() {
                             }}
                             initial={false}
                             animate={{ 
-                              x: translateX,
+                              x: 0, // No horizontal movement
                               y: translateY,
                               z: translateZ,
-                              rotateZ: rotate,
-                              rotateY: rotateY,
+                              rotateX: rotateX, // Vertical tilt
                               opacity,
                               scale
                             }}
@@ -737,14 +734,12 @@ export default function Home() {
                       {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
                         const imageIndex = (fragmentIndex + offset) % fragmentImages.length
                         const zIndex = 40 - offset * 10
-                        // Enhanced 3D depth effect (mirrored for FRAGMENT)
-                        const translateX = offset === 0 ? 0 : offset === 1 ? -16 : offset === 2 ? -12 : -8
-                        const translateY = offset * 10
-                        const translateZ = -offset * 20 // Add depth
-                        const rotate = -offset * 3
-                        const rotateY = -offset * 2 // Add Y-axis rotation for 3D effect (mirrored)
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
-                        const scale = 1 - offset * 0.05
+                        // Vertical Stack Effect
+                        const translateY = offset * 16 // Vertical spacing
+                        const translateZ = -offset * 30 // Depth for 3D effect
+                        const rotateX = offset * 2 // Slight tilt for depth
+                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
+                        const scale = 1 - offset * 0.04 // Slight scale reduction
                         
                         return (
                           <motion.div
@@ -756,11 +751,10 @@ export default function Home() {
                             }}
                             initial={false}
                             animate={{ 
-                              x: translateX,
+                              x: 0, // No horizontal movement
                               y: translateY,
                               z: translateZ,
-                              rotateZ: rotate,
-                              rotateY: rotateY,
+                              rotateX: rotateX, // Vertical tilt
                               opacity,
                               scale
                             }}
@@ -848,14 +842,12 @@ export default function Home() {
                       {[0, 1, 2, 3].map((offset) => {
                         const imageIndex = (recodeIndex + offset) % recodeImages.length
                         const zIndex = 40 - offset * 10
-                        // Enhanced 3D depth effect
-                        const translateX = offset === 0 ? 0 : offset === 1 ? 16 : offset === 2 ? 12 : 8
-                        const translateY = offset * 10
-                        const translateZ = -offset * 20 // Add depth
-                        const rotate = offset * 3
-                        const rotateY = offset * 2 // Add Y-axis rotation for 3D effect
-                        const opacity = offset === 0 ? 1 : offset === 1 ? 0.95 : 1 - offset * 0.2
-                        const scale = 1 - offset * 0.05
+                        // Vertical Stack Effect
+                        const translateY = offset * 16 // Vertical spacing
+                        const translateZ = -offset * 30 // Depth for 3D effect
+                        const rotateX = offset * 2 // Slight tilt for depth
+                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
+                        const scale = 1 - offset * 0.04 // Slight scale reduction
                         
                         return (
                           <motion.div
@@ -867,11 +859,10 @@ export default function Home() {
                             }}
                             initial={false}
                             animate={{ 
-                              x: translateX,
+                              x: 0, // No horizontal movement
                               y: translateY,
                               z: translateZ,
-                              rotateZ: rotate,
-                              rotateY: rotateY,
+                              rotateX: rotateX, // Vertical tilt
                               opacity,
                               scale
                             }}
