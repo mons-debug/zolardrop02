@@ -29,6 +29,9 @@ export default async function handler(
     }
 
     const products = await prisma.product.findMany({
+      where: {
+        status: 'published'
+      },
       skip,
       take: limitNum,
       include: {
@@ -39,7 +42,11 @@ export default async function handler(
       }
     })
 
-    const total = await prisma.product.count()
+    const total = await prisma.product.count({
+      where: {
+        status: 'published'
+      }
+    })
 
     res.status(200).json({
       products,

@@ -16,9 +16,12 @@ export default async function handler(
       return res.status(400).json({ message: 'Product ID or SKU is required' })
     }
 
-    // Try to find by ID first, then by SKU
-    let product = await prisma.product.findUnique({
-      where: { id },
+    // Try to find by ID first, then by SKU (only published products)
+    let product = await prisma.product.findFirst({
+      where: { 
+        id,
+        status: 'published'
+      },
       include: {
         variants: {
           orderBy: {
@@ -30,8 +33,11 @@ export default async function handler(
 
     // If not found by ID, try to find by SKU
     if (!product) {
-      product = await prisma.product.findUnique({
-        where: { sku: id },
+      product = await prisma.product.findFirst({
+        where: { 
+          sku: id,
+          status: 'published'
+        },
         include: {
           variants: {
             orderBy: {

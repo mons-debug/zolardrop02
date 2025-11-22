@@ -120,6 +120,8 @@ export default async function handler(
     if (currency !== undefined) updateData.currency = currency
     if (stock !== undefined) updateData.stock = stock
     if (category !== undefined) updateData.category = category
+    // Ensure status remains published if not explicitly changed
+    updateData.status = 'published'
 
     // Handle variants update
     if (variants !== undefined) {
