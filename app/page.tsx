@@ -531,18 +531,36 @@ export default function Home() {
             >
               {/* Wavy Background */}
               <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
-                <WavyBackground
-                  containerClassName="w-full h-full"
-                  className="w-full h-full"
-                  colors={["#f5f5f5", "#ececec", "#e8e8e8", "#f0f0f0", "#ededed", "#e5e5e5"]}
-                  waveWidth={180}
-                  backgroundFill="white"
-                  blur={12}
-                  speed="slow"
-                  waveOpacity={0.15}
-                >
-                  <div />
-                </WavyBackground>
+                {/* Desktop Wave */}
+                <div className="hidden md:block w-full h-full">
+                  <WavyBackground
+                    containerClassName="w-full h-full"
+                    className="w-full h-full"
+                    colors={["#f5f5f5", "#ececec", "#e8e8e8", "#f0f0f0", "#ededed", "#e5e5e5"]}
+                    waveWidth={180}
+                    backgroundFill="white"
+                    blur={12}
+                    speed="slow"
+                    waveOpacity={0.15}
+                  >
+                    <div />
+                  </WavyBackground>
+                </div>
+                {/* Mobile Wave - More visible with curved vertical flow */}
+                <div className="block md:hidden w-full h-full">
+                  <WavyBackground
+                    containerClassName="w-full h-full"
+                    className="w-full h-full"
+                    colors={["#e8e8e8", "#d9d9d9", "#cfcfcf", "#e0e0e0", "#d5d5d5", "#dbdbdb"]}
+                    waveWidth={120}
+                    backgroundFill="white"
+                    blur={8}
+                    speed="slow"
+                    waveOpacity={0.28}
+                  >
+                    <div />
+                  </WavyBackground>
+                </div>
               </div>
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
