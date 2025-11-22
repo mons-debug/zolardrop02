@@ -27,6 +27,7 @@ export default function NewProductPage() {
   const [sku, setSku] = useState('')
   const [priceCents, setPriceCents] = useState('')
   const [stock, setStock] = useState('')
+  const [sizeInventory, setSizeInventory] = useState('')
   const [category, setCategory] = useState('sweatshirts')
   const [images, setImages] = useState<string[]>([])
   
@@ -106,6 +107,7 @@ export default function NewProductPage() {
           sku,
           priceCents: Math.round(parseFloat(priceCents) * 100),
           stock: parseInt(stock),
+          sizeInventory: sizeInventory || null,
           category,
           images,
           variants: variants.length > 0 ? variants : undefined
@@ -241,6 +243,22 @@ export default function NewProductPage() {
                   placeholder="100"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Size Inventory (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={sizeInventory}
+                  onChange={(e) => setSizeInventory(e.target.value)}
+                  placeholder="e.g. M=25, L=15, S=10, XL=5"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Enter sizes and quantities separated by commas
+                </p>
               </div>
               </div>
             </div>

@@ -17,6 +17,7 @@ interface Product {
   salePriceCents?: number
   currency: string
   stock: number
+  sizeInventory?: string | null
   category?: string
   variants: Array<{
     id: string
@@ -137,6 +138,21 @@ export default function ProductPage() {
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
   const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
+
+  // Parse sizeInventory string
+  const parseSizeInventory = (sizeStr: string | null | undefined): Array<{ size: string; quantity: number }> => {
+    if (!sizeStr) return []
+    try {
+      return sizeStr.split(',').map(item => {
+        const [size, qty] = item.trim().split('=')
+        return { size: size.trim(), quantity: parseInt(qty) || 0 }
+      }).filter(item => item.size && !isNaN(item.quantity))
+    } catch {
+      return []
+    }
+  }
+
+  const sizeInventory = parseSizeInventory(product.sizeInventory)
 
   // Get available sizes from variants
   const getAvailableSizes = (): string[] => {
@@ -358,8 +374,34 @@ export default function ProductPage() {
               </p>
             </div>
 
-            {/* Size Selection */}
-            {getAvailableSizes().length > 0 && (
+            {/* Product-Level Size Selection (from sizeInventory) */}
+            {sizeInventory.length > 0 && (
+              <div>
+                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
+                <div className="flex flex-wrap gap-3">
+                  {sizeInventory.map(({ size, quantity }) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      disabled={quantity === 0}
+                      className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
+                        selectedSize === size
+                          ? 'border-black bg-black text-white shadow-md'
+                          : quantity === 0
+                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                            : 'border-gray-300 text-black hover:border-black hover:text-black'
+                      }`}
+                    >
+                      {size}
+                      {quantity === 0 && ' (Out)'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Size Selection (from variants) - fallback if no sizeInventory */}
+            {sizeInventory.length === 0 && getAvailableSizes().length > 0 && (
               <div>
                 <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
                 <div className="flex flex-wrap gap-3">
