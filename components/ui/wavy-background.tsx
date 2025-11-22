@@ -52,13 +52,13 @@ export const WavyBackground = ({
     ctx = canvas.getContext("2d");
     if (!ctx) return;
     
-    // Get parent dimensions and add extra width for seamless effect
+    // Get parent dimensions and add significant extra width for seamless effect
     const parent = canvas.parentElement;
     const parentWidth = parent?.offsetWidth || window.innerWidth;
     const parentHeight = parent?.offsetHeight || window.innerHeight;
     
-    // Add 20% extra width on each side for seamless wave effect
-    w = ctx.canvas.width = parentWidth * 1.4;
+    // Make canvas 200% wider to ensure waves extend far beyond visible edges
+    w = ctx.canvas.width = parentWidth * 2;
     h = ctx.canvas.height = parentHeight;
     ctx.filter = `blur(${blur}px)`;
     nt = 0;
@@ -69,7 +69,7 @@ export const WavyBackground = ({
       const parentWidth = parent?.offsetWidth || window.innerWidth;
       const parentHeight = parent?.offsetHeight || window.innerHeight;
       
-      w = ctx.canvas.width = parentWidth * 1.4;
+      w = ctx.canvas.width = parentWidth * 2;
       h = ctx.canvas.height = parentHeight;
       ctx.filter = `blur(${blur}px)`;
     };
@@ -138,10 +138,12 @@ export const WavyBackground = ({
         ref={canvasRef}
         id="canvas"
         style={{
-          left: '-20%',
+          left: '-50%',
           top: '0',
-          width: '140%',
+          width: '200%',
           height: '100%',
+          transform: 'translateZ(0)',
+          willChange: 'transform',
           ...(isSafari ? { filter: `blur(${blur}px)` } : {}),
         }}
       ></canvas>
