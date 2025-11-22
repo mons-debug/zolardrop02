@@ -48,14 +48,22 @@ export const WavyBackground = ({
 
   const init = () => {
     canvas = canvasRef.current;
+    if (!canvas) return;
     ctx = canvas.getContext("2d");
-    w = ctx.canvas.width = window.innerWidth;
-    h = ctx.canvas.height = window.innerHeight;
+    if (!ctx) return;
+    
+    // Get parent dimensions for proper sizing
+    const parent = canvas.parentElement;
+    w = ctx.canvas.width = parent?.offsetWidth || window.innerWidth;
+    h = ctx.canvas.height = parent?.offsetHeight || window.innerHeight;
     ctx.filter = `blur(${blur}px)`;
     nt = 0;
+    
     window.onresize = function () {
-      w = ctx.canvas.width = window.innerWidth;
-      h = ctx.canvas.height = window.innerHeight;
+      if (!ctx || !canvas) return;
+      const parent = canvas.parentElement;
+      w = ctx.canvas.width = parent?.offsetWidth || window.innerWidth;
+      h = ctx.canvas.height = parent?.offsetHeight || window.innerHeight;
       ctx.filter = `blur(${blur}px)`;
     };
     render();
@@ -74,7 +82,12 @@ export const WavyBackground = ({
       ctx.beginPath();
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
-      for (x = 0; x < w; x += 5) {
+      
+      // Extend wave beyond canvas edges for seamless effect
+      const startX = -50;
+      const endX = w + 50;
+      
+      for (x = startX; x < endX; x += 5) {
         var y = noise(x / 800, 0.3 * i, nt) * 100;
         ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
       }
@@ -112,7 +125,7 @@ export const WavyBackground = ({
   return (
     <div
       className={cn(
-        "w-full h-full flex flex-col items-center justify-center",
+        "w-full h-full flex flex-col items-center justify-center overflow-hidden",
         containerClassName
       )}
     >
@@ -121,6 +134,8 @@ export const WavyBackground = ({
         ref={canvasRef}
         id="canvas"
         style={{
+          minWidth: '100%',
+          minHeight: '100%',
           ...(isSafari ? { filter: `blur(${blur}px)` } : {}),
         }}
       ></canvas>

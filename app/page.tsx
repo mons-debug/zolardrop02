@@ -530,16 +530,16 @@ export default function Home() {
               className="relative overflow-hidden rounded-lg md:rounded-2xl"
             >
               {/* Wavy Background */}
-              <div className="absolute inset-0 -z-10 overflow-hidden">
+              <div className="absolute inset-0 -z-10">
                 <WavyBackground
                   containerClassName="w-full h-full absolute inset-0"
                   className="w-full h-full"
-                  colors={["#ff5b00", "#ff7b2e", "#ffaa88", "#ff5b00", "#ff9055"]}
-                  waveWidth={80}
+                  colors={["#e5e5e5", "#d4d4d4", "#cccccc", "#e0e0e0", "#d8d8d8"]}
+                  waveWidth={100}
                   backgroundFill="white"
-                  blur={5}
+                  blur={8}
                   speed="slow"
-                  waveOpacity={0.08}
+                  waveOpacity={0.12}
                 >
                   <div />
                 </WavyBackground>
