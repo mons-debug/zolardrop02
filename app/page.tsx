@@ -531,32 +531,32 @@ export default function Home() {
             >
               {/* Wavy Background */}
               <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
-                {/* Desktop Wave */}
+                {/* Desktop Wave - Silky smooth and visible */}
                 <div className="hidden md:block w-full h-full">
                   <WavyBackground
                     containerClassName="w-full h-full"
                     className="w-full h-full"
-                    colors={["#e0e0e0", "#d4d4d4", "#c8c8c8", "#d8d8d8", "#cccccc", "#d0d0d0"]}
-                    waveWidth={180}
+                    colors={["#ebebeb", "#e2e2e2", "#d9d9d9", "#e5e5e5", "#dfdfdf", "#e8e8e8"]}
+                    waveWidth={220}
                     backgroundFill="white"
-                    blur={10}
+                    blur={15}
                     speed="slow"
-                    waveOpacity={0.45}
+                    waveOpacity={0.32}
                   >
                     <div />
                   </WavyBackground>
                 </div>
-                {/* Mobile Wave - More visible with curved vertical flow */}
+                {/* Mobile Wave - Silky with better visibility */}
                 <div className="block md:hidden w-full h-full">
                   <WavyBackground
                     containerClassName="w-full h-full"
                     className="w-full h-full"
-                    colors={["#d0d0d0", "#bababa", "#a8a8a8", "#c4c4c4", "#b5b5b5", "#c0c0c0"]}
-                    waveWidth={120}
+                    colors={["#e0e0e0", "#d5d5d5", "#cbcbcb", "#dadada", "#d0d0d0", "#d8d8d8"]}
+                    waveWidth={150}
                     backgroundFill="white"
-                    blur={6}
+                    blur={10}
                     speed="slow"
-                    waveOpacity={0.6}
+                    waveOpacity={0.4}
                   >
                     <div />
                   </WavyBackground>
