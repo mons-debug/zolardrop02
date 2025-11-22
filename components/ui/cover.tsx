@@ -129,8 +129,8 @@ export const Cover = ({
         initial={{ scale: 1, x: 0, y: 0 }}
         animate={{
           scale: hovered ? 0.8 : 1,
-          x: hovered && !isTouchDevice ? [0, -30, 30, -30, 30, 0] : 0,
-          y: hovered && !isTouchDevice ? [0, 30, -30, 30, -30, 0] : 0,
+          x: hovered ? (isTouchDevice ? [0, -8, 8, -8, 8, 0] : [0, -30, 30, -30, 30, 0]) : 0,
+          y: hovered ? (isTouchDevice ? [0, 8, -8, 8, -8, 0] : [0, 30, -30, 30, -30, 0]) : 0,
         }}
         exit={{
           filter: "none",
@@ -141,13 +141,13 @@ export const Cover = ({
         transition={{
           duration: 0.2,
           x: {
-            duration: 0.1,
-            repeat: hovered && !isTouchDevice ? Infinity : 0,
+            duration: isTouchDevice ? 0.08 : 0.1,
+            repeat: hovered ? (isTouchDevice ? 2 : Infinity) : 0,
             repeatType: "loop",
           },
           y: {
-            duration: 0.1,
-            repeat: hovered && !isTouchDevice ? Infinity : 0,
+            duration: isTouchDevice ? 0.08 : 0.1,
+            repeat: hovered ? (isTouchDevice ? 2 : Infinity) : 0,
             repeatType: "loop",
           },
           scale: {
