@@ -102,8 +102,8 @@ export const Cover = ({
         key={String(hovered)}
         animate={{
           scale: hovered ? 0.8 : 1,
-          x: hovered ? [0, -50, 50, -40, 40, -20, 20, 0] : 0,
-          y: hovered ? [0, 40, -40, 30, -30, 15, -15, 0] : 0,
+          x: hovered ? [0, -30, 30, -30, 30, 0] : 0,
+          y: hovered ? [0, 30, -30, 30, -30, 0] : 0,
         }}
         exit={{
           filter: "none",
@@ -112,18 +112,19 @@ export const Cover = ({
           y: 0,
         }}
         transition={{
-          duration: 0.6,
+          duration: 0.2,
           x: {
-            duration: 0.6,
-            ease: [0.6, 0.01, 0.05, 0.95],
+            duration: 0.1,
+            repeat: hovered ? Infinity : 0,
+            repeatType: "loop",
           },
           y: {
-            duration: 0.6,
-            ease: [0.6, 0.01, 0.05, 0.95],
+            duration: 0.1,
+            repeat: hovered ? Infinity : 0,
+            repeatType: "loop",
           },
           scale: {
-            duration: 0.15,
-            ease: "easeOut",
+            duration: 0.2,
           },
           filter: {
             duration: 0.2,
