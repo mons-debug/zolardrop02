@@ -30,6 +30,8 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
 
   useEffect(() => {
     fetchProducts()
@@ -78,6 +80,56 @@ export default function AdminProductsPage() {
     }
   }
 
+  const toggleSelectProduct = (productId: string) => {
+    const newSelected = new Set(selectedProducts)
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId)
+    } else {
+      newSelected.add(productId)
+    }
+    setSelectedProducts(newSelected)
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedProducts.size === products.length) {
+      setSelectedProducts(new Set())
+    } else {
+      setSelectedProducts(new Set(products.map(p => p.id)))
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedProducts.size === 0) return
+
+    const count = selectedProducts.size
+    if (!confirm(`Are you sure you want to delete ${count} product${count > 1 ? 's' : ''}? This will also delete all their variants.`)) {
+      return
+    }
+
+    try {
+      setBulkDeleting(true)
+      
+      // Delete products in parallel
+      const deletePromises = Array.from(selectedProducts).map(productId =>
+        fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
+      )
+
+      const results = await Promise.all(deletePromises)
+      const successCount = results.filter(r => r.ok).length
+      
+      // Remove deleted products from state
+      setProducts(products.filter(p => !selectedProducts.has(p.id)))
+      setSelectedProducts(new Set())
+      
+      alert(`Successfully deleted ${successCount} out of ${count} product${count > 1 ? 's' : ''}`)
+    } catch (error) {
+      console.error('Error bulk deleting products:', error)
+      alert('Failed to delete products')
+    } finally {
+      setBulkDeleting(false)
+    }
+  }
+
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`
   }
@@ -115,6 +167,44 @@ export default function AdminProductsPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Bulk Actions Toolbar */}
+        {selectedProducts.size > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-blue-900">
+                {selectedProducts.size} product{selectedProducts.size > 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={() => setSelectedProducts(new Set())}
+                className="text-sm text-blue-700 hover:text-blue-900 underline"
+              >
+                Clear selection
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {bulkDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Delete Selected
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -140,6 +230,14 @@ export default function AdminProductsPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th className="px-6 py-3 text-left">
+                      <input
+                        type="checkbox"
+                        checked={products.length > 0 && selectedProducts.size === products.length}
+                        onChange={toggleSelectAll}
+                        className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                      />
+                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
                     </th>
@@ -166,7 +264,15 @@ export default function AdminProductsPage() {
                     const firstImage = images[0] || '/placeholder.png'
 
                     return (
-                      <tr key={product.id} className="hover:bg-gray-50">
+                      <tr key={product.id} className={`hover:bg-gray-50 ${selectedProducts.has(product.id) ? 'bg-blue-50' : ''}`}>
+                        <td className="px-6 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.has(product.id)}
+                            onChange={() => toggleSelectProduct(product.id)}
+                            className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                          />
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-16 w-16 relative">
