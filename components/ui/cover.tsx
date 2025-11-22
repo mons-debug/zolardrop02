@@ -112,16 +112,14 @@ export const Cover = ({
           y: 0,
         }}
         transition={{
-          duration: 0.2,
+          duration: 0.5,
           x: {
-            duration: 0.2,
-            repeat: Infinity,
-            repeatType: "loop",
+            duration: 0.5,
+            ease: "easeInOut",
           },
           y: {
-            duration: 0.2,
-            repeat: Infinity,
-            repeatType: "loop",
+            duration: 0.5,
+            ease: "easeInOut",
           },
           scale: {
             duration: 0.2,
