@@ -159,9 +159,13 @@ export const Cover = ({
           },
         }}
         className={cn(
-          "text-white inline-block relative z-20 group-hover/cover:text-white transition duration-200",
+          "text-white inline-block relative z-20 group-hover/cover:text-white transition duration-200 select-none",
           className
         )}
+        style={{
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+        }}
       >
         {children}
       </motion.span>
