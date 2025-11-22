@@ -24,17 +24,8 @@ const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').t
   loading: () => null
 })
 
-// Lazy load Cover for hero text effect
-const Cover = dynamic(() => import('@/components/ui/cover').then(mod => ({ default: mod.Cover })), {
-  ssr: false,
-  loading: () => null
-})
-
-// Lazy load GlareCard for collection stacks
-const GlareCard = dynamic(() => import('@/components/ui/glare-card').then(mod => ({ default: mod.GlareCard })), {
-  ssr: false,
-  loading: () => null
-})
+// Import Cover directly for hero text effect (fix deployment issue)
+import { Cover } from '@/components/ui/cover'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -606,77 +597,46 @@ export default function Home() {
                               ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
                             }}
                           >
-                            {offset === 0 ? (
-                              <GlareCard className="bg-gray-100">
-                                <div 
-                                  className="relative w-full h-full overflow-hidden"
-                                  style={{
-                                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)',
-                                    transform: 'translateY(-8px)'
-                                  }}
-                                >
-                                  <AnimatePresence mode="wait">
-                                    {essenceImages[imageIndex] && (
-                                      <motion.div
-                                        key={`essence-img-${imageIndex}`}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.4 }}
-                                        className="absolute inset-0"
-                                      >
-                                        <Image
-                                          src={essenceImages[imageIndex]}
-                                          alt={`Essence ${imageIndex + 1}`}
-                                          loading="lazy"
-                                          fill
-                                          className="object-cover"
-                                          sizes="(max-width: 768px) 100vw, 50vw"
-                                          unoptimized
-                                        />
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                  <div className="absolute bottom-4 left-4 text-white text-sm font-medium z-10">
-                                    {imageIndex + 1} / {essenceImages.length}
-                                  </div>
-                                </div>
-                              </GlareCard>
-                            ) : (
-                              <div 
-                                className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
-                                style={{
-                                  boxShadow: offset === 1 
+                            <div 
+                              className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
+                              style={{
+                                boxShadow: offset === 0 
+                                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)' 
+                                  : offset === 1 
                                     ? '0 20px 40px -15px rgba(0, 0, 0, 0.25)' 
-                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)'
-                                }}
-                              >
-                                <AnimatePresence mode="wait">
-                                  {essenceImages[imageIndex] && (
-                                    <motion.div
-                                      key={`essence-img-${imageIndex}`}
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      exit={{ opacity: 0 }}
-                                      transition={{ duration: 0.4 }}
-                                      className="absolute inset-0"
-                                    >
-                                      <Image
-                                        src={essenceImages[imageIndex]}
-                                        alt={`Essence ${imageIndex + 1}`}
-                                        loading="lazy"
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 100vw, 50vw"
-                                        unoptimized
-                                      />
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              </div>
-                            )}
+                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)',
+                                transform: offset === 0 ? 'translateY(-8px)' : 'none'
+                              }}
+                            >
+                              <AnimatePresence mode="wait">
+                                {essenceImages[imageIndex] && (
+                                  <motion.div
+                                    key={`essence-img-${imageIndex}`}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="absolute inset-0"
+                                  >
+                                    <Image
+                                      src={essenceImages[imageIndex]}
+                                      alt={`Essence ${imageIndex + 1}`}
+                                      loading="lazy"
+                                      fill
+                                      className="object-cover"
+                                      sizes="(max-width: 768px) 100vw, 50vw"
+                                      unoptimized
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                                  {imageIndex + 1} / {essenceImages.length}
+                                </div>
+                              )}
+                            </div>
                           </motion.div>
                         )
                       })}
@@ -802,77 +762,46 @@ export default function Home() {
                               ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
                             }}
                           >
-                            {offset === 0 ? (
-                              <GlareCard className="bg-gray-100">
-                                <div 
-                                  className="relative w-full h-full overflow-hidden"
-                                  style={{
-                                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)',
-                                    transform: 'translateY(-8px)'
-                                  }}
-                                >
-                                  <AnimatePresence mode="wait">
-                                    {fragmentImages[imageIndex] && (
-                                      <motion.div
-                                        key={`fragment-img-${imageIndex}`}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        transition={{ duration: 0.4 }}
-                                        className="absolute inset-0"
-                                      >
-                                        <Image
-                                          src={fragmentImages[imageIndex]}
-                                          alt={`Fragment ${imageIndex + 1}`}
-                                          loading="lazy"
-                                          fill
-                                          className="object-cover"
-                                          sizes="(max-width: 768px) 100vw, 50vw"
-                                          unoptimized
-                                        />
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                  <div className="absolute bottom-4 left-4 text-white text-sm font-medium z-10">
-                                    {imageIndex + 1} / {fragmentImages.length}
-                                  </div>
-                                </div>
-                              </GlareCard>
-                            ) : (
-                              <div 
-                                className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
-                                style={{
-                                  boxShadow: offset === 1 
+                            <div 
+                              className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
+                              style={{
+                                boxShadow: offset === 0 
+                                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)' 
+                                  : offset === 1 
                                     ? '0 20px 40px -15px rgba(0, 0, 0, 0.25)' 
-                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)'
-                                }}
-                              >
-                                <AnimatePresence mode="wait">
-                                  {fragmentImages[imageIndex] && (
-                                    <motion.div
-                                      key={`fragment-img-${imageIndex}`}
-                                      initial={{ opacity: 0 }}
-                                      animate={{ opacity: 1 }}
-                                      exit={{ opacity: 0 }}
-                                      transition={{ duration: 0.4 }}
-                                      className="absolute inset-0"
-                                    >
-                                      <Image
-                                        src={fragmentImages[imageIndex]}
-                                        alt={`Fragment ${imageIndex + 1}`}
-                                        loading="lazy"
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 100vw, 50vw"
-                                        unoptimized
-                                      />
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              </div>
-                            )}
+                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)',
+                                transform: offset === 0 ? 'translateY(-8px)' : 'none'
+                              }}
+                            >
+                              <AnimatePresence mode="wait">
+                                {fragmentImages[imageIndex] && (
+                                  <motion.div
+                                    key={`fragment-img-${imageIndex}`}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="absolute inset-0"
+                                  >
+                                    <Image
+                                      src={fragmentImages[imageIndex]}
+                                      alt={`Fragment ${imageIndex + 1}`}
+                                      loading="lazy"
+                                      fill
+                                      className="object-cover"
+                                      sizes="(max-width: 768px) 100vw, 50vw"
+                                      unoptimized
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                              {offset === 0 && (
+                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+                                  {imageIndex + 1} / {fragmentImages.length}
+                                </div>
+                              )}
+                            </div>
                           </motion.div>
                         )
                       })}
