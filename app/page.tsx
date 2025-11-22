@@ -536,12 +536,12 @@ export default function Home() {
                   <WavyBackground
                     containerClassName="w-full h-full"
                     className="w-full h-full"
-                    colors={["#f5f5f5", "#ececec", "#e8e8e8", "#f0f0f0", "#ededed", "#e5e5e5"]}
+                    colors={["#e0e0e0", "#d4d4d4", "#c8c8c8", "#d8d8d8", "#cccccc", "#d0d0d0"]}
                     waveWidth={180}
                     backgroundFill="white"
-                    blur={12}
+                    blur={10}
                     speed="slow"
-                    waveOpacity={0.15}
+                    waveOpacity={0.45}
                   >
                     <div />
                   </WavyBackground>
@@ -551,12 +551,12 @@ export default function Home() {
                   <WavyBackground
                     containerClassName="w-full h-full"
                     className="w-full h-full"
-                    colors={["#e8e8e8", "#d9d9d9", "#cfcfcf", "#e0e0e0", "#d5d5d5", "#dbdbdb"]}
+                    colors={["#d0d0d0", "#bababa", "#a8a8a8", "#c4c4c4", "#b5b5b5", "#c0c0c0"]}
                     waveWidth={120}
                     backgroundFill="white"
-                    blur={8}
+                    blur={6}
                     speed="slow"
-                    waveOpacity={0.28}
+                    waveOpacity={0.6}
                   >
                     <div />
                   </WavyBackground>
