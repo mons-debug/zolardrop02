@@ -529,38 +529,31 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="relative rounded-lg md:rounded-2xl"
             >
-              {/* Wavy Background */}
-              <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
-                {/* Desktop - Silky Fabric Texture */}
-                <div className="hidden md:block w-full h-full">
+              {/* Silky Gradient Background - Modern & Visible */}
+              <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
+                {/* Animated Silky Gradient Layers */}
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-gray-50 to-white opacity-80"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-200/40 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_var(--tw-gradient-stops))] from-gray-200/40 via-transparent to-transparent"></div>
+                
+                {/* Silky Wave Overlay with Canvas */}
+                <div className="absolute inset-0">
                   <WavyBackground
                     containerClassName="w-full h-full"
                     className="w-full h-full"
-                    colors={["#f0f0f0", "#e8e8e8", "#ececec", "#ededed", "#e9e9e9", "#efefef"]}
-                    waveWidth={80}
-                    backgroundFill="white"
-                    blur={20}
+                    colors={["#e8e8e8", "#d8d8d8", "#d0d0d0", "#dcdcdc", "#d4d4d4", "#e0e0e0"]}
+                    waveWidth={160}
+                    backgroundFill="transparent"
+                    blur={12}
                     speed="slow"
-                    waveOpacity={0.35}
+                    waveOpacity={0.5}
                   >
                     <div />
                   </WavyBackground>
                 </div>
-                {/* Mobile - Silky Fabric Texture */}
-                <div className="block md:hidden w-full h-full">
-                  <WavyBackground
-                    containerClassName="w-full h-full"
-                    className="w-full h-full"
-                    colors={["#ececec", "#e4e4e4", "#e8e8e8", "#e6e6e6", "#e5e5e5", "#eaeaea"]}
-                    waveWidth={60}
-                    backgroundFill="white"
-                    blur={15}
-                    speed="slow"
-                    waveOpacity={0.4}
-                  >
-                    <div />
-                  </WavyBackground>
-                </div>
+                
+                {/* Subtle Shimmer Effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" style={{animationDuration: '4s'}}></div>
               </div>
               
               <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
