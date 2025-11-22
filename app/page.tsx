@@ -78,10 +78,25 @@ export default function Home() {
           const fragment = stacks.find((s: any) => s.collectionName === 'FRAGMENT')
           const recode = stacks.find((s: any) => s.collectionName === 'RECODE')
           
-          // Set images
-          setEssenceImages(essence?.images || [])
-          setFragmentImages(fragment?.images || [])
-          setRecodeImages(recode?.images || [])
+          // Set images with fallbacks
+          setEssenceImages(essence?.images && essence.images.length > 0 ? essence.images : [
+            'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80',
+            'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80',
+            'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80',
+            'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80'
+          ])
+          setFragmentImages(fragment?.images && fragment.images.length > 0 ? fragment.images : [
+            'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=800&q=80',
+            'https://images.unsplash.com/photo-1622445275463-afa2ab738c34?w=800&q=80',
+            'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
+            'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=800&q=80'
+          ])
+          setRecodeImages(recode?.images && recode.images.length > 0 ? recode.images : [
+            'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80',
+            'https://images.unsplash.com/photo-1622470953794-aa9c70b0fb9d?w=800&q=80',
+            'https://images.unsplash.com/photo-1604176354204-9268737828e4?w=800&q=80',
+            'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80'
+          ])
           
           // Set titles
           setEssenceTitle(essence?.title || 'ESSENCE')
@@ -185,19 +200,16 @@ export default function Home() {
     return () => clearTimeout(timer)
   }, [heroSlides, currentSlide])
 
-  // Auto-rotate ESSENCE collection with CardStack animation
+  // Auto-rotate ESSENCE collection
   useEffect(() => {
     if (essenceImages.length <= 1) return
     const timer = setInterval(() => {
-      setEssenceIndex((prev) => {
-        // Move last card to front (CardStack style)
-        return (prev + 1) % essenceImages.length
-      })
+      setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
     }, essenceDelay)
     return () => clearInterval(timer)
   }, [essenceImages.length, essenceDelay])
 
-  // Auto-rotate FRAGMENT collection with CardStack animation
+  // Auto-rotate FRAGMENT collection
   useEffect(() => {
     if (fragmentImages.length <= 1) return
     const timer = setInterval(() => {
@@ -206,7 +218,7 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [fragmentImages.length, fragmentDelay])
 
-  // Auto-rotate RECODE collection with CardStack animation
+  // Auto-rotate RECODE collection
   useEffect(() => {
     if (recodeImages.length <= 1) return
     const timer = setInterval(() => {
@@ -518,16 +530,16 @@ export default function Home() {
               className="relative overflow-hidden rounded-lg md:rounded-2xl"
             >
               {/* Wavy Background */}
-              <div className="absolute inset-0 -z-10">
+              <div className="absolute inset-0 -z-10 overflow-hidden">
                 <WavyBackground
-                  containerClassName="absolute inset-0"
-                  className="absolute inset-0"
-                  colors={["#000000", "#ff5b00", "#1a1a1a", "#ff7b2e", "#2a2a2a"]}
-                  waveWidth={60}
+                  containerClassName="w-full h-full absolute inset-0"
+                  className="w-full h-full"
+                  colors={["#ff5b00", "#ff7b2e", "#ffaa88", "#ff5b00", "#ff9055"]}
+                  waveWidth={80}
                   backgroundFill="white"
-                  blur={15}
+                  blur={5}
                   speed="slow"
-                  waveOpacity={0.15}
+                  waveOpacity={0.08}
                 >
                   <div />
                 </WavyBackground>
@@ -593,8 +605,6 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
-                              {/* Glass reflection effect */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {essenceImages[imageIndex] && (
                                   <motion.div
@@ -760,8 +770,6 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
-                              {/* Glass reflection effect */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {fragmentImages[imageIndex] && (
                                   <motion.div
@@ -873,8 +881,6 @@ export default function Home() {
                                 transform: offset === 0 ? 'translateY(-8px)' : 'none'
                               }}
                             >
-                              {/* Glass reflection effect */}
-                              <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none z-20" />
                               <AnimatePresence mode="wait">
                                 {recodeImages[imageIndex] && (
                                   <motion.div
