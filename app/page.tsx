@@ -27,6 +27,7 @@ const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').t
 // Import Cover directly for hero text effect (fix deployment issue)
 import { Cover } from '@/components/ui/cover'
 import { Spotlight } from '@/components/ui/spotlight'
+import { AnimatedCollection } from '@/components/ui/animated-collection'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -535,7 +536,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
+              viewport={{ once: true }}
               transition={{ duration: 0.6 }}
               className="relative rounded-lg md:rounded-2xl"
             >
@@ -555,436 +556,62 @@ export default function Home() {
                 </WavyBackground>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
-                {/* Left: Interactive 4-Card Stack */}
-                <div className="relative order-2 md:order-1 px-8 md:px-0">
-                  <div 
-                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => {
-                      setEssenceIndex((prev) => (prev + 1) % essenceImages.length)
-                      // Navigate after short delay to show animation
-                      setTimeout(() => {
-                        window.location.href = essenceLinkUrl
-                      }, 600)
-                    }}
-                  >
-                    <div className="relative w-full h-full">
-                      {essenceImages.length > 0 && [0, 1, 2, 3].map((offset) => {
-                        const imageIndex = (essenceIndex + offset) % essenceImages.length
-                        const zIndex = 40 - offset * 10
-                        // Vertical Stack Effect
-                        const translateY = offset * 16 // Vertical spacing
-                        const translateZ = -offset * 30 // Depth for 3D effect
-                        const rotateX = offset * 2 // Slight tilt for depth
-                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
-                        const scale = 1 - offset * 0.04 // Slight scale reduction
-                        
-                        return (
-                          <motion.div
-                            key={`essence-${imageIndex}-${offset}`}
-                            className="card-stack absolute inset-0"
-                            style={{ 
-                              zIndex,
-                              transformStyle: 'preserve-3d'
-                            }}
-                            initial={false}
-                            animate={{ 
-                              x: 0, // No horizontal movement
-                              y: translateY,
-                              z: translateZ,
-                              rotateX: rotateX, // Vertical tilt
-                              opacity,
-                              scale
-                            }}
-                            transition={{ 
-                              duration: 0.7,
-                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
-                            }}
-                          >
-                            <div 
-                              className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
-                              style={{
-                                boxShadow: offset === 0 
-                                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)' 
-                                  : offset === 1 
-                                    ? '0 20px 40px -15px rgba(0, 0, 0, 0.25)' 
-                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)',
-                                transform: offset === 0 ? 'translateY(-8px)' : 'none'
-                              }}
-                            >
-                              <AnimatePresence mode="wait">
-                                {essenceImages[imageIndex] && (
-                                  <motion.div
-                                    key={`essence-img-${imageIndex}`}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.4 }}
-                                    className="absolute inset-0"
-                                  >
-                                    <Image
-                                      src={essenceImages[imageIndex]}
-                                      alt={`Essence ${imageIndex + 1}`}
-                                      loading="lazy"
-                                      fill
-                                      className="object-cover"
-                                      sizes="(max-width: 768px) 100vw, 50vw"
-                                      unoptimized
-                                    />
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && (
-                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
-                                  {imageIndex + 1} / {essenceImages.length}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right: Content */}
-                <div className="space-y-4 order-1 md:order-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
-                      </div>
-
-                  <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
-                    {essenceTitle}
-                  </h3>
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+                <AnimatedCollection
+                  collection={{
+                    title: essenceTitle,
+                    subtitle: "Available Now",
+                    description: essenceDescription,
+                    images: essenceImages,
+                    link: essenceLinkUrl
+                  }}
+                  autoplay={true}
+                />
+              </div>
+            </motion.div>
                   
-                  <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
-                    {essenceDescription}
-                  </p>
-                  
-                  <Link
-                    href={essenceLinkUrl}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
-                  >
-                    <span>See Collection</span>
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                    </svg>
-                  </Link>
-                                  </div>
-                              </div>
-                            </motion.div>
-                  
-            {/* FRAGMENT COLLECTION - STAGGERED UP */}
+            {/* FRAGMENT COLLECTION */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative md:mt-8"
+              className="relative md:mt-8 bg-white rounded-lg md:rounded-2xl"
             >
-              {/* Background Panel */}
-              <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
-              
-              <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
-                {/* Left: Content */}
-                <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
-                    </div>
-                    
-                  <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
-                    {fragmentTitle}
-                      </h3>
-                  
-                  <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
-                    {fragmentDescription}
-                  </p>
-                  
-                  <Link
-                    href={fragmentLinkUrl}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
-                  >
-                    <span>See Collection</span>
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
-                            </div>
-                            
-                {/* Right: Interactive 4-Card Stack */}
-                <div className="relative px-8 md:px-0">
-                  <div 
-                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => {
-                      setFragmentIndex((prev) => (prev + 1) % fragmentImages.length)
-                      // Navigate after short delay to show animation
-                      setTimeout(() => {
-                        window.location.href = fragmentLinkUrl
-                      }, 600)
-                    }}
-                  >
-                    <div className="relative w-full h-full">
-                      {fragmentImages.length > 0 && [0, 1, 2, 3].map((offset) => {
-                        const imageIndex = (fragmentIndex + offset) % fragmentImages.length
-                        const zIndex = 40 - offset * 10
-                        // Vertical Stack Effect
-                        const translateY = offset * 16 // Vertical spacing
-                        const translateZ = -offset * 30 // Depth for 3D effect
-                        const rotateX = offset * 2 // Slight tilt for depth
-                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
-                        const scale = 1 - offset * 0.04 // Slight scale reduction
-                        
-                        return (
-                          <motion.div
-                            key={`fragment-${imageIndex}-${offset}`}
-                            className="card-stack absolute inset-0"
-                            style={{ 
-                              zIndex,
-                              transformStyle: 'preserve-3d'
-                            }}
-                            initial={false}
-                            animate={{ 
-                              x: 0, // No horizontal movement
-                              y: translateY,
-                              z: translateZ,
-                              rotateX: rotateX, // Vertical tilt
-                              opacity,
-                              scale
-                            }}
-                            transition={{ 
-                              duration: 0.7,
-                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
-                            }}
-                          >
-                            <div 
-                              className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
-                              style={{
-                                boxShadow: offset === 0 
-                                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)' 
-                                  : offset === 1 
-                                    ? '0 20px 40px -15px rgba(0, 0, 0, 0.25)' 
-                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)',
-                                transform: offset === 0 ? 'translateY(-8px)' : 'none'
-                              }}
-                            >
-                              <AnimatePresence mode="wait">
-                                {fragmentImages[imageIndex] && (
-                                  <motion.div
-                                    key={`fragment-img-${imageIndex}`}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.4 }}
-                                    className="absolute inset-0"
-                                  >
-                                    <Image
-                                      src={fragmentImages[imageIndex]}
-                                      alt={`Fragment ${imageIndex + 1}`}
-                                      loading="lazy"
-                                      fill
-                                      className="object-cover"
-                                      sizes="(max-width: 768px) 100vw, 50vw"
-                                      unoptimized
-                                    />
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && (
-                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
-                                  {imageIndex + 1} / {fragmentImages.length}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                </div>
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+                <AnimatedCollection
+                  collection={{
+                    title: fragmentTitle,
+                    subtitle: "Available Now",
+                    description: fragmentDescription,
+                    images: fragmentImages,
+                    link: fragmentLinkUrl
+                  }}
+                  autoplay={true}
+                />
               </div>
             </motion.div>
           </div>
                     
-          {/* RECODE COLLECTION - INTERACTIVE CARD STACK */}
-                    <motion.div
+          {/* RECODE COLLECTION */}
+          <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="relative md:mt-8"
+            className="relative md:mt-8 bg-white rounded-lg md:rounded-2xl"
           >
-            {/* Background Panel */}
-            <div className="absolute inset-0 bg-white rounded-lg md:rounded-2xl -z-10" />
-            
-            <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
-              {/* Left: Interactive 4-Card Stack */}
-              <div className="relative px-8 md:px-0 order-2 md:order-1">
-                {recodeImages.length > 0 ? (
-                  <div 
-                    className="relative aspect-[3/4] cursor-pointer perspective-1000 max-w-md mx-auto"
-                    onClick={() => {
-                      setRecodeIndex((prev) => (prev + 1) % recodeImages.length)
-                      // Navigate after short delay to show animation
-                      setTimeout(() => {
-                        window.location.href = recodeLinkUrl
-                      }, 600)
-                    }}
-                  >
-                    <div className="relative w-full h-full">
-                      {[0, 1, 2, 3].map((offset) => {
-                        const imageIndex = (recodeIndex + offset) % recodeImages.length
-                        const zIndex = 40 - offset * 10
-                        // Vertical Stack Effect
-                        const translateY = offset * 16 // Vertical spacing
-                        const translateZ = -offset * 30 // Depth for 3D effect
-                        const rotateX = offset * 2 // Slight tilt for depth
-                        const opacity = offset === 0 ? 1 : 0.9 - offset * 0.15
-                        const scale = 1 - offset * 0.04 // Slight scale reduction
-                        
-                        return (
-                          <motion.div
-                            key={`recode-${imageIndex}-${offset}`}
-                            className="card-stack absolute inset-0"
-                            style={{ 
-                              zIndex,
-                              transformStyle: 'preserve-3d'
-                            }}
-                            initial={false}
-                            animate={{ 
-                              x: 0, // No horizontal movement
-                              y: translateY,
-                              z: translateZ,
-                              rotateX: rotateX, // Vertical tilt
-                              opacity,
-                              scale
-                            }}
-                            transition={{ 
-                              duration: 0.7,
-                              ease: [0.34, 1.56, 0.64, 1] // Elastic easing for smooth shuffle
-                            }}
-                          >
-                            <div 
-                              className="relative w-full h-full overflow-hidden bg-gray-100 rounded-sm"
-                              style={{
-                                boxShadow: offset === 0 
-                                  ? '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 15px 30px -10px rgba(0, 0, 0, 0.25)' 
-                                  : offset === 1 
-                                    ? '0 20px 40px -15px rgba(0, 0, 0, 0.25)' 
-                                    : '0 10px 25px -10px rgba(0, 0, 0, 0.15)',
-                                transform: offset === 0 ? 'translateY(-8px)' : 'none'
-                              }}
-                            >
-                              <AnimatePresence mode="wait">
-                                {recodeImages[imageIndex] && (
-                                  <motion.div
-                                    key={`recode-img-${imageIndex}`}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.4 }}
-                                    className="absolute inset-0"
-                                  >
-                                    <Image
-                                      src={recodeImages[imageIndex]}
-                                      alt={`Recode ${imageIndex + 1}`}
-                                      loading="lazy"
-                                      fill
-                                      className="object-cover"
-                                      sizes="(max-width: 768px) 100vw, 50vw"
-                                      unoptimized
-                                    />
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                              {offset === 0 && (
-                                <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
-                                  {imageIndex + 1} / {recodeImages.length}
-                                </div>
-                              )}
-                            </div>
-                          </motion.div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="relative aspect-[3/4] max-w-md mx-auto cursor-not-allowed">
-                    <div className="relative w-full h-full bg-gray-200 rounded-sm shadow-2xl flex items-center justify-center">
-                      <div className="text-center">
-                        <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        <p className="text-gray-500 text-sm">Coming Soon</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Right: Content */}
-              <div className="space-y-4 order-1 md:order-2">
-                {recodeImages.length > 0 ? (
-                  <>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-500 rounded-full">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
-                      <span className="text-xs font-bold uppercase tracking-wider text-white">Available Now</span>
-                    </div>
-                    
-                    <h3 className="text-4xl md:text-5xl font-light text-black tracking-tight leading-none">
-                      {recodeTitle}
-                    </h3>
-                    
-                    <p className="text-base text-gray-600 leading-relaxed whitespace-pre-line">
-                      {recodeDescription}
-                    </p>
-                    
-                    <Link
-                      href={recodeLinkUrl}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-medium uppercase tracking-wider text-xs hover:bg-orange-500 transition-all duration-300 group"
-                    >
-                      <span>See Collection</span>
-                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-700 rounded-full">
-                      <svg className="w-3 h-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      <span className="text-xs font-bold uppercase tracking-wider text-gray-300">Coming Soon</span>
-                    </div>
-                    
-                    <h3 className="text-4xl md:text-5xl font-light text-gray-400 tracking-tight leading-none">
-                      {recodeTitle}
-                    </h3>
-                    
-                    <p className="text-base text-gray-500 leading-relaxed whitespace-pre-line">
-                      {recodeDescription}
-                    </p>
-                    
-                    <div className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 text-gray-500 font-medium uppercase tracking-wider text-xs cursor-not-allowed border border-gray-300">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                      </svg>
-                      <span>Coming Soon</span>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+              <AnimatedCollection
+                collection={{
+                  title: recodeTitle,
+                  subtitle: "Available Now",
+                  description: recodeDescription,
+                  images: recodeImages,
+                  link: recodeLinkUrl
+                }}
+                autoplay={true}
+              />
             </div>
           </motion.div>
 
