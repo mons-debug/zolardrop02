@@ -44,7 +44,25 @@ export default function AdminProductsPage() {
       
       if (response.ok) {
         const data = await response.json()
-        setProducts(data.products || [])
+        const allProducts = data.products || []
+        
+        // Filter out variant products (products with " - colorname" pattern that are duplicates)
+        // Only keep main products - variants should be managed inside product edit page
+        const mainProducts = allProducts.filter((product: Product) => {
+          // If title contains " - " it might be a variant product created as separate item
+          // Check if there's a main product with the base name
+          if (product.title.includes(' - ')) {
+            const baseName = product.title.split(' - ')[0]
+            const hasMainProduct = allProducts.some((p: Product) => 
+              p.title === baseName && p.id !== product.id
+            )
+            // If main product exists, skip this variant product
+            return !hasMainProduct
+          }
+          return true
+        })
+        
+        setProducts(mainProducts)
       }
     } catch (error) {
       console.error('Error fetching products:', error)
