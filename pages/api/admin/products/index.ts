@@ -18,7 +18,7 @@ export default async function handler(
   }
 
   try {
-    const { sku, title, description, images, priceCents, salePriceCents, currency, stock, sizeInventory, category, variants } = req.body
+    const { sku, title, color, description, images, priceCents, salePriceCents, currency, stock, sizeInventory, category, variants } = req.body
 
     // Validation
     if (!sku || !title || !priceCents) {
@@ -53,6 +53,7 @@ export default async function handler(
       data: {
         sku,
         title,
+        color: color || null,
         description,
         images: images ? JSON.stringify(images) : undefined,
         priceCents,

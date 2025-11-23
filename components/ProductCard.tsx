@@ -9,6 +9,7 @@ interface Product {
   id: string
   sku: string
   title: string
+  color?: string | null
   description: string
   images: string
   priceCents: number

@@ -11,6 +11,7 @@ interface Product {
   id: string
   sku: string
   title: string
+  color?: string | null
   description: string
   images: string
   priceCents: number
@@ -181,6 +182,17 @@ export default function ProductPage() {
   // Prioritize variant size inventory over product size inventory
   const displaySizeInventory = variantSizeInventory.length > 0 ? variantSizeInventory : sizeInventory
 
+  // Dynamic display values based on selected variant
+  const displayTitle = selectedVariant && selectedVariant.description
+    ? `${product.title} - ${selectedVariant.color}`
+    : product.title
+
+  const displayDescription = selectedVariant && selectedVariant.description
+    ? selectedVariant.description
+    : product.description
+
+  const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
+
   // Get available sizes from variants
   const getAvailableSizes = (): string[] => {
     if (!product) return []
@@ -281,7 +293,7 @@ export default function ProductPage() {
           {' / '}
           <Link href="/products" className="hover:text-black transition-colors">Products</Link>
           {' / '}
-          <span className="text-black">{product.title}</span>
+          <span className="text-black">{displayTitle}</span>
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16">
@@ -300,7 +312,7 @@ export default function ProductPage() {
                 <>
                   <Image
                     src={allImages[currentImageIndex]}
-                    alt={product.title}
+                    alt={displayTitle}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={() => setImageError(true)}
@@ -360,7 +372,7 @@ export default function ProductPage() {
                   >
                     <Image
                       src={image}
-                      alt={`${product.title} ${index + 1}`}
+                      alt={`${displayTitle} ${index + 1}`}
                       fill
                       className="object-cover"
                       unoptimized
@@ -375,7 +387,7 @@ export default function ProductPage() {
           <div className="space-y-8">
             <div>
               <h1 className="text-2xl md:text-3xl font-light tracking-tight text-black mb-3">
-                {product.title}
+                {displayTitle}
               </h1>
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 SKU: {product.sku}
@@ -390,14 +402,14 @@ export default function ProductPage() {
                 </div>
               )}
               <div className="text-3xl font-light text-black">
-                {selectedVariant ? formatPrice(selectedVariant.priceCents) : formatPrice(product.priceCents)}
+                {formatPrice(displayPrice)}
               </div>
             </div>
 
             {/* Description */}
             <div>
               <p className="text-sm text-gray-600 leading-relaxed">
-                {product.description}
+                {displayDescription}
               </p>
             </div>
 

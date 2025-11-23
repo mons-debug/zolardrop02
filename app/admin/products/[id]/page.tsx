@@ -43,6 +43,7 @@ export default function EditProductPage() {
   
   // Product fields
   const [title, setTitle] = useState('')
+  const [color, setColor] = useState('')
   const [description, setDescription] = useState('')
   const [sku, setSku] = useState('')
   const [priceCents, setPriceCents] = useState('')
@@ -78,6 +79,7 @@ export default function EditProductPage() {
         const product = data.product
 
         setTitle(product.title)
+        setColor(product.color || '')
         setDescription(product.description || '')
         setSku(product.sku)
         setPriceCents((product.priceCents / 100).toFixed(2))
@@ -211,6 +213,7 @@ export default function EditProductPage() {
         },
         body: JSON.stringify({
           title,
+          color: color || null,
           description: description || null,
           sku,
           priceCents: Math.round(parseFloat(priceCents) * 100),
@@ -283,6 +286,22 @@ export default function EditProductPage() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Color (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                  placeholder="e.g., Black, Navy, Multicolor"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Main color for this product (variants can have different colors)
+                </p>
               </div>
 
               <div>

@@ -14,6 +14,7 @@ model Product {
   id             String    @id @default(uuid())
   sku            String    @unique
   title          String
+  color          String?   // Main product color
   description    String?
   images         String?
   priceCents     Int

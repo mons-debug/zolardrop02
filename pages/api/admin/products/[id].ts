@@ -73,7 +73,7 @@ export default async function handler(
 
   // Handle PUT request (update)
   try {
-    const { sku, title, description, images, priceCents, salePriceCents, currency, stock, sizeInventory, category, variants } = req.body
+    const { sku, title, color, description, images, priceCents, salePriceCents, currency, stock, sizeInventory, category, variants } = req.body
 
     // Validation
     if (priceCents !== undefined && priceCents < 0) {
@@ -113,6 +113,7 @@ export default async function handler(
     const updateData: any = {}
     if (sku !== undefined) updateData.sku = sku
     if (title !== undefined) updateData.title = title
+    if (color !== undefined) updateData.color = color
     if (description !== undefined) updateData.description = description
       if (images !== undefined) updateData.images = images ? JSON.stringify(images) : undefined
     if (priceCents !== undefined) updateData.priceCents = priceCents
