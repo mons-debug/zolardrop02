@@ -118,7 +118,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   // Get price - use variant price if available, otherwise product price
   const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
-  const displayStock = selectedVariant ? selectedVariant.stock : product.stock
+  // Get stock - if variant selected use variant stock, if no variant but has variants use total, otherwise use product stock
+  const displayStock = selectedVariant 
+    ? selectedVariant.stock 
+    : (hasVariants ? totalStock : product.stock)
 
   const handleAddToCart = () => {
     const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
@@ -260,6 +263,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                 <span className="mx-2">•</span>
                 <span>{selectedVariant.stock} in stock</span>
               </>
+            ) : hasVariants ? (
+              <span>{totalStock} in stock (all colors)</span>
             ) : (
               <span>{product.stock} in stock</span>
             )}
