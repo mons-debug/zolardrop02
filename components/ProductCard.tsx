@@ -60,11 +60,10 @@ export default function ProductCard({ product }: ProductCardProps) {
   const parentSku = (product as any)._parentProductSku || product.sku
   const variantId = (product as any)._variantId
   
-  // For variant products, find the specific variant; otherwise use first variant
-  const initialVariant = hasVariants 
-    ? (variantId 
-        ? product.variants.find(v => v.id === variantId) || product.variants[0]
-        : product.variants[0])
+  // For variant products, find the specific variant
+  // For regular products, don't pre-select a variant (let product images show first)
+  const initialVariant = hasVariants && isVariantProduct && variantId
+    ? product.variants.find(v => v.id === variantId) || null
     : null
   
   const [selectedVariant, setSelectedVariant] = useState(initialVariant)
@@ -83,13 +82,24 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
-  // For variant products, ONLY use the variant's images (don't fall back to product images)
-  // For regular products, prioritize variant images but fall back to product images
+  // Image priority logic:
+  // - For variant products (separate product per color): ONLY use that variant's images
+  // - For regular products with variant selected: use selected variant's images
+  // - For regular products without variant selected: use product's primary images
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
-  const allImages = isVariantProduct && variantImages.length > 0
-    ? variantImages  // Variant product - only show variant images
-    : [...variantImages, ...productImages].filter(img => img) // Regular product - variant images first, then product images
+  
+  let allImages: string[]
+  if (isVariantProduct) {
+    // Variant product - only show variant images
+    allImages = variantImages.length > 0 ? variantImages : productImages
+  } else if (selectedVariant && variantImages.length > 0) {
+    // Regular product with variant selected - show variant images
+    allImages = variantImages
+  } else {
+    // Regular product without variant selected - show product images
+    allImages = productImages
+  }
 
   // Change image when variant changes
   const handleVariantChange = (variant: typeof selectedVariant) => {
