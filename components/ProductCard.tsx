@@ -54,15 +54,23 @@ const colorMap: Record<string, string> = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const hasVariants = product.variants && product.variants.length > 0
-  const [selectedVariant, setSelectedVariant] = useState(hasVariants ? product.variants[0] : null)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [imageError, setImageError] = useState(false)
-  const { addItem } = useCart()
-
-  // Check if this is a variant product
+  
+  // Check if this is a variant product (separate product representing a specific variant)
   const isVariantProduct = (product as any)._isVariantProduct || false
   const parentSku = (product as any)._parentProductSku || product.sku
   const variantId = (product as any)._variantId
+  
+  // For variant products, find the specific variant; otherwise use first variant
+  const initialVariant = hasVariants 
+    ? (variantId 
+        ? product.variants.find(v => v.id === variantId) || product.variants[0]
+        : product.variants[0])
+    : null
+  
+  const [selectedVariant, setSelectedVariant] = useState(initialVariant)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [imageError, setImageError] = useState(false)
+  const { addItem } = useCart()
 
   // Safely parse images with error handling
   const parseImages = (imageString: string): string[] => {
@@ -75,9 +83,13 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
   }
 
+  // For variant products, ONLY use the variant's images (don't fall back to product images)
+  // For regular products, prioritize variant images but fall back to product images
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
-  const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
+  const allImages = isVariantProduct && variantImages.length > 0
+    ? variantImages  // Variant product - only show variant images
+    : [...variantImages, ...productImages].filter(img => img) // Regular product - variant images first, then product images
 
   // Change image when variant changes
   const handleVariantChange = (variant: typeof selectedVariant) => {

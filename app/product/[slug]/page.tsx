@@ -513,7 +513,7 @@ export default function ProductPage() {
                       }}
                       className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
                         (colorOption.isMainProduct && !selectedVariant) || 
-                        (selectedVariant?.id === colorOption.id)
+                        (selectedVariant?.id === colorOption.variant?.id)
                           ? 'border-black bg-black text-white shadow-md'
                           : 'border-gray-300 text-black hover:border-black hover:text-black'
                       }`}
