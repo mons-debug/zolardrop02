@@ -192,6 +192,34 @@ export default function ProductPage() {
     : product.description
 
   const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
+  
+  const displayColor = selectedVariant ? selectedVariant.color : (product.color || 'Default')
+
+  // Get all available colors (main product + variants)
+  const getAllColors = () => {
+    const colors = []
+    
+    // Add main product color as first option if it exists
+    if (product.color) {
+      colors.push({
+        id: 'main',
+        color: product.color,
+        isMainProduct: true
+      })
+    }
+    
+    // Add variant colors
+    product.variants.forEach((v: any) => {
+      colors.push({
+        id: v.id,
+        color: v.color,
+        isMainProduct: false,
+        variant: v
+      })
+    })
+    
+    return colors
+  }
 
   // Get available sizes from variants
   const getAvailableSizes = (): string[] => {
@@ -392,6 +420,11 @@ export default function ProductPage() {
               <p className="text-xs uppercase tracking-wider text-gray-500">
                 SKU: {product.sku}
               </p>
+              {preSelectedVariantId && selectedVariant && (
+                <p className="text-sm text-gray-500 mt-1">
+                  Viewing: {selectedVariant.color} variant
+                </p>
+              )}
             </div>
 
             {/* Price */}
@@ -461,27 +494,36 @@ export default function ProductPage() {
               </div>
             )}
 
-            {/* Tune Selection */}
-            <div>
-              <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Tune</h3>
-              <div className="flex flex-wrap gap-3">
-                {getFilteredVariants().map((variant) => (
-                  <button
-                    key={variant.id}
-                    onClick={() => handleVariantChange(variant)}
-                    className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
-                      selectedVariant?.id === variant.id
-                        ? 'border-orange-500 bg-orange-500 text-white shadow-md'
-                        : 'border-gray-300 text-black hover:border-orange-500 hover:text-orange-500'
-                    }`}
-                    disabled={variant.stock === 0}
-                  >
-                    {variant.color}
-                    {variant.stock === 0 && ' (Out of Stock)'}
-                  </button>
-                ))}
+            {/* Color Selection */}
+            {getAllColors().length > 0 && (
+              <div>
+                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Color</h3>
+                <div className="flex flex-wrap gap-3">
+                  {getAllColors().map((colorOption: any) => (
+                    <button
+                      key={colorOption.id}
+                      onClick={() => {
+                        if (colorOption.isMainProduct) {
+                          setSelectedVariant(null)
+                          setCurrentImageIndex(0)
+                        } else {
+                          setSelectedVariant(colorOption.variant)
+                          setCurrentImageIndex(0)
+                        }
+                      }}
+                      className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
+                        (colorOption.isMainProduct && !selectedVariant) || 
+                        (selectedVariant?.id === colorOption.id)
+                          ? 'border-black bg-black text-white shadow-md'
+                          : 'border-gray-300 text-black hover:border-black hover:text-black'
+                      }`}
+                    >
+                      {colorOption.color}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Selected Variant Info */}
             {selectedVariant && (
