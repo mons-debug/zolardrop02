@@ -271,21 +271,38 @@ export default function ProductPage() {
   }
 
   const handleAddToCart = () => {
-    if (!selectedVariant || !product) return
+    if (!product) return
 
-    const variantImgs = parseImages(selectedVariant.images)
-    const productImgs = parseImages(product.images)
-    const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
+    // If product has variants, use selected variant. Otherwise use product data
+    if (product.variants && product.variants.length > 0 && selectedVariant) {
+      const variantImgs = parseImages(selectedVariant.images)
+      const productImgs = parseImages(product.images)
+      const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
 
-    addItem({
-      productId: product.id,
-      variantId: selectedVariant.id,
-      qty: 1,
-      priceCents: selectedVariant.priceCents,
-      title: product.title,
-      image: firstImage,
-      variantName: selectedVariant.color
-    })
+      addItem({
+        productId: product.id,
+        variantId: selectedVariant.id,
+        qty: 1,
+        priceCents: selectedVariant.priceCents,
+        title: product.title,
+        image: firstImage,
+        variantName: selectedVariant.color
+      })
+    } else {
+      // Product without variants or no variant selected
+      const productImgs = parseImages(product.images)
+      const firstImage = productImgs[0] || '/placeholder.jpg'
+
+      addItem({
+        productId: product.id,
+        variantId: product.id, // Use product ID as variant ID for products without variants
+        qty: 1,
+        priceCents: product.priceCents,
+        title: product.title,
+        image: firstImage,
+        variantName: product.color || 'Default'
+      })
+    }
   }
 
   // JSON-LD Structured Data for SEO
@@ -583,14 +600,22 @@ export default function ProductPage() {
             <div className="space-y-4">
               <button
                 onClick={handleAddToCart}
-                disabled={(selectedVariant && selectedVariant.stock === 0) || (!selectedVariant && product.stock === 0)}
+                disabled={
+                  product.variants && product.variants.length > 0
+                    ? (selectedVariant ? selectedVariant.stock === 0 : true) // If has variants, need variant selected and in stock
+                    : product.stock === 0 // If no variants, just check product stock
+                }
                 className={`w-full py-4 px-8 text-xs uppercase tracking-widest font-medium transition-colors ${
-                  (selectedVariant && selectedVariant.stock > 0) || (!selectedVariant && product.stock > 0)
+                  (product.variants && product.variants.length > 0
+                    ? (selectedVariant && selectedVariant.stock > 0)
+                    : product.stock > 0)
                     ? 'bg-black text-white hover:bg-gray-800'
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {(selectedVariant && selectedVariant.stock > 0) || (!selectedVariant && product.stock > 0)
+                {(product.variants && product.variants.length > 0
+                  ? (selectedVariant && selectedVariant.stock > 0)
+                  : product.stock > 0)
                   ? 'Add to Cart'
                   : 'Out of Stock'
                 }
