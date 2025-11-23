@@ -273,6 +273,12 @@ export default function ProductPage() {
   const handleAddToCart = () => {
     if (!product) return
 
+    // Check if size selection is required but not selected
+    if ((displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize) {
+      alert('Please select a size before adding to cart')
+      return
+    }
+
     // If product has variants, use selected variant. Otherwise use product data
     if (product.variants && product.variants.length > 0 && selectedVariant) {
       const variantImgs = parseImages(selectedVariant.images)
@@ -286,7 +292,7 @@ export default function ProductPage() {
         priceCents: selectedVariant.priceCents,
         title: product.title,
         image: firstImage,
-        variantName: selectedVariant.color
+        variantName: `${selectedVariant.color}${selectedVariant.size ? ` - ${selectedVariant.size}` : ''}`
       })
     } else {
       // Product without variants or no variant selected
@@ -300,7 +306,7 @@ export default function ProductPage() {
         priceCents: product.priceCents,
         title: product.title,
         image: firstImage,
-        variantName: product.color || 'Default'
+        variantName: `${product.color || 'Default'}${selectedSize ? ` - ${selectedSize}` : ''}`
       })
     }
   }
@@ -601,23 +607,32 @@ export default function ProductPage() {
               <button
                 onClick={handleAddToCart}
                 disabled={
-                  product.variants && product.variants.length > 0
-                    ? (selectedVariant ? selectedVariant.stock === 0 : true) // If has variants, need variant selected and in stock
-                    : product.stock === 0 // If no variants, just check product stock
+                  // Only disable if out of stock
+                  (product.variants && product.variants.length > 0)
+                    ? (selectedVariant && selectedVariant.stock === 0)
+                    : product.stock === 0
                 }
                 className={`w-full py-4 px-8 text-xs uppercase tracking-widest font-medium transition-colors ${
-                  (product.variants && product.variants.length > 0
-                    ? (selectedVariant && selectedVariant.stock > 0)
-                    : product.stock > 0)
-                    ? 'bg-black text-white hover:bg-gray-800'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  ((displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize)
+                    ? 'bg-orange-500 text-white hover:bg-orange-600'
+                    : (product.variants && product.variants.length > 0)
+                      ? (selectedVariant && selectedVariant.stock === 0)
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-black text-white hover:bg-gray-800'
+                      : product.stock === 0
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-black text-white hover:bg-gray-800'
                 }`}
               >
-                {(product.variants && product.variants.length > 0
-                  ? (selectedVariant && selectedVariant.stock > 0)
-                  : product.stock > 0)
-                  ? 'Add to Cart'
-                  : 'Out of Stock'
+                {(displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize
+                  ? 'Please Select a Size First'
+                  : (product.variants && product.variants.length > 0)
+                    ? (selectedVariant && selectedVariant.stock === 0)
+                      ? 'Out of Stock'
+                      : 'Add to Cart'
+                    : product.stock === 0
+                      ? 'Out of Stock'
+                      : 'Add to Cart'
                 }
               </button>
 
