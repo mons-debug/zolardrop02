@@ -158,7 +158,13 @@ export default function ProductPage() {
 
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
-  const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
+  // If variant is selected and has images, show ONLY variant images
+  // Otherwise show product images
+  const allImages = (selectedVariant && variantImages.length > 0)
+    ? variantImages
+    : productImages.length > 0 
+      ? productImages
+      : []
 
   // Parse sizeInventory string
   const parseSizeInventory = (sizeStr: string | null | undefined): Array<{ size: string; quantity: number }> => {
