@@ -95,8 +95,9 @@ export default function ProductPage() {
                 setSelectedVariant(firstVariantWithSize)
               }
             } else {
-              // No sizes, just select first variant
-              setSelectedVariant(data.product.variants[0])
+              // No sizes, select first variant with stock, or just first variant
+              const firstAvailableVariant = data.product.variants.find((v: any) => v.stock > 0) || data.product.variants[0]
+              setSelectedVariant(firstAvailableVariant)
             }
           }
           setLoading(false)
@@ -158,11 +159,6 @@ export default function ProductPage() {
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
   const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
-  
-  // Calculate total stock across all variants
-  const totalStock = product.variants && product.variants.length > 0
-    ? product.variants.reduce((sum, v) => sum + v.stock, 0)
-    : product.stock
 
   // Parse sizeInventory string
   const parseSizeInventory = (sizeStr: string | null | undefined): Array<{ size: string; quantity: number }> => {
@@ -192,9 +188,9 @@ export default function ProductPage() {
     ? `${product.title} - ${selectedVariant.color}`
     : product.title
 
-  const displayDescription = selectedVariant && selectedVariant.description
+  const displayDescription = (selectedVariant && selectedVariant.description)
     ? selectedVariant.description
-    : product.description
+    : (product.description || `High-quality ${product.title} - Available now at ZOLAR.`)
 
   const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
   
@@ -531,64 +527,66 @@ export default function ProductPage() {
             )}
 
             {/* Selected Variant Info */}
-            {selectedVariant && (
-              <div className="border-t border-b border-gray-200 py-4">
-                <div className="grid grid-cols-2 gap-4 text-xs uppercase tracking-wider">
-                  <div>
-                    <span className="text-gray-500">Selected Tune</span>
-                    <div className="text-black mt-1">{selectedVariant.color}</div>
-                  </div>
-                  {selectedVariant.size && (
+            <div className="border-t border-b border-gray-200 py-4">
+              <div className="grid grid-cols-2 gap-4 text-xs uppercase tracking-wider">
+                {selectedVariant ? (
+                  <>
                     <div>
-                      <span className="text-gray-500">Size</span>
-                      <div className="text-black mt-1">{selectedVariant.size}</div>
+                      <span className="text-gray-500">Selected Color</span>
+                      <div className="text-black mt-1">{selectedVariant.color}</div>
                     </div>
-                  )}
-                  <div>
-                    <span className="text-gray-500">SKU</span>
-                    <div className="text-black mt-1">{selectedVariant.sku}</div>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Stock</span>
-                    {selectedVariant.stock > 0 ? (
-                      <div className="text-black mt-1">{selectedVariant.stock} left</div>
-                    ) : (
-                      <div className="text-orange-600 font-semibold mt-1">Out of Stock</div>
+                    {selectedVariant.size && (
+                      <div>
+                        <span className="text-gray-500">Size</span>
+                        <div className="text-black mt-1">{selectedVariant.size}</div>
+                      </div>
                     )}
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Price</span>
-                    <div className="text-black mt-1">{formatPrice(selectedVariant.priceCents)}</div>
-                  </div>
-                </div>
-                {selectedVariant.stock === 0 && totalStock > 0 && (
-                  <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                    <p className="text-sm text-orange-800">
-                      ⚠️ This color is currently out of stock, but other colors are available. Please select a different color above.
-                    </p>
-                  </div>
+                    <div>
+                      <span className="text-gray-500">SKU</span>
+                      <div className="text-black mt-1">{selectedVariant.sku}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Stock</span>
+                      <div className="text-black mt-1">{selectedVariant.stock} left</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Price</span>
+                      <div className="text-black mt-1">{formatPrice(selectedVariant.priceCents)}</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <span className="text-gray-500">SKU</span>
+                      <div className="text-black mt-1">{product.sku}</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Stock</span>
+                      <div className="text-black mt-1">{product.stock} left</div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Price</span>
+                      <div className="text-black mt-1">{formatPrice(product.priceCents)}</div>
+                    </div>
+                  </>
                 )}
               </div>
-            )}
+            </div>
 
             {/* Add to Cart */}
             <div className="space-y-4">
               <button
                 onClick={handleAddToCart}
-                disabled={!selectedVariant || (selectedVariant.stock === 0 && totalStock === 0)}
+                disabled={(selectedVariant && selectedVariant.stock === 0) || (!selectedVariant && product.stock === 0)}
                 className={`w-full py-4 px-8 text-xs uppercase tracking-widest font-medium transition-colors ${
-                  selectedVariant && (selectedVariant.stock > 0 || totalStock > 0)
+                  (selectedVariant && selectedVariant.stock > 0) || (!selectedVariant && product.stock > 0)
                     ? 'bg-black text-white hover:bg-gray-800'
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {!selectedVariant
-                  ? 'Select a Color'
-                  : selectedVariant.stock > 0
-                    ? 'Add to Cart'
-                    : totalStock > 0
-                      ? 'Select Another Color (This One is Out of Stock)'
-                      : 'Out of Stock'
+                {(selectedVariant && selectedVariant.stock > 0) || (!selectedVariant && product.stock > 0)
+                  ? 'Add to Cart'
+                  : 'Out of Stock'
                 }
               </button>
 
