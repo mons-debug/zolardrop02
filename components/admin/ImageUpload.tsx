@@ -81,22 +81,80 @@ export default function ImageUpload({
     }
   }
 
+  const uploadMultipleFiles = async (files: FileList) => {
+    setUploading(true)
+    setError(null)
+
+    const uploadPromises = Array.from(files).map(async (file) => {
+      const validationError = validateFile(file)
+      if (validationError) {
+        console.error(`Validation error for ${file.name}:`, validationError)
+        return null
+      }
+
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        })
+
+        if (!response.ok) {
+          throw new Error('Upload failed')
+        }
+
+        const data = await response.json()
+        return data.url
+      } catch (err) {
+        console.error(`Upload error for ${file.name}:`, err)
+        return null
+      }
+    })
+
+    try {
+      const results = await Promise.all(uploadPromises)
+      const successfulUploads = results.filter(url => url !== null)
+      
+      if (successfulUploads.length === 0) {
+        setError('All uploads failed. Please try again.')
+      } else if (successfulUploads.length < files.length) {
+        setError(`${successfulUploads.length} of ${files.length} images uploaded successfully.`)
+      }
+
+      // Call onUpload for each successful upload
+      successfulUploads.forEach(url => onUpload(url as string))
+    } catch (err) {
+      console.error('Multiple upload error:', err)
+      setError('Some uploads failed. Please try again.')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const handleDrop = async (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      await uploadFile(file)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      if (multiple && e.dataTransfer.files.length > 1) {
+        await uploadMultipleFiles(e.dataTransfer.files)
+      } else {
+        await uploadFile(e.dataTransfer.files[0])
+      }
     }
   }
 
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      await uploadFile(file)
+    if (e.target.files && e.target.files.length > 0) {
+      if (multiple && e.target.files.length > 1) {
+        await uploadMultipleFiles(e.target.files)
+      } else {
+        await uploadFile(e.target.files[0])
+      }
     }
   }
 
@@ -188,7 +246,7 @@ export default function ImageUpload({
                   {' '}or drag and drop
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  PNG, JPG, WEBP, GIF up to 10MB
+                  PNG, JPG, WEBP, GIF up to 10MB{multiple ? ' (multiple files allowed)' : ''}
                 </p>
               </div>
             </div>

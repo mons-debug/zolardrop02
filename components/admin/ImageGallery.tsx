@@ -133,15 +133,16 @@ export default function ImageGallery({
       <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
         <ImageUpload
           onUpload={handleAddImage}
-          label={images.length === 0 ? 'Upload First Image' : 'Add More Images'}
+          label={images.length === 0 ? 'Upload First Image (or multiple)' : 'Add More Images (can select multiple)'}
+          multiple={true}
         />
       </div>
 
       {/* Helper Text */}
       <p className="text-sm text-gray-500">
         {images.length === 0 
-          ? 'Upload at least one product image. The first image will be the primary image.'
-          : 'The first image is the primary image shown in listings. Click "Set Primary" to change it.'
+          ? 'Upload at least one product image. You can select multiple images at once. The first image will be the primary image.'
+          : 'The first image is the primary image shown in listings. Click "Set Primary" to change it. You can select multiple images at once.'
         }
       </p>
     </div>

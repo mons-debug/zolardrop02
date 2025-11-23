@@ -121,14 +121,6 @@ export default function EditProductPage() {
     }
   }
 
-  const handleVariantImageUpload = (url: string) => {
-    setVariantImages([...variantImages, url])
-  }
-
-  const removeVariantImage = (index: number) => {
-    setVariantImages(variantImages.filter((_, i) => i !== index))
-  }
-
   const addVariant = () => {
     if (!variantColor || !variantSku || !variantPrice || !variantStock) {
       alert('Please fill in all variant fields')
@@ -528,36 +520,12 @@ export default function EditProductPage() {
                   {/* Variant Images */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Variant Images (Optional)
+                      Variant Images (Optional) - Can upload multiple at once
                     </label>
                     
-                    {/* Image Gallery */}
-                    {variantImages.length > 0 && (
-                      <div className="grid grid-cols-4 gap-3 mb-3">
-                        {variantImages.map((url, index) => (
-                          <div key={index} className="relative group">
-                            <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
-                              <img
-                                src={url}
-                                alt={`Variant ${index + 1}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => removeVariantImage(index)}
-                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    
-                    {/* Upload Component */}
-                    <ImageUpload
-                      onUpload={handleVariantImageUpload}
+                    <ImageGallery
+                      images={variantImages}
+                      onImagesChange={setVariantImages}
                       label=""
                     />
                   </div>
