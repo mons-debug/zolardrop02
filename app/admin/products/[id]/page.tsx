@@ -55,6 +55,7 @@ export default function EditProductPage() {
   // Variants
   const [variants, setVariants] = useState<Variant[]>([])
   const [showVariantForm, setShowVariantForm] = useState(false)
+  const [editingVariantIndex, setEditingVariantIndex] = useState<number | null>(null)
   const [variantColor, setVariantColor] = useState('')
   const [variantSku, setVariantSku] = useState('')
   const [variantPrice, setVariantPrice] = useState('')
@@ -134,7 +135,7 @@ export default function EditProductPage() {
       return
     }
 
-    const newVariant: Variant = {
+    const variantData: Variant = {
       color: variantColor,
       sku: variantSku,
       priceCents: Math.round(parseFloat(variantPrice) * 100),
@@ -145,9 +146,48 @@ export default function EditProductPage() {
       showAsProduct: variantShowAsProduct
     }
 
-    setVariants([...variants, newVariant])
+    if (editingVariantIndex !== null) {
+      // Editing existing variant - preserve the ID if it exists
+      const updatedVariants = [...variants]
+      updatedVariants[editingVariantIndex] = {
+        ...variantData,
+        id: variants[editingVariantIndex].id // Keep the original ID
+      }
+      setVariants(updatedVariants)
+      setEditingVariantIndex(null)
+    } else {
+      // Adding new variant
+      setVariants([...variants, variantData])
+    }
     
     // Reset variant form
+    setVariantColor('')
+    setVariantSku('')
+    setVariantPrice('')
+    setVariantStock('')
+    setVariantImages([])
+    setVariantSizeInventory('')
+    setVariantDescription('')
+    setVariantShowAsProduct(false)
+    setShowVariantForm(false)
+  }
+
+  const editVariant = (index: number) => {
+    const variant = variants[index]
+    setEditingVariantIndex(index)
+    setVariantColor(variant.color)
+    setVariantSku(variant.sku)
+    setVariantPrice((variant.priceCents / 100).toFixed(2))
+    setVariantStock(variant.stock.toString())
+    setVariantImages(variant.images || [])
+    setVariantSizeInventory(variant.sizeInventory || '')
+    setVariantDescription(variant.description || '')
+    setVariantShowAsProduct(variant.showAsProduct || false)
+    setShowVariantForm(true)
+  }
+
+  const cancelEditVariant = () => {
+    setEditingVariantIndex(null)
     setVariantColor('')
     setVariantSku('')
     setVariantPrice('')
@@ -413,10 +453,16 @@ export default function EditProductPage() {
                 <h2 className="text-xl font-semibold text-gray-900">Variants (Colors)</h2>
                 <button
                   type="button"
-                  onClick={() => setShowVariantForm(!showVariantForm)}
+                  onClick={() => {
+                    if (showVariantForm) {
+                      cancelEditVariant()
+                    } else {
+                      setShowVariantForm(true)
+                    }
+                  }}
                   className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
                 >
-                  {showVariantForm ? 'Cancel' : '+ Add Variant'}
+                  {showVariantForm ? (editingVariantIndex !== null ? 'Cancel Edit' : 'Cancel') : '+ Add Variant'}
                 </button>
               </div>
 
@@ -561,13 +607,24 @@ export default function EditProductPage() {
                     </label>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={addVariant}
-                    className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 transition-colors"
-                  >
-                    Add Variant
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={addVariant}
+                      className="flex-1 bg-orange-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-orange-600 transition-colors"
+                    >
+                      {editingVariantIndex !== null ? 'Update Variant' : 'Add Variant'}
+                    </button>
+                    {editingVariantIndex !== null && (
+                      <button
+                        type="button"
+                        onClick={cancelEditVariant}
+                        className="px-6 bg-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -595,6 +652,21 @@ export default function EditProductPage() {
                             </>
                           )}
                         </div>
+                        {variant.sizeInventory && (
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium text-gray-700">Size Inventory:</span> {variant.sizeInventory}
+                          </div>
+                        )}
+                        {variant.description && (
+                          <div className="text-sm text-gray-600 mb-2">
+                            <span className="font-medium text-gray-700">Description:</span> {variant.description}
+                          </div>
+                        )}
+                        {variant.showAsProduct && (
+                          <div className="inline-block px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-medium mb-2">
+                            Shows as separate product
+                          </div>
+                        )}
                         {variant.images && variant.images.length > 0 && (
                           <div className="flex gap-2">
                             {variant.images.slice(0, 4).map((img, imgIdx) => (
@@ -610,13 +682,22 @@ export default function EditProductPage() {
                           </div>
                         )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeVariant(index)}
-                        className="ml-4 px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        Remove
-                      </button>
+                      <div className="ml-4 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => editVariant(index)}
+                          className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeVariant(index)}
+                          className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
