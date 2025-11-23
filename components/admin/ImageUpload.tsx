@@ -139,7 +139,7 @@ export default function ImageUpload({
     setDragActive(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      if (multiple && e.dataTransfer.files.length > 1) {
+      if (multiple) {
         await uploadMultipleFiles(e.dataTransfer.files)
       } else {
         await uploadFile(e.dataTransfer.files[0])
@@ -150,7 +150,7 @@ export default function ImageUpload({
   const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault()
     if (e.target.files && e.target.files.length > 0) {
-      if (multiple && e.target.files.length > 1) {
+      if (multiple) {
         await uploadMultipleFiles(e.target.files)
       } else {
         await uploadFile(e.target.files[0])
