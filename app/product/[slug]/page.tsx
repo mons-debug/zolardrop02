@@ -158,6 +158,11 @@ export default function ProductPage() {
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
   const allImages = [...variantImages, ...productImages].filter(img => img) // Show variant images first, filter empty
+  
+  // Calculate total stock across all variants
+  const totalStock = product.variants && product.variants.length > 0
+    ? product.variants.reduce((sum, v) => sum + v.stock, 0)
+    : product.stock
 
   // Parse sizeInventory string
   const parseSizeInventory = (sizeStr: string | null | undefined): Array<{ size: string; quantity: number }> => {
@@ -545,13 +550,24 @@ export default function ProductPage() {
                   </div>
                   <div>
                     <span className="text-gray-500">Stock</span>
-                    <div className="text-black mt-1">{selectedVariant.stock} left</div>
+                    {selectedVariant.stock > 0 ? (
+                      <div className="text-black mt-1">{selectedVariant.stock} left</div>
+                    ) : (
+                      <div className="text-orange-600 font-semibold mt-1">Out of Stock</div>
+                    )}
                   </div>
                   <div>
                     <span className="text-gray-500">Price</span>
                     <div className="text-black mt-1">{formatPrice(selectedVariant.priceCents)}</div>
                   </div>
                 </div>
+                {selectedVariant.stock === 0 && totalStock > 0 && (
+                  <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded">
+                    <p className="text-sm text-orange-800">
+                      ⚠️ This color is currently out of stock, but other colors are available. Please select a different color above.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -559,16 +575,20 @@ export default function ProductPage() {
             <div className="space-y-4">
               <button
                 onClick={handleAddToCart}
-                disabled={!selectedVariant || selectedVariant.stock === 0}
+                disabled={!selectedVariant || (selectedVariant.stock === 0 && totalStock === 0)}
                 className={`w-full py-4 px-8 text-xs uppercase tracking-widest font-medium transition-colors ${
-                  selectedVariant && selectedVariant.stock > 0
+                  selectedVariant && (selectedVariant.stock > 0 || totalStock > 0)
                     ? 'bg-black text-white hover:bg-gray-800'
                     : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
               >
-                {selectedVariant && selectedVariant.stock > 0
-                  ? 'Add to Cart'
-                  : 'Out of Stock'
+                {!selectedVariant
+                  ? 'Select a Color'
+                  : selectedVariant.stock > 0
+                    ? 'Add to Cart'
+                    : totalStock > 0
+                      ? 'Select Another Color (This One is Out of Stock)'
+                      : 'Out of Stock'
                 }
               </button>
 
