@@ -35,6 +35,7 @@ self.addEventListener('push', (event) => {
     requireInteraction: true,
     vibrate: [200, 100, 200, 100, 200], // Longer vibration pattern
     silent: false, // Ensure notification is NOT silent
+    sound: '/notification-cash.mp3', // Cash register sound
     data: {
       url: '/admin'
     }
@@ -58,27 +59,31 @@ self.addEventListener('push', (event) => {
   }
 
   event.waitUntil(
-    // Always show notification, even if app is open
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon,
-      badge: data.badge,
-      tag: data.tag,
-      requireInteraction: data.requireInteraction,
-      vibrate: data.vibrate,
-      silent: false, // Play system sound
-      data: data.data,
-      actions: [
-        {
-          action: 'view',
-          title: 'View Order',
-          icon: '/icon-72x72.png'
-        },
-        {
-          action: 'close',
-          title: 'Dismiss'
-        }
-      ]
+    // Play cash register sound in service worker (for locked phone)
+    playCashRegisterSound().then(() => {
+      // Always show notification, even if app is open
+      return self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: data.icon,
+        badge: data.badge,
+        tag: data.tag,
+        requireInteraction: data.requireInteraction,
+        vibrate: data.vibrate,
+        silent: false, // Play system sound (browser will use default notification sound)
+        sound: data.sound, // Some browsers support custom sound
+        data: data.data,
+        actions: [
+          {
+            action: 'view',
+            title: 'View Order',
+            icon: '/icon-72x72.png'
+          },
+          {
+            action: 'close',
+            title: 'Dismiss'
+          }
+        ]
+      })
     }).then(() => {
       // Send message to all open clients (for in-app notification + sound)
       return self.clients.matchAll({ type: 'window', includeUncontrolled: true })
@@ -90,9 +95,65 @@ self.addEventListener('push', (event) => {
             })
           })
         })
+    }).catch(err => {
+      console.error('Error showing notification:', err)
+      // Still try to show notification even if sound fails
+      return self.registration.showNotification(data.title, {
+        body: data.body,
+        icon: data.icon,
+        badge: data.badge,
+        tag: data.tag,
+        requireInteraction: data.requireInteraction,
+        vibrate: data.vibrate,
+        silent: false,
+        data: data.data,
+        actions: [
+          {
+            action: 'view',
+            title: 'View Order',
+            icon: '/icon-72x72.png'
+          },
+          {
+            action: 'close',
+            title: 'Dismiss'
+          }
+        ]
+      })
     })
   )
 })
+
+// Play cash register sound in service worker
+function playCashRegisterSound() {
+  return new Promise((resolve, reject) => {
+    try {
+      // Service workers can't use Web Audio API directly, but we can try to use Audio
+      // Note: Service workers have limited audio capabilities
+      // The system notification sound will play automatically when silent: false
+      
+      // Try to play sound via message to clients if any are open
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+        .then(clients => {
+          if (clients.length > 0) {
+            // Send message to clients to play sound
+            clients.forEach(client => {
+              client.postMessage({
+                type: 'PLAY_SOUND'
+              })
+            })
+          }
+          resolve()
+        })
+        .catch(err => {
+          console.error('Error sending sound message to clients:', err)
+          resolve() // Don't fail notification if sound fails
+        })
+    } catch (error) {
+      console.error('Error in playCashRegisterSound:', error)
+      resolve() // Don't fail notification if sound fails
+    }
+  })
+}
 
 // Notification click event
 self.addEventListener('notificationclick', (event) => {

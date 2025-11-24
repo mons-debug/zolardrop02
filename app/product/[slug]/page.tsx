@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/CartContext'
 import CartIcon from '@/components/CartIcon'
+import { Lens } from '@/components/ui/lens'
 
 interface Product {
   id: string
@@ -65,6 +66,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [selectedVariant, setSelectedVariant] = useState<any>(null)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const [sizeQuantities, setSizeQuantities] = useState<Record<string, number>>({}) // Track quantities for each size
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
@@ -270,45 +272,115 @@ export default function ProductPage() {
     return `${(cents / 100).toFixed(2)} MAD`
   }
 
+  // Update quantity for a specific size
+  const updateSizeQuantity = (size: string, quantity: number) => {
+    if (quantity < 0) return
+    setSizeQuantities(prev => ({
+      ...prev,
+      [size]: quantity
+    }))
+  }
+
+  // Get total quantity across all sizes
+  const getTotalQuantity = () => {
+    return Object.values(sizeQuantities).reduce((sum, qty) => sum + qty, 0)
+  }
+
   const handleAddToCart = () => {
     if (!product) return
 
-    // Check if size selection is required but not selected
-    if ((displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize) {
-      alert('Please select a size before adding to cart')
-      return
-    }
-
-    // If product has variants, use selected variant. Otherwise use product data
-    if (product.variants && product.variants.length > 0 && selectedVariant) {
-      const variantImgs = parseImages(selectedVariant.images)
-      const productImgs = parseImages(product.images)
-      const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
-
-      addItem({
-        productId: product.id,
-        variantId: selectedVariant.id,
-        qty: 1,
-        priceCents: selectedVariant.priceCents,
-        title: product.title,
-        image: firstImage,
-        variantName: `${selectedVariant.color}${selectedVariant.size ? ` - ${selectedVariant.size}` : ''}`
-      })
+    const hasSizes = displaySizeInventory.length > 0 || getAvailableSizes().length > 0
+    
+    // If product has sizes, check if size and quantity are selected
+    if (hasSizes) {
+      if (!selectedSize) {
+        alert('Please select a size before adding to cart')
+        return
+      }
+      const qty = sizeQuantities[selectedSize] || 0
+      if (qty === 0) {
+        alert('Please select a quantity before adding to cart')
+        return
+      }
     } else {
-      // Product without variants or no variant selected
-      const productImgs = parseImages(product.images)
-      const firstImage = productImgs[0] || '/placeholder.jpg'
-
-      addItem({
-        productId: product.id,
-        variantId: product.id, // Use product ID as variant ID for products without variants
-        qty: 1,
-        priceCents: product.priceCents,
-        title: product.title,
-        image: firstImage,
-        variantName: `${product.color || 'Default'}${selectedSize ? ` - ${selectedSize}` : ''}`
-      })
+      // No sizes - use single selection logic
+      if (!selectedVariant && product.variants && product.variants.length > 0) {
+        alert('Please select a variant before adding to cart')
+        return
+      }
     }
+
+    const productImgs = parseImages(product.images)
+    const firstImage = productImgs[0] || '/placeholder.jpg'
+
+    // If product has sizes, add the selected size with quantity
+    if (hasSizes && selectedSize) {
+      const qty = sizeQuantities[selectedSize] || 1
+      
+      // Find variant for this size and color
+      const variantForSize = product.variants?.find((v: any) => 
+        v.size === selectedSize && 
+        (selectedVariant ? v.color === selectedVariant.color : true)
+      ) || selectedVariant
+
+      if (variantForSize) {
+        const variantImgs = parseImages(variantForSize.images)
+        const variantImage = variantImgs[0] || firstImage
+
+        addItem({
+          productId: product.id,
+          variantId: variantForSize.id,
+          qty: qty,
+          priceCents: variantForSize.priceCents,
+          title: product.title,
+          image: variantImage,
+          variantName: `${variantForSize.color || product.color || 'Default'} - ${selectedSize}`,
+          size: selectedSize
+        })
+      } else {
+        // No variant found, use product directly
+        addItem({
+          productId: product.id,
+          variantId: product.id,
+          qty: qty,
+          priceCents: product.priceCents,
+          title: product.title,
+          image: firstImage,
+          variantName: `${product.color || 'Default'} - ${selectedSize}`,
+          size: selectedSize
+        })
+      }
+    } else {
+      // No sizes - single item logic
+      if (product.variants && product.variants.length > 0 && selectedVariant) {
+        const variantImgs = parseImages(selectedVariant.images)
+        const variantImage = variantImgs[0] || firstImage
+
+        addItem({
+          productId: product.id,
+          variantId: selectedVariant.id,
+          qty: 1,
+          priceCents: selectedVariant.priceCents,
+          title: product.title,
+          image: variantImage,
+          variantName: `${selectedVariant.color}${selectedVariant.size ? ` - ${selectedVariant.size}` : ''}`
+        })
+      } else {
+        addItem({
+          productId: product.id,
+          variantId: product.id,
+          qty: 1,
+          priceCents: product.priceCents,
+          title: product.title,
+          image: firstImage,
+          variantName: `${product.color || 'Default'}${selectedSize ? ` - ${selectedSize}` : ''}`
+        })
+      }
+    }
+
+    // Clear size quantities after adding
+    setSizeQuantities({})
+    setSelectedSize(null)
   }
 
   // JSON-LD Structured Data for SEO
@@ -358,33 +430,36 @@ export default function ProductPage() {
           {/* Image Gallery */}
           <div className="space-y-3">
             <div 
-              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group cursor-zoom-in"
-              onClick={() => {
-                if (allImages.length > 0 && !imageError) {
-                  setZoomedImageUrl(allImages[currentImageIndex])
-                  setIsZoomed(true)
-                }
-              }}
+              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group"
             >
               {allImages.length > 0 && !imageError ? (
-                <>
-                  <Image
-                    src={allImages[currentImageIndex]}
-                    alt={displayTitle}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={() => setImageError(true)}
-                    unoptimized
-                  />
-                  {/* Zoom Icon Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
-                      <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div 
+                  className="w-full h-full relative"
+                  onClick={() => {
+                    // On click, open full zoom modal (especially useful on mobile)
+                    setZoomedImageUrl(allImages[currentImageIndex])
+                    setIsZoomed(true)
+                  }}
+                >
+                  <Lens zoomFactor={2} lensSize={200}>
+                    <Image
+                      src={allImages[currentImageIndex]}
+                      alt={displayTitle}
+                      fill
+                      className="object-cover"
+                      onError={() => setImageError(true)}
+                      unoptimized
+                    />
+                  </Lens>
+                  {/* Zoom hint overlay - only show on hover/touch */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300 flex items-center justify-center pointer-events-none">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
                       </svg>
                     </div>
                   </div>
-                </>
+                </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
                   <div className="text-center p-8">
@@ -479,48 +554,154 @@ export default function ProductPage() {
             {/* Product-Level Size Selection (from sizeInventory or variant sizeInventory) */}
             {displaySizeInventory.length > 0 && (
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
-                <div className="flex flex-wrap gap-3">
-                  {displaySizeInventory.map(({ size, quantity }) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      disabled={quantity === 0}
-                      className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
-                        selectedSize === size
-                          ? 'border-black bg-black text-white shadow-md'
-                          : quantity === 0
-                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                            : 'border-gray-300 text-black hover:border-black hover:text-black'
-                      }`}
-                    >
-                      {size}
-                      {quantity === 0 && ' (Out)'}
-                    </button>
-                  ))}
+                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-3">Select Size</h3>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {displaySizeInventory.map(({ size, quantity }) => {
+                    const isAvailable = quantity > 0
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          if (isAvailable) {
+                            setSelectedSize(size)
+                            // Auto-set quantity to 1 when size is selected
+                            if (!sizeQuantities[size] || sizeQuantities[size] === 0) {
+                              updateSizeQuantity(size, 1)
+                            }
+                          }
+                        }}
+                        disabled={!isAvailable}
+                        className={`px-4 py-2.5 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
+                          selectedSize === size
+                            ? 'border-black bg-black text-white shadow-md'
+                            : !isAvailable
+                              ? 'border-gray-200 text-gray-300 cursor-not-allowed opacity-50'
+                              : 'border-gray-300 text-black hover:border-black hover:text-black'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
                 </div>
+                
+                {/* Size Selected - Show Quantity and Stock Status */}
+                {selectedSize && displaySizeInventory.find(s => s.size === selectedSize)?.quantity > 0 && (() => {
+                  const selectedSizeData = displaySizeInventory.find(s => s.size === selectedSize)
+                  const quantity = selectedSizeData?.quantity || 0
+                  const isLowStock = quantity > 0 && quantity <= 10
+                  const currentQty = sizeQuantities[selectedSize] || 1
+                  
+                  return (
+                    <div className="flex items-center gap-4 mb-6 p-3 bg-gray-50 border border-gray-200 rounded-sm">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs uppercase tracking-wider text-gray-600">Size:</span>
+                          <span className="text-sm font-semibold text-black">{selectedSize}</span>
+                          <span className={`text-xs font-medium ml-2 ${
+                            isLowStock ? 'text-orange-600' : 'text-green-600'
+                          }`}>
+                            {isLowStock ? '⚠ Low Stock' : '✓ In Stock'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs uppercase tracking-wider text-gray-600">Quantity:</span>
+                          <select
+                            value={currentQty}
+                            onChange={(e) => {
+                              const qty = parseInt(e.target.value)
+                              const maxQty = quantity
+                              updateSizeQuantity(selectedSize, Math.min(qty, maxQty))
+                            }}
+                            className="px-3 py-1.5 text-sm border border-gray-300 focus:border-black focus:outline-none transition-colors bg-white"
+                          >
+                            {Array.from({ length: Math.min(quantity, 10) }, (_, i) => i + 1).map(num => (
+                              <option key={num} value={num}>{num}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             )}
 
             {/* Size Selection (from variants) - fallback if no sizeInventory */}
             {displaySizeInventory.length === 0 && getAvailableSizes().length > 0 && (
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-4">Select Size</h3>
-                <div className="flex flex-wrap gap-3">
-                  {getAvailableSizes().map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => handleSizeChange(size)}
-                      className={`px-5 py-3 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
-                        selectedSize === size
-                          ? 'border-black bg-black text-white shadow-md'
-                          : 'border-gray-300 text-black hover:border-black hover:text-black'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-3">Select Size</h3>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {getAvailableSizes().map((size) => {
+                    // Find variant for this size to get stock
+                    const variantForSize = product?.variants?.find((v: any) => v.size === size)
+                    const availableStock = variantForSize?.stock || 0
+                    const isAvailable = availableStock > 0
+                    return (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          if (isAvailable) {
+                            handleSizeChange(size)
+                            // Auto-set quantity to 1 when size is selected
+                            if (!sizeQuantities[size] || sizeQuantities[size] === 0) {
+                              updateSizeQuantity(size, 1)
+                            }
+                          }
+                        }}
+                        disabled={!isAvailable}
+                        className={`px-4 py-2.5 text-xs uppercase tracking-wider font-medium border-2 transition-all rounded-sm ${
+                          selectedSize === size
+                            ? 'border-black bg-black text-white shadow-md'
+                            : !isAvailable
+                              ? 'border-gray-200 text-gray-300 cursor-not-allowed opacity-50'
+                              : 'border-gray-300 text-black hover:border-black hover:text-black'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    )
+                  })}
                 </div>
+                
+                {/* Size Selected - Show Quantity and Stock Status */}
+                {selectedSize && (() => {
+                  const variantForSize = product?.variants?.find((v: any) => v.size === selectedSize)
+                  const availableStock = variantForSize?.stock || 0
+                  const isLowStock = availableStock > 0 && availableStock <= 10
+                  const currentQty = sizeQuantities[selectedSize] || 1
+                  
+                  return availableStock > 0 && (
+                    <div className="flex items-center gap-4 mb-6 p-3 bg-gray-50 border border-gray-200 rounded-sm">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs uppercase tracking-wider text-gray-600">Size:</span>
+                          <span className="text-sm font-semibold text-black">{selectedSize}</span>
+                          <span className={`text-xs font-medium ml-2 ${
+                            isLowStock ? 'text-orange-600' : 'text-green-600'
+                          }`}>
+                            {isLowStock ? '⚠ Low Stock' : '✓ In Stock'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs uppercase tracking-wider text-gray-600">Quantity:</span>
+                          <select
+                            value={currentQty}
+                            onChange={(e) => {
+                              const qty = parseInt(e.target.value)
+                              updateSizeQuantity(selectedSize, Math.min(qty, availableStock))
+                            }}
+                            className="px-3 py-1.5 text-sm border border-gray-300 focus:border-black focus:outline-none transition-colors bg-white"
+                          >
+                            {Array.from({ length: Math.min(availableStock, 10) }, (_, i) => i + 1).map(num => (
+                              <option key={num} value={num}>{num}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             )}
 
@@ -576,7 +757,15 @@ export default function ProductPage() {
                     </div>
                     <div>
                       <span className="text-gray-500">Stock</span>
-                      <div className="text-black mt-1">{selectedVariant.stock} left</div>
+                      <div className="text-black mt-1">
+                        {selectedVariant.stock === 0 ? (
+                          <span className="text-red-600">Out of Stock</span>
+                        ) : selectedVariant.stock <= 10 ? (
+                          <span className="text-orange-600">Low Stock</span>
+                        ) : (
+                          <span className="text-green-600">In Stock</span>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <span className="text-gray-500">Price</span>
@@ -591,7 +780,15 @@ export default function ProductPage() {
                     </div>
                     <div>
                       <span className="text-gray-500">Stock</span>
-                      <div className="text-black mt-1">{product.stock} left</div>
+                      <div className="text-black mt-1">
+                        {product.stock === 0 ? (
+                          <span className="text-red-600">Out of Stock</span>
+                        ) : product.stock <= 10 ? (
+                          <span className="text-orange-600">Low Stock</span>
+                        ) : (
+                          <span className="text-green-600">In Stock</span>
+                        )}
+                      </div>
                     </div>
                     <div>
                       <span className="text-gray-500">Price</span>
@@ -613,7 +810,7 @@ export default function ProductPage() {
                     : product.stock === 0
                 }
                 className={`w-full py-4 px-8 text-xs uppercase tracking-widest font-medium transition-colors ${
-                  ((displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize)
+                  ((displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && (!selectedSize || !sizeQuantities[selectedSize]))
                     ? 'bg-orange-500 text-white hover:bg-orange-600'
                     : (product.variants && product.variants.length > 0)
                       ? (selectedVariant && selectedVariant.stock === 0)
@@ -624,8 +821,8 @@ export default function ProductPage() {
                         : 'bg-black text-white hover:bg-gray-800'
                 }`}
               >
-                {(displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && !selectedSize
-                  ? 'Please Select a Size First'
+                {(displaySizeInventory.length > 0 || getAvailableSizes().length > 0) && (!selectedSize || !sizeQuantities[selectedSize])
+                  ? 'Please Select Size & Quantity'
                   : (product.variants && product.variants.length > 0)
                     ? (selectedVariant && selectedVariant.stock === 0)
                       ? 'Out of Stock'

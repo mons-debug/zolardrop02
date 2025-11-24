@@ -44,11 +44,12 @@ export default function CartDrawer() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
+          body: JSON.stringify({
           items: state.items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
-            qty: item.qty
+            qty: item.qty,
+            size: item.size // Include size if available
           })),
           customer: customerInfo,
           shippingCents: 0 // Could be made configurable

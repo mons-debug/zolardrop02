@@ -21,6 +21,7 @@ interface OrderItem {
   priceCents: number
   product?: Product
   color?: string
+  size?: string
 }
 
 interface Customer {
@@ -388,10 +389,14 @@ export default function OrderDetailPage() {
                           {item.product?.title || 'Unknown Product'}
                         </Link>
                         <p className="text-sm text-gray-500 mt-0.5">
-                          Color: {item.color || 'N/A'} • SKU: {item.product?.sku || item.productId.slice(0, 8)}
+                          {item.color && `Color: ${item.color}`}
+                          {item.color && item.size && ' • '}
+                          {item.size && `Size: ${item.size}`}
+                          {!item.color && !item.size && 'N/A'}
+                          {' • '}SKU: {item.product?.sku || item.productId.slice(0, 8)}
                         </p>
                         <p className="text-sm text-gray-500 mt-0.5">
-                          {formatPrice(item.priceCents)} × {item.qty}
+                          {formatPrice(item.priceCents)} × {item.qty} = {formatPrice(item.priceCents * item.qty)}
                         </p>
                       </div>
                       <div className="text-right">

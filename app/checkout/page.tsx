@@ -45,7 +45,8 @@ export default function CheckoutPage() {
           items: items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
-            qty: item.qty
+            qty: item.qty,
+            size: item.size // Include size if available
           })),
           customer: {
             name: formData.name,

@@ -59,6 +59,7 @@ export default function Home() {
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+  const [productLinks, setProductLinks] = useState<Record<string, string>>({}) // Map slide titles to product URLs
 
   // Navigation functions
   const nextSlide = () => {
@@ -150,7 +151,7 @@ export default function Home() {
     fetchProducts()
   }, [])
 
-  // Fetch hero slides from database
+  // Fetch hero slides from database and resolve product links
   useEffect(() => {
     const fetchHeroSlides = async () => {
       try {
@@ -172,6 +173,33 @@ export default function Home() {
             duration: slide.duration || 5000
           }))
           setHeroSlides(slides)
+
+          // For slides without linkUrl or with /products, try to find product by title
+          const linkMap: Record<string, string> = {}
+          for (const slide of slides) {
+            if (!slide.linkUrl || slide.linkUrl === '/products') {
+              // Try to find product by title
+              try {
+                const searchRes = await fetch(`/api/search?q=${encodeURIComponent(slide.title)}`)
+                if (searchRes.ok) {
+                  const searchData = await searchRes.json()
+                  if (searchData.products && searchData.products.length > 0) {
+                    // Use first matching product
+                    linkMap[slide.title] = `/product/${searchData.products[0].sku}`
+                  }
+                }
+              } catch (err) {
+                // Silently fail, use default /products
+              }
+            } else if (slide.linkUrl && !slide.linkUrl.startsWith('/product/')) {
+              // If linkUrl exists but is not a product link, keep it as is
+              linkMap[slide.title] = slide.linkUrl
+            } else {
+              // Direct product link
+              linkMap[slide.title] = slide.linkUrl
+            }
+          }
+          setProductLinks(linkMap)
         }
       } catch (error) {
         // Silently handle error
@@ -425,11 +453,11 @@ export default function Home() {
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
               >
                 <Link
-                  href="/products"
+                  href={productLinks[heroSlides[currentSlide]?.title] || heroSlides[currentSlide]?.linkUrl || '/products'}
                   className="inline-block px-8 lg:px-10 py-3 lg:py-3.5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
                 >
                   <span className="text-xs lg:text-sm font-semibold tracking-widest uppercase">
-                    Explore Current Drop
+                    {productLinks[heroSlides[currentSlide]?.title] || (heroSlides[currentSlide]?.linkUrl && heroSlides[currentSlide].linkUrl !== '/products') ? 'Shop Now' : 'Explore Current Drop'}
                   </span>
                 </Link>
 
@@ -531,7 +559,7 @@ export default function Home() {
                   </motion.div>
 
           {/* ESSENCE & FRAGMENT - STAGGERED LAYOUT */}
-          <div className="relative space-y-12 md:space-y-0">
+          <div className="relative space-y-6 md:space-y-0">
             {/* ESSENCE COLLECTION */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -556,7 +584,7 @@ export default function Home() {
                 </WavyBackground>
               </div>
               
-              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
                 <AnimatedCollection
                   collection={{
                     title: essenceTitle,
@@ -579,7 +607,7 @@ export default function Home() {
               transition={{ duration: 0.6 }}
               className="relative md:mt-8 bg-white rounded-lg md:rounded-2xl"
             >
-              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
                 <AnimatedCollection
                   collection={{
                     title: fragmentTitle,
@@ -603,7 +631,7 @@ export default function Home() {
             transition={{ duration: 0.8 }}
             className="relative md:mt-8 bg-white rounded-lg md:rounded-2xl"
           >
-            <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-12 md:py-16">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
               <AnimatedCollection
                 collection={{
                   title: recodeTitle,

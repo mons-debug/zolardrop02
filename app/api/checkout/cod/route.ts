@@ -7,6 +7,7 @@ interface CheckoutItem {
   productId: string
   variantId: string
   qty: number
+  size?: string
 }
 
 interface CustomerInfo {
@@ -160,7 +161,8 @@ export async function POST(request: NextRequest) {
           productId: item.productId,
           variantId: item.variantId,
           qty: item.qty,
-          priceCents: stockResults.find(r => r.variant.id === item.variantId)?.variant.priceCents || 0
+          priceCents: stockResults.find(r => r.variant.id === item.variantId)?.variant.priceCents || 0,
+          size: item.size // Include size if available
         })))
       }
     })
@@ -228,6 +230,27 @@ export async function POST(request: NextRequest) {
             if (process.env.NODE_ENV === 'development') {
               console.error('Failed to send low stock alert:', stockError)
             }
+          }
+
+          // Send push notification for low stock
+          try {
+            await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/push/send`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                title: '⚠️ Low Stock Alert',
+                body: `${item.product.title} (${item.color}) - Only ${item.stock} left`,
+                url: `/admin/products/${item.productSku}`,
+                tag: 'low-stock'
+              })
+            })
+          } catch (pushError) {
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Failed to send low stock push notification:', pushError)
+            }
+            // Don't fail the order if push fails
           }
         }
       }

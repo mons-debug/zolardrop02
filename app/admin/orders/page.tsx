@@ -33,6 +33,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
@@ -40,13 +41,32 @@ export default function OrdersPage() {
   }, [])
 
   useEffect(() => {
-    // Apply filters
-    if (statusFilter === 'all') {
-      setFilteredOrders(orders)
-    } else {
-      setFilteredOrders(orders.filter(order => order.status === statusFilter))
+    // Apply filters and search
+    let filtered = orders
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => order.status === statusFilter)
     }
-  }, [orders, statusFilter])
+    
+    // Apply search query (search by order ID, customer name, phone, or city)
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(order => {
+        const orderId = order.id.toLowerCase()
+        const customerName = order.customer?.name?.toLowerCase() || ''
+        const customerPhone = order.customer?.phone?.toLowerCase() || ''
+        const customerCity = order.customer?.city?.toLowerCase() || ''
+        
+        return orderId.includes(query) || 
+               customerName.includes(query) || 
+               customerPhone.includes(query) || 
+               customerCity.includes(query)
+      })
+    }
+    
+    setFilteredOrders(filtered)
+  }, [orders, statusFilter, searchQuery])
 
   const fetchOrders = async () => {
     try {
@@ -139,9 +159,30 @@ export default function OrdersPage() {
       const items = JSON.parse(order.items || '[]')
       const count = items.reduce((sum: number, item: any) => sum + (item.qty || 0), 0)
       const uniqueProducts = items.length
-      return { count, uniqueProducts }
+      
+      // Build size breakdown: e.g., "2 M, 1 S"
+      const sizeMap: Record<string, number> = {}
+      items.forEach((item: any) => {
+        if (item.size) {
+          sizeMap[item.size] = (sizeMap[item.size] || 0) + (item.qty || 1)
+        }
+      })
+      const sizeBreakdown = Object.entries(sizeMap)
+        .map(([size, qty]) => ({ size, qty: qty as number }))
+        .sort((a, b) => {
+          // Sort sizes: S, M, L, XL, XXL, etc.
+          const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
+          const aIndex = sizeOrder.indexOf(a.size.toUpperCase())
+          const bIndex = sizeOrder.indexOf(b.size.toUpperCase())
+          if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
+          if (aIndex !== -1) return -1
+          if (bIndex !== -1) return 1
+          return a.size.localeCompare(b.size)
+        })
+      
+      return { count, uniqueProducts, sizeBreakdown: sizeBreakdown.length > 0 ? sizeBreakdown : null }
     } catch {
-      return { count: 0, uniqueProducts: 0 }
+      return { count: 0, uniqueProducts: 0, sizeBreakdown: null }
     }
   }
 
@@ -215,23 +256,39 @@ export default function OrdersPage() {
 
       {/* Main Content */}
       <main className="p-8">
-        {/* Filters */}
+        {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow border border-gray-200 p-4 mb-6">
-          <div className="flex items-center space-x-4">
-            <label className="text-sm font-medium text-gray-700">Filter by status:</label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
-            >
-              <option value="all">All Orders</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="shipped">Shipped</option>
-              <option value="delivered">Delivered</option>
-              <option value="refunded">Refunded</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            {/* Search Input */}
+            <div className="flex-1 w-full sm:w-auto">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Orders:</label>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by Order ID, Customer Name, Phone, or City..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+              />
+            </div>
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by status:</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-sm"
+              >
+                <option value="all">All Orders</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="refunded">Refunded</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-4">
             <span className="text-sm text-gray-500">
               Showing {filteredOrders.length} of {orders.length} orders
             </span>
@@ -305,7 +362,7 @@ export default function OrdersPage() {
                             {order.customer?.name || 'Unknown Customer'}
                           </Link>
                           <span className="text-xs text-gray-400 mt-1 font-mono">
-                            #{order.id.slice(0, 8)}
+                            #{order.id.slice(0, 8).toUpperCase()}
                           </span>
                           {isNewOrder(order.createdAt) && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white mt-1 animate-pulse">
@@ -314,13 +371,22 @@ export default function OrdersPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         {(() => {
-                          const { count, uniqueProducts } = getItemSummary(order)
+                          const { count, uniqueProducts, sizeBreakdown } = getItemSummary(order)
                           return (
                             <div className="flex flex-col">
                               <span className="text-sm font-semibold text-gray-900">{count} items</span>
                               <span className="text-xs text-gray-500">{uniqueProducts} product{uniqueProducts !== 1 ? 's' : ''}</span>
+                              {sizeBreakdown && sizeBreakdown.length > 0 && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                  {sizeBreakdown.map((item, idx) => (
+                                    <span key={idx}>
+                                      {item.qty}×{item.size}{idx < sizeBreakdown.length - 1 ? ', ' : ''}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           )
                         })()}

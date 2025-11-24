@@ -209,6 +209,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       const AudioContext = window.AudioContext || (window as any).webkitAudioContext
       if (AudioContext) {
         audioContextRef.current = new AudioContext()
+        // Try to resume immediately (may fail on some browsers until user interaction)
+        audioContextRef.current.resume().catch(() => {
+          // Will be resumed on user interaction
+        })
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -217,59 +221,143 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     }
   }, [])
 
-  // Play notification sound
+  // Play cash register sound (cha-ching)
   const playNotificationSound = async () => {
     try {
-      if (!audioContextRef.current) return
+      // Try using HTML5 Audio first (more reliable across browsers)
+      try {
+        const audio = new Audio()
+        // Create cash register sound using data URI (base64 encoded short cash register sound)
+        // Using a simple "cha-ching" sound pattern
+        audio.volume = 0.6
+        audio.playbackRate = 1.0
+        
+        // Try cash register sound file first, then fallback to existing notification.mp3, then Web Audio API
+        const cashSoundUrl = '/notification-cash.mp3'
+        const fallbackSoundUrl = '/notification.mp3'
+        
+        // Try to load the cash register sound file
+        audio.src = cashSoundUrl
+        audio.load()
+        
+        const playPromise = audio.play()
+        
+        if (playPromise !== undefined) {
+          await playPromise.catch(async (error) => {
+            // If cash sound file doesn't exist, try fallback notification.mp3
+            if (error.name !== 'NotAllowedError' && error.name !== 'NotSupportedError') {
+              try {
+                audio.src = fallbackSoundUrl
+                audio.load()
+                const fallbackPromise = audio.play()
+                if (fallbackPromise !== undefined) {
+                  await fallbackPromise.catch(async () => {
+                    // If fallback also fails, generate cash register sound with Web Audio API
+                    await playCashRegisterSound()
+                  })
+                }
+              } catch {
+                // If fallback fails, use Web Audio API
+                await playCashRegisterSound()
+              }
+            } else {
+              // Permission error, fallback to Web Audio API
+              await playCashRegisterSound()
+            }
+          })
+        }
+      } catch (audioError) {
+        // Fallback to Web Audio API if HTML5 Audio fails
+        await playCashRegisterSound()
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to play sound:', error)
+      }
+    }
+  }
+
+  // Generate cash register sound using Web Audio API
+  const playCashRegisterSound = async () => {
+    try {
+      if (!audioContextRef.current) {
+        // Try to create audio context if it doesn't exist
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext
+        if (AudioContext) {
+          audioContextRef.current = new AudioContext()
+        } else {
+          return
+        }
+      }
 
       const audioContext = audioContextRef.current
+      
+      // Resume audio context if suspended (required by browser autoplay policies)
       if (audioContext.state === 'suspended') {
         await audioContext.resume()
       }
 
       const now = audioContext.currentTime
       
-      const createBellTone = (frequency: number, startTime: number, duration: number, volume: number) => {
-        const osc1 = audioContext.createOscillator()
-        const gain1 = audioContext.createGain()
-        
-        osc1.type = 'sine'
-        osc1.frequency.setValueAtTime(frequency, startTime)
-        osc1.frequency.exponentialRampToValueAtTime(frequency * 0.8, startTime + duration)
-        
-        gain1.gain.setValueAtTime(0, startTime)
-        gain1.gain.linearRampToValueAtTime(volume, startTime + 0.005)
-        gain1.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
-        
-        osc1.connect(gain1)
-        gain1.connect(audioContext.destination)
-        
-        osc1.start(startTime)
-        osc1.stop(startTime + duration)
-        
-        const osc2 = audioContext.createOscillator()
-        const gain2 = audioContext.createGain()
-        
-        osc2.type = 'sine'
-        osc2.frequency.setValueAtTime(frequency * 2, startTime)
-        
-        gain2.gain.setValueAtTime(0, startTime)
-        gain2.gain.linearRampToValueAtTime(volume * 0.3, startTime + 0.005)
-        gain2.gain.exponentialRampToValueAtTime(0.01, startTime + duration * 0.6)
-        
-        osc2.connect(gain2)
-        gain2.connect(audioContext.destination)
-        
-        osc2.start(startTime)
-        osc2.stop(startTime + duration)
-      }
-      
-      createBellTone(1318.51, now, 0.15, 0.3)
-      createBellTone(880, now + 0.08, 0.25, 0.35)
-      createBellTone(523.25, now + 0.12, 0.3, 0.15)
+      // Create "cha-ching" cash register sound
+      // First "cha" - quick high-pitched sound
+      const cha1 = audioContext.createOscillator()
+      const gain1 = audioContext.createGain()
+      cha1.type = 'sine'
+      cha1.frequency.setValueAtTime(800, now)
+      cha1.frequency.exponentialRampToValueAtTime(1200, now + 0.05)
+      gain1.gain.setValueAtTime(0, now)
+      gain1.gain.linearRampToValueAtTime(0.4, now + 0.01)
+      gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.1)
+      cha1.connect(gain1)
+      gain1.connect(audioContext.destination)
+      cha1.start(now)
+      cha1.stop(now + 0.1)
+
+      // Second "cha" - slightly lower
+      const cha2 = audioContext.createOscillator()
+      const gain2 = audioContext.createGain()
+      cha2.type = 'sine'
+      cha2.frequency.setValueAtTime(600, now + 0.08)
+      cha2.frequency.exponentialRampToValueAtTime(900, now + 0.13)
+      gain2.gain.setValueAtTime(0, now + 0.08)
+      gain2.gain.linearRampToValueAtTime(0.4, now + 0.09)
+      gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.18)
+      cha2.connect(gain2)
+      gain2.connect(audioContext.destination)
+      cha2.start(now + 0.08)
+      cha2.stop(now + 0.18)
+
+      // "Ching" - bell-like sound
+      const ching = audioContext.createOscillator()
+      const gain3 = audioContext.createGain()
+      ching.type = 'sine'
+      ching.frequency.setValueAtTime(1000, now + 0.15)
+      ching.frequency.exponentialRampToValueAtTime(800, now + 0.35)
+      gain3.gain.setValueAtTime(0, now + 0.15)
+      gain3.gain.linearRampToValueAtTime(0.5, now + 0.16)
+      gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.35)
+      ching.connect(gain3)
+      gain3.connect(audioContext.destination)
+      ching.start(now + 0.15)
+      ching.stop(now + 0.35)
+
+      // Add a subtle "ding" at the end
+      const ding = audioContext.createOscillator()
+      const gain4 = audioContext.createGain()
+      ding.type = 'sine'
+      ding.frequency.setValueAtTime(1200, now + 0.3)
+      ding.frequency.exponentialRampToValueAtTime(600, now + 0.45)
+      gain4.gain.setValueAtTime(0, now + 0.3)
+      gain4.gain.linearRampToValueAtTime(0.3, now + 0.31)
+      gain4.gain.exponentialRampToValueAtTime(0.01, now + 0.45)
+      ding.connect(gain4)
+      gain4.connect(audioContext.destination)
+      ding.start(now + 0.3)
+      ding.stop(now + 0.45)
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to play sound:', error)
+        console.error('Failed to play cash register sound:', error)
       }
     }
   }
@@ -456,9 +544,25 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       window.dispatchEvent(customEvent)
     })
 
-    channel.bind('low-stock', () => {
+    channel.bind('low-stock', (data: any) => {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('⚠️ Low stock event received via Pusher', data)
+      }
+      
       // Refresh notifications from database
       fetchNotifications()
+
+      // Play sound for low stock alerts
+      if (soundEnabled) {
+        playNotificationSound().catch(() => {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Sound failed to play for low stock alert')
+          }
+        })
+      } else if (process.env.NODE_ENV === 'development') {
+        console.log('🔕 Sound disabled, showing prompt')
+        setShowSoundPrompt(true)
+      }
     })
 
     return () => {
@@ -622,7 +726,19 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       {/* Notification Bell */}
       <div className="relative">
         <button
-          onClick={() => setShowDropdown(!showDropdown)}
+          onClick={async () => {
+            // Enable audio context on user interaction (required by browsers)
+            if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+              try {
+                await audioContextRef.current.resume()
+              } catch (error) {
+                if (process.env.NODE_ENV === 'development') {
+                  console.error('Failed to resume audio context:', error)
+                }
+              }
+            }
+            setShowDropdown(!showDropdown)
+          }}
           className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

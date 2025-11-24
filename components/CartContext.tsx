@@ -10,6 +10,7 @@ export interface CartItem {
   title: string
   image: string
   variantName?: string
+  size?: string // Size for products with size variants
 }
 
 interface CartState {
@@ -19,8 +20,8 @@ interface CartState {
 
 type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: { productId: string; variantId: string } }
-  | { type: 'UPDATE_QUANTITY'; payload: { productId: string; variantId: string; qty: number } }
+  | { type: 'REMOVE_ITEM'; payload: { productId: string; variantId: string; size?: string } }
+  | { type: 'UPDATE_QUANTITY'; payload: { productId: string; variantId: string; qty: number; size?: string } }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_CART' }
   | { type: 'SET_CART'; payload: CartItem[] }
@@ -28,8 +29,8 @@ type CartAction =
 interface CartContextType {
   state: CartState
   addItem: (item: Omit<CartItem, 'qty'> & { qty?: number }) => void
-  removeItem: (productId: string, variantId: string) => void
-  updateQuantity: (productId: string, variantId: string, qty: number) => void
+  removeItem: (productId: string, variantId: string, size?: string) => void
+  updateQuantity: (productId: string, variantId: string, qty: number, size?: string) => void
   clearCart: () => void
   toggleCart: () => void
   getSubtotal: () => number
@@ -41,8 +42,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined)
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
+      // Match items by productId, variantId, AND size (if size exists)
       const existingItemIndex = state.items.findIndex(
-        item => item.productId === action.payload.productId && item.variantId === action.payload.variantId
+        item => 
+          item.productId === action.payload.productId && 
+          item.variantId === action.payload.variantId &&
+          item.size === action.payload.size
       )
 
       if (existingItemIndex >= 0) {
@@ -63,14 +68,22 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         ...state,
         items: state.items.filter(
-          item => !(item.productId === action.payload.productId && item.variantId === action.payload.variantId)
+          item => !(
+            item.productId === action.payload.productId && 
+            item.variantId === action.payload.variantId &&
+            item.size === action.payload.size
+          )
         )
       }
     }
 
     case 'UPDATE_QUANTITY': {
       const updatedItems = state.items.map(item => {
-        if (item.productId === action.payload.productId && item.variantId === action.payload.variantId) {
+        if (
+          item.productId === action.payload.productId && 
+          item.variantId === action.payload.variantId &&
+          item.size === action.payload.size
+        ) {
           return { ...item, qty: Math.max(0, action.payload.qty) }
         }
         return item
@@ -130,12 +143,12 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  const removeItem = (productId: string, variantId: string) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: { productId, variantId } })
+  const removeItem = (productId: string, variantId: string, size?: string) => {
+    dispatch({ type: 'REMOVE_ITEM', payload: { productId, variantId, size } })
   }
 
-  const updateQuantity = (productId: string, variantId: string, qty: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, variantId, qty } })
+  const updateQuantity = (productId: string, variantId: string, qty: number, size?: string) => {
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, variantId, qty, size } })
   }
 
   const clearCart = () => {

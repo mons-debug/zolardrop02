@@ -139,10 +139,37 @@ export default function ProductCard({ product }: ProductCardProps) {
     })
   }
 
+  // Check if this is ESSENCE-SWEATSHIRT and find Eclipse Black variant
+  const getProductLink = () => {
+    if (isVariantProduct) {
+      return `/product/${parentSku}?variant=${variantId}`
+    }
+    
+    // Check if product SKU or title contains ESSENCE-SWEATSHIRT
+    const isEssenceSweatshirt = product.sku.toUpperCase().includes('ESSENCE-SWEATSHIRT') || 
+                                product.sku.toUpperCase().includes('ESS-SW') ||
+                                product.title.toUpperCase().includes('ESSENCE') && product.title.toUpperCase().includes('SWEATSHIRT')
+    
+    if (isEssenceSweatshirt && hasVariants) {
+      // Find Eclipse Black or Black variant
+      const eclipseBlackVariant = product.variants.find(v => 
+        v.color.toLowerCase() === 'eclipse black' || 
+        v.color.toLowerCase() === 'black' ||
+        (v.color.toLowerCase().includes('black') && v.color.toLowerCase().includes('eclipse'))
+      )
+      
+      if (eclipseBlackVariant) {
+        return `/product/${product.sku}?variant=${eclipseBlackVariant.id}`
+      }
+    }
+    
+    return `/product/${product.sku}`
+  }
+
   return (
     <div className="group h-full flex flex-col">
       <Link 
-        href={isVariantProduct ? `/product/${parentSku}?variant=${variantId}` : `/product/${product.sku}`} 
+        href={getProductLink()} 
         className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col" 
         style={{ willChange: 'transform' }}
       >
@@ -260,13 +287,19 @@ export default function ProductCard({ product }: ProductCardProps) {
             {hasVariants && selectedVariant ? (
               <>
                 <span className="font-normal">{selectedVariant.color}</span>
-                <span className="mx-2">•</span>
-                <span>{selectedVariant.stock} in stock</span>
+                {selectedVariant.stock > 0 && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span className={selectedVariant.stock <= 10 ? 'text-orange-600' : 'text-green-600'}>
+                      {selectedVariant.stock <= 10 ? 'Low Stock' : 'In Stock'}
+                    </span>
+                  </>
+                )}
               </>
             ) : hasVariants ? (
-              <span>{totalStock} in stock (all colors)</span>
+              <span>{totalStock > 0 ? (totalStock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
             ) : (
-              <span>{product.stock} in stock</span>
+              <span>{product.stock > 0 ? (product.stock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
             )}
           </div>
 

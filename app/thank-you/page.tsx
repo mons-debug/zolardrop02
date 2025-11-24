@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface TrackingSettings {
   googleAdsId: string | null
@@ -15,10 +16,23 @@ interface TrackingSettings {
   isActive: boolean
 }
 
+interface OrderItem {
+  productId: string
+  variantId: string
+  qty: number
+  priceCents: number
+  title?: string
+  image?: string
+  variantName?: string
+  size?: string
+}
+
 export default function ThankYouPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [trackingSettings, setTrackingSettings] = useState<TrackingSettings | null>(null)
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([])
+  const [loadingItems, setLoadingItems] = useState(false)
   
   const orderId = searchParams.get('orderId')
   const total = searchParams.get('total')
@@ -32,7 +46,78 @@ export default function ThankYouPage() {
 
     // Fetch tracking settings
     fetchTrackingSettings()
+    
+    // Fetch order details to show items
+    if (orderId) {
+      fetchOrderDetails()
+    }
   }, [orderId])
+
+  const fetchOrderDetails = async () => {
+    try {
+      setLoadingItems(true)
+      const response = await fetch(`/api/admin/orders/${orderId}`)
+      if (response.ok) {
+        const data = await response.json()
+        const items = JSON.parse(data.order.items || '[]') as OrderItem[]
+        
+        // Fetch product details for each item
+        const itemsWithDetails = await Promise.all(
+          items.map(async (item) => {
+            try {
+              const productRes = await fetch(`/api/products/${item.productId}`)
+              if (productRes.ok) {
+                const productData = await productRes.json()
+                return {
+                  ...item,
+                  title: productData.product?.title || 'Unknown Product',
+                  image: productData.product?.images ? JSON.parse(productData.product.images)[0] : '/placeholder.jpg'
+                }
+              }
+            } catch (err) {
+              if (process.env.NODE_ENV === 'development') {
+                console.error('Failed to fetch product:', err)
+              }
+            }
+            return item
+          })
+        )
+        setOrderItems(itemsWithDetails)
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching order details:', error)
+      }
+    } finally {
+      setLoadingItems(false)
+    }
+  }
+
+  const downloadReceipt = async () => {
+    if (!orderId) return
+    
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}/receipt`)
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `receipt-${orderId.slice(0, 8).toUpperCase()}.pdf`
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+      } else {
+        alert('Failed to download receipt. Please try again later.')
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error downloading receipt:', error)
+      }
+      alert('Failed to download receipt. Please try again later.')
+    }
+  }
 
   const fetchTrackingSettings = async () => {
     try {
@@ -233,6 +318,60 @@ export default function ThankYouPage() {
               </p>
             </motion.div>
 
+            {/* Order Items */}
+            {loadingItems ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="mb-8 bg-white rounded-xl p-6 border border-gray-200"
+              >
+                <p className="text-gray-600 text-sm text-center">Loading order items...</p>
+              </motion.div>
+            ) : orderItems.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+                className="mb-8 bg-white rounded-xl p-6 border border-gray-200"
+              >
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                <div className="space-y-4">
+                  {orderItems.map((item, index) => (
+                    <div key={index} className="flex items-start space-x-4 pb-4 border-b border-gray-100 last:border-0">
+                      {item.image && (
+                        <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                          <Image
+                            src={item.image}
+                            alt={item.title || 'Product'}
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{item.title || 'Product'}</p>
+                        {item.variantName && (
+                          <p className="text-xs text-gray-500 mt-1">{item.variantName}</p>
+                        )}
+                        {item.size && (
+                          <p className="text-xs text-gray-500">Size: {item.size}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">Quantity: {item.qty}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-gray-900">
+                          {formatPrice((item.priceCents * item.qty).toString())}
+                        </p>
+                        <p className="text-xs text-gray-500">{formatPrice(item.priceCents.toString())} each</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* What's Next Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -277,20 +416,31 @@ export default function ThankYouPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col gap-4"
             >
-              <Link
-                href="/"
-                className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm uppercase tracking-widest hover:from-orange-600 hover:to-orange-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl rounded-lg"
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/"
+                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm uppercase tracking-widest hover:from-orange-600 hover:to-orange-700 transition-all duration-300 font-bold shadow-lg hover:shadow-xl rounded-lg text-center"
+                >
+                  Back to Home
+                </Link>
+                <Link
+                  href="/products"
+                  className="px-8 py-4 border-2 border-gray-900 text-gray-900 text-sm uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all duration-300 font-bold rounded-lg text-center"
+                >
+                  Continue Shopping
+                </Link>
+              </div>
+              <button
+                onClick={downloadReceipt}
+                className="px-8 py-4 bg-white border-2 border-orange-500 text-orange-600 text-sm uppercase tracking-widest hover:bg-orange-50 transition-all duration-300 font-bold rounded-lg flex items-center justify-center space-x-2"
               >
-                Back to Home
-              </Link>
-              <Link
-                href="/products"
-                className="px-8 py-4 border-2 border-gray-900 text-gray-900 text-sm uppercase tracking-widest hover:bg-gray-900 hover:text-white transition-all duration-300 font-bold rounded-lg"
-              >
-                Continue Shopping
-              </Link>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download Receipt</span>
+              </button>
             </motion.div>
           </motion.div>
 
