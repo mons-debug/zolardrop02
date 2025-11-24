@@ -16,12 +16,17 @@ type Collection = {
 export const AnimatedCollection = ({
   collection,
   autoplay = true,
+  index = 0,
 }: {
   collection: Collection;
   autoplay?: boolean;
+  index?: number;
 }) => {
   const [active, setActive] = useState(0);
   const images = collection.images.length > 0 ? collection.images : ['/placeholder.jpg'];
+  
+  // Alternate layout: even index = image left, odd index = image right
+  const isEven = index % 2 === 0;
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % images.length);
@@ -50,7 +55,7 @@ export const AnimatedCollection = ({
     <div className="w-full">
       <div className="relative grid grid-cols-1 gap-8 md:gap-12 md:grid-cols-2">
         {/* Image Stack */}
-        <div className="order-2 md:order-1">
+        <div className={isEven ? "order-2 md:order-1" : "order-2 md:order-2"}>
           <div className="relative h-96 md:h-[500px] w-full max-w-md mx-auto">
             <AnimatePresence>
               {images.map((image, index) => (
@@ -132,28 +137,29 @@ export const AnimatedCollection = ({
         </div>
 
         {/* Content - Static, no animation */}
-        <div className="flex flex-col justify-center py-4 order-1 md:order-2">
+        <div className={isEven ? "flex flex-col justify-center py-4 order-1 md:order-2" : "flex flex-col justify-center py-4 order-1 md:order-1"}>
           <div>
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">
+            {/* Orange Badge */}
+            <div className="inline-block mb-6">
+              <span className="px-4 py-2 bg-orange-500 text-white text-xs uppercase tracking-wider font-semibold rounded-full">
                 {collection.subtitle}
               </span>
-              <div className="h-px w-12 bg-gradient-to-r from-gray-300 to-transparent" />
             </div>
 
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-black mb-6 leading-[0.9]">
+            <h3 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-black mb-6">
               {collection.title}
             </h3>
 
-            <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed mb-8">
+            <p className="text-base md:text-lg text-gray-600 leading-relaxed mb-8 max-w-md">
               {collection.description}
             </p>
 
             <a
               href={collection.link}
-              className="inline-block px-8 py-4 bg-black text-white text-sm uppercase tracking-wider hover:bg-gray-800 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white text-sm font-semibold uppercase tracking-wider hover:bg-orange-600 transition-colors rounded"
             >
-              Explore Collection
+              SEE COLLECTIONS
+              <IconArrowRight className="h-4 w-4" />
             </a>
           </div>
         </div>

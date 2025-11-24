@@ -560,12 +560,13 @@ export default function Home() {
                 <AnimatedCollection
                   collection={{
                     title: essenceTitle,
-                    subtitle: "Available Now",
+                    subtitle: "STREET ESSENTIALS",
                     description: essenceDescription,
                     images: essenceImages,
                     link: essenceLinkUrl
                   }}
                   autoplay={true}
+                  index={0}
                 />
               </div>
             </motion.div>
@@ -582,12 +583,13 @@ export default function Home() {
                 <AnimatedCollection
                   collection={{
                     title: fragmentTitle,
-                    subtitle: "Available Now",
+                    subtitle: "SUMMER DROP 2025",
                     description: fragmentDescription,
                     images: fragmentImages,
                     link: fragmentLinkUrl
                   }}
                   autoplay={true}
+                  index={1}
                 />
               </div>
             </motion.div>
@@ -605,12 +607,13 @@ export default function Home() {
               <AnimatedCollection
                 collection={{
                   title: recodeTitle,
-                  subtitle: "Available Now",
+                  subtitle: "COMING SOON 2025",
                   description: recodeDescription,
                   images: recodeImages,
                   link: recodeLinkUrl
                 }}
                 autoplay={true}
+                index={2}
               />
             </div>
           </motion.div>
