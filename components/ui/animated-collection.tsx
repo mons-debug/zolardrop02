@@ -131,27 +131,9 @@ export const AnimatedCollection = ({
           </div>
         </div>
 
-        {/* Content */}
+        {/* Content - Static, no animation */}
         <div className="flex flex-col justify-center py-4 order-1 md:order-2">
-          <motion.div
-            key={active}
-            initial={{
-              y: 20,
-              opacity: 0,
-            }}
-            animate={{
-              y: 0,
-              opacity: 1,
-            }}
-            exit={{
-              y: -20,
-              opacity: 0,
-            }}
-            transition={{
-              duration: 0.2,
-              ease: "easeInOut",
-            }}
-          >
+          <div>
             <div className="flex items-center gap-4 mb-6">
               <span className="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium">
                 {collection.subtitle}
@@ -163,31 +145,9 @@ export const AnimatedCollection = ({
               {collection.title}
             </h3>
 
-            <motion.p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed mb-8">
-              {collection.description.split(" ").map((word, index) => (
-                <motion.span
-                  key={index}
-                  initial={{
-                    filter: "blur(10px)",
-                    opacity: 0,
-                    y: 5,
-                  }}
-                  animate={{
-                    filter: "blur(0px)",
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    duration: 0.2,
-                    ease: "easeInOut",
-                    delay: 0.02 * index,
-                  }}
-                  className="inline-block"
-                >
-                  {word}&nbsp;
-                </motion.span>
-              ))}
-            </motion.p>
+            <p className="text-lg md:text-xl text-gray-600 font-light leading-relaxed mb-8">
+              {collection.description}
+            </p>
 
             <a
               href={collection.link}
@@ -195,7 +155,7 @@ export const AnimatedCollection = ({
             >
               Explore Collection
             </a>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
