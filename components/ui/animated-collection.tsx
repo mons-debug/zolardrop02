@@ -65,31 +65,29 @@ export const AnimatedCollection = ({
                     opacity: 0,
                     scale: 0.85,
                     z: -100,
-                    rotate: randomRotateY(),
                   }}
                   animate={{
                     opacity: isActive(index) ? 1 : 0.7,
                     scale: isActive(index) ? 1 : 0.92,
                     z: isActive(index) ? 0 : -100,
-                    rotate: isActive(index) ? 0 : randomRotateY(),
                     zIndex: isActive(index)
                       ? 40
                       : images.length + 2 - index,
-                    y: isActive(index) ? [0, -30, 0] : 0,
+                    y: isActive(index) ? [0, -20, 0] : 0,
                   }}
                   exit={{
                     opacity: 0,
                     scale: 0.85,
                     z: 100,
-                    rotate: randomRotateY(),
                   }}
                   transition={{
-                    duration: 0.6,
+                    duration: 0.5,
                     ease: [0.4, 0, 0.2, 1],
                     y: {
-                      duration: 2,
+                      duration: 3,
                       repeat: Infinity,
                       ease: "easeInOut",
+                      repeatType: "reverse",
                     },
                   }}
                   className="absolute inset-0 origin-bottom"
