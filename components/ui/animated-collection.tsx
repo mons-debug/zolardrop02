@@ -58,65 +58,75 @@ export const AnimatedCollection = ({
                   key={`${image}-${index}`}
                   initial={{
                     opacity: 0,
-                    scale: 0.9,
+                    scale: 0.85,
                     z: -100,
                     rotate: randomRotateY(),
                   }}
                   animate={{
                     opacity: isActive(index) ? 1 : 0.7,
-                    scale: isActive(index) ? 1 : 0.95,
+                    scale: isActive(index) ? 1 : 0.92,
                     z: isActive(index) ? 0 : -100,
                     rotate: isActive(index) ? 0 : randomRotateY(),
                     zIndex: isActive(index)
                       ? 40
                       : images.length + 2 - index,
-                    y: isActive(index) ? [0, -20, 0] : 0,
+                    y: isActive(index) ? [0, -30, 0] : 0,
                   }}
                   exit={{
                     opacity: 0,
-                    scale: 0.9,
+                    scale: 0.85,
                     z: 100,
                     rotate: randomRotateY(),
                   }}
                   transition={{
-                    duration: 0.4,
-                    ease: "easeInOut",
+                    duration: 0.6,
+                    ease: [0.4, 0, 0.2, 1],
+                    y: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    },
                   }}
                   className="absolute inset-0 origin-bottom"
                 >
-                  <div className="relative h-full w-full rounded-2xl overflow-hidden bg-white border border-gray-200">
+                  <a 
+                    href={collection.link}
+                    className="block relative h-full w-full rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer group"
+                  >
                     <Image
                       src={image}
                       alt={collection.title}
                       fill
-                      className="object-cover object-center"
+                      className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                       unoptimized
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/placeholder.jpg';
                       }}
                     />
-                  </div>
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                  </a>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
 
-          {/* Navigation Arrows - Desktop (side) / Mobile (bottom) */}
-          <div className="flex gap-4 justify-center mt-6 md:justify-start">
+          {/* Navigation Arrows - More spacing from cards */}
+          <div className="flex gap-4 justify-center mt-10 md:mt-12 md:justify-start">
             <button
               onClick={handlePrev}
-              className="group/button flex h-10 w-10 items-center justify-center rounded-full bg-black hover:bg-gray-800 transition-colors"
+              className="group/button flex h-12 w-12 items-center justify-center rounded-full bg-black hover:bg-orange-500 transition-all duration-300 shadow-md hover:shadow-xl hover:scale-110"
               aria-label="Previous image"
             >
-              <IconArrowLeft className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:rotate-12" />
+              <IconArrowLeft className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:-translate-x-0.5" />
             </button>
             <button
               onClick={handleNext}
-              className="group/button flex h-10 w-10 items-center justify-center rounded-full bg-black hover:bg-gray-800 transition-colors"
+              className="group/button flex h-12 w-12 items-center justify-center rounded-full bg-black hover:bg-orange-500 transition-all duration-300 shadow-md hover:shadow-xl hover:scale-110"
               aria-label="Next image"
             >
-              <IconArrowRight className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:-rotate-12" />
+              <IconArrowRight className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:translate-x-0.5" />
             </button>
           </div>
         </div>
