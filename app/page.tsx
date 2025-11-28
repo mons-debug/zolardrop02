@@ -59,13 +59,16 @@ export default function Home() {
   const [heroSlides, setHeroSlides] = useState<any[]>([])
   const [heroLoading, setHeroLoading] = useState(true)
   const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
+  const [productLinks, setProductLinks] = useState<Record<string, string>>({})
 
   // Navigation functions
   const nextSlide = () => {
+    if (heroSlides.length === 0) return
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
   }
 
   const prevSlide = () => {
+    if (heroSlides.length === 0) return
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
   }
 
@@ -140,6 +143,24 @@ export default function Home() {
         if (res.ok) {
           const data = await res.json()
           setProducts(data.products || [])
+          
+          // Build product links map for hero slides
+          const links: Record<string, string> = {}
+          data.products?.forEach((product: any) => {
+            // For "Eclipse Black" hero slide, find essence sweatshirt with Eclipse Black variant
+            if (product.sku && product.sku.startsWith('ESS-SW')) {
+              const eclipseBlackVariant = product.variants?.find((v: any) => 
+                v.color && (
+                  v.color.toLowerCase().includes('eclipse') && v.color.toLowerCase().includes('black') ||
+                  v.color === 'Eclipse Black'
+                )
+              )
+              if (eclipseBlackVariant) {
+                links['Eclipse Black'] = `/product/${product.sku}?variant=${eclipseBlackVariant.id}`
+              }
+            }
+          })
+          setProductLinks(links)
         }
       } catch (error) {
         // Silently handle error
@@ -425,11 +446,15 @@ export default function Home() {
                 className="flex flex-col sm:flex-row items-start sm:items-center gap-4"
               >
                 <Link
-                  href="/products"
+                  href={heroSlides[currentSlide]?.linkUrl || productLinks[heroSlides[currentSlide]?.title || ''] || '/products'}
                   className="inline-block px-8 lg:px-10 py-3 lg:py-3.5 bg-white text-black hover:bg-orange-500 hover:text-white transition-all duration-300 group"
                 >
                   <span className="text-xs lg:text-sm font-semibold tracking-widest uppercase">
-                    Explore Current Drop
+                    {heroSlides[currentSlide]?.linkUrl && heroSlides[currentSlide]?.linkUrl !== '/products'
+                      ? 'Shop Now'
+                      : productLinks[heroSlides[currentSlide]?.title || '']
+                        ? 'Shop Now'
+                        : 'Explore Current Drop'}
                   </span>
                 </Link>
 

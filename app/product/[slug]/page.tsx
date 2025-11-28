@@ -68,8 +68,6 @@ export default function ProductPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const [zoomedImageUrl, setZoomedImageUrl] = useState('')
 
   useEffect(() => {
     if (slug) {
@@ -84,20 +82,47 @@ export default function ProductPage() {
         .then(data => {
           setProduct(data.product)
           if (data.product && data.product.variants && data.product.variants.length > 0) {
+            // Check if this is an essence sweatshirt (ESS-SW SKU pattern)
+            const isEssenceSweatshirt = data.product.sku && data.product.sku.startsWith('ESS-SW')
+            
+            // Prioritize "Eclipse Black" variant for essence sweatshirts
+            let eclipseBlackVariant = null
+            if (isEssenceSweatshirt) {
+              eclipseBlackVariant = data.product.variants.find((v: any) => 
+                v.color && (
+                  v.color.toLowerCase().includes('eclipse') && v.color.toLowerCase().includes('black') ||
+                  v.color === 'Eclipse Black' ||
+                  (v.color.toLowerCase() === 'black' && data.product.variants.length > 1)
+                )
+              )
+            }
+            
             // Check if variants have sizes
             const variantsWithSizes = data.product.variants.filter((v: any) => v.size)
             if (variantsWithSizes.length > 0) {
-              // Set initial size to first available size
-              setSelectedSize(variantsWithSizes[0].size)
-              // Set initial variant to first variant with that size
-              const firstVariantWithSize = data.product.variants.find((v: any) => v.size === variantsWithSizes[0].size)
-              if (firstVariantWithSize) {
-                setSelectedVariant(firstVariantWithSize)
+              // If we found Eclipse Black, use it if it has a size
+              if (eclipseBlackVariant && eclipseBlackVariant.size) {
+                setSelectedSize(eclipseBlackVariant.size)
+                setSelectedVariant(eclipseBlackVariant)
+              } else {
+                // Set initial size to first available size
+                setSelectedSize(variantsWithSizes[0].size)
+                // Set initial variant to first variant with that size, or Eclipse Black if available
+                const firstVariantWithSize = eclipseBlackVariant && eclipseBlackVariant.size === variantsWithSizes[0].size
+                  ? eclipseBlackVariant
+                  : data.product.variants.find((v: any) => v.size === variantsWithSizes[0].size)
+                if (firstVariantWithSize) {
+                  setSelectedVariant(firstVariantWithSize)
+                }
               }
             } else {
-              // No sizes, select first variant with stock, or just first variant
-              const firstAvailableVariant = data.product.variants.find((v: any) => v.stock > 0) || data.product.variants[0]
-              setSelectedVariant(firstAvailableVariant)
+              // No sizes, prioritize Eclipse Black for essence sweatshirts, otherwise first variant with stock
+              if (eclipseBlackVariant && eclipseBlackVariant.stock > 0) {
+                setSelectedVariant(eclipseBlackVariant)
+              } else {
+                const firstAvailableVariant = data.product.variants.find((v: any) => v.stock > 0) || data.product.variants[0]
+                setSelectedVariant(firstAvailableVariant)
+              }
             }
           }
           setLoading(false)
@@ -358,33 +383,17 @@ export default function ProductPage() {
           {/* Image Gallery */}
           <div className="space-y-3">
             <div 
-              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group cursor-zoom-in"
-              onClick={() => {
-                if (allImages.length > 0 && !imageError) {
-                  setZoomedImageUrl(allImages[currentImageIndex])
-                  setIsZoomed(true)
-                }
-              }}
+              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group"
             >
               {allImages.length > 0 && !imageError ? (
-                <>
-                  <Image
-                    src={allImages[currentImageIndex]}
-                    alt={displayTitle}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={() => setImageError(true)}
-                    unoptimized
-                  />
-                  {/* Zoom Icon Overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-4 shadow-lg">
-                      <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-                      </svg>
-                    </div>
-                  </div>
-                </>
+                <Image
+                  src={allImages[currentImageIndex]}
+                  alt={displayTitle}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={() => setImageError(true)}
+                  unoptimized
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
                   <div className="text-center p-8">
@@ -649,79 +658,6 @@ export default function ProductPage() {
         </div>
       </div>
 
-      {/* Zoom Modal */}
-      {isZoomed && (
-        <div 
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setIsZoomed(false)}
-        >
-          {/* Close Button */}
-          <button
-            onClick={() => setIsZoomed(false)}
-            className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
-            aria-label="Close zoom"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Navigation Arrows */}
-          {allImages.length > 1 && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : allImages.length - 1
-                  setCurrentImageIndex(newIndex)
-                  setZoomedImageUrl(allImages[newIndex])
-                }}
-                className="absolute left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
-                aria-label="Previous image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const newIndex = currentImageIndex < allImages.length - 1 ? currentImageIndex + 1 : 0
-                  setCurrentImageIndex(newIndex)
-                  setZoomedImageUrl(allImages[newIndex])
-                }}
-                className="absolute right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
-                aria-label="Next image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </>
-          )}
-
-          {/* Zoomed Image */}
-          <div className="relative w-full h-full flex items-center justify-center">
-            <div className="relative max-w-7xl max-h-full w-full h-full">
-              <Image
-                src={zoomedImageUrl}
-                alt={product.title}
-                fill
-                className="object-contain"
-                unoptimized
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
-
-          {/* Image Counter */}
-          {allImages.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-              {currentImageIndex + 1} / {allImages.length}
-            </div>
-          )}
-        </div>
-      )}
     </div>
     </>
   )
