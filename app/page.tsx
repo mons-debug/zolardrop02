@@ -63,10 +63,12 @@ export default function Home() {
 
   // Navigation functions
   const nextSlide = () => {
+    if (heroSlides.length === 0) return
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
   }
 
   const prevSlide = () => {
+    if (heroSlides.length === 0) return
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)
   }
 
