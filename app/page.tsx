@@ -462,6 +462,8 @@ export default function Home() {
                     {productLinks[heroSlides[currentSlide]?.title] || (heroSlides[currentSlide]?.linkUrl && heroSlides[currentSlide].linkUrl !== '/products') ? 'Shop Now' : 'Explore Current Drop'}
                   </span>
                 </Link>
+
+                {/* Navigation Arrows - REMOVED FROM DESKTOP */}
               </motion.div>
             </div>
           </motion.div>
