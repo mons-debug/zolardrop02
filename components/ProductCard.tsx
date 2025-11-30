@@ -71,13 +71,23 @@ export default function ProductCard({ product }: ProductCardProps) {
                              product.sku?.startsWith('ESS-')
     
     if (hasVariants && isEssenceProduct) {
-      // Prioritize Eclipse Black for Essence products
-      const eclipseBlackVariant = product.variants.find(v => 
-        v.color && (
-          v.color.toLowerCase().includes('eclipse black') ||
-          v.color.toLowerCase() === 'eclipse black'
+      console.log('🔍 Product variants:', product.variants.map(v => ({ id: v.id, color: v.color })))
+      
+      // Prioritize Eclipse Black for Essence products - robust matching
+      const eclipseBlackVariant = product.variants.find(v => {
+        if (!v.color) return false
+        const color = v.color.toLowerCase().trim()
+        return (
+          color === 'eclipse black' ||
+          color.includes('eclipse black') ||
+          color === 'eclipse-black' ||
+          color === 'eclipseblack' ||
+          (color.includes('eclipse') && color.includes('black'))
         )
-      )
+      })
+      
+      console.log('✅ Eclipse Black variant found:', eclipseBlackVariant)
+      
       if (eclipseBlackVariant) {
         return eclipseBlackVariant
       }

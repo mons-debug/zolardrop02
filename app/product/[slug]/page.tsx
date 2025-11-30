@@ -84,10 +84,14 @@ export default function ProductPage() {
         })
         .then(data => {
           setProduct(data.product)
+          console.log('🔍 URL variant ID:', preSelectedVariantId)
+          console.log('🔍 Available variants:', data.product.variants?.map((v: any) => ({ id: v.id, color: v.color })))
+          
           if (data.product && data.product.variants && data.product.variants.length > 0) {
             // FIRST PRIORITY: Check if variant is specified in URL
             if (preSelectedVariantId) {
               const urlVariant = data.product.variants.find((v: any) => v.id === preSelectedVariantId)
+              console.log('✅ Found URL variant:', urlVariant)
               if (urlVariant) {
                 setSelectedVariant(urlVariant)
                 if (urlVariant.size) {
@@ -104,12 +108,18 @@ export default function ProductPage() {
             
             let eclipseBlackVariant = null
             if (isEssenceProduct) {
-              eclipseBlackVariant = data.product.variants.find((v: any) => 
-                v.color && (
-                  v.color.toLowerCase().includes('eclipse black') ||
-                  v.color.toLowerCase() === 'eclipse black'
+              eclipseBlackVariant = data.product.variants.find((v: any) => {
+                if (!v.color) return false
+                const color = v.color.toLowerCase().trim()
+                return (
+                  color === 'eclipse black' ||
+                  color.includes('eclipse black') ||
+                  color === 'eclipse-black' ||
+                  color === 'eclipseblack' ||
+                  (color.includes('eclipse') && color.includes('black'))
                 )
-              )
+              })
+              console.log('🔍 Eclipse Black variant search:', eclipseBlackVariant)
             }
             
             // Check if variants have sizes
