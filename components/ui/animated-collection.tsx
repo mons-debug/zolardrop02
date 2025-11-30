@@ -234,8 +234,8 @@ export const AnimatedCollection = ({
             </AnimatePresence>
           </div>
 
-          {/* Navigation Arrows - Desktop only */}
-          <div className="hidden md:flex gap-4 justify-center mt-10 md:mt-12 md:justify-start">
+          {/* Navigation Arrows - Show on both mobile and desktop */}
+          <div className="flex gap-4 justify-center mt-10 md:mt-12 md:justify-start">
             <button
               onClick={handleManualPrev}
               className="group/button flex h-12 w-12 items-center justify-center rounded-full bg-black hover:bg-orange-500 transition-all duration-300 shadow-md hover:shadow-xl hover:scale-110"
