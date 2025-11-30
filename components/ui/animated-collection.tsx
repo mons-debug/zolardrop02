@@ -188,36 +188,44 @@ export const AnimatedCollection = ({
                     />
                     {/* Overlay on hover */}
                     <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-                    {/* Arrow button - Cycles images instead of navigating */}
-                    {isCurrent && images.length > 1 && (
+                    {/* Arrow button - Mobile only */}
+                    {isCurrent && (
                       <div 
-                        className="absolute bottom-0 right-0 w-20 h-20 z-[60]"
+                        className="md:hidden absolute bottom-0 right-0 w-20 h-20 z-[60]"
                         onMouseEnter={() => setIsOverArrowButton(true)}
                         onMouseLeave={() => setIsOverArrowButton(false)}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
+                        onTouchStart={(e) => {
+                          e.stopPropagation();
+                          e.preventDefault();
+                        }}
                         style={{ pointerEvents: 'auto' }}
                       >
-                        <button
-                          ref={arrowButtonRef as any}
+                        <a
+                          ref={arrowButtonRef}
+                          href={collection.link}
+                          className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-all duration-300 hover:bg-orange-500 hover:text-white cursor-pointer z-[70]"
+                          aria-label={`View ${collection.title} collection`}
                           onClick={(event) => {
                             event.stopPropagation();
                             event.preventDefault();
-                            // Cycle to next image instead of navigating
-                            handleManualNext();
+                            window.location.href = collection.link;
+                          }}
+                          onPointerDown={(event) => {
+                            event.stopPropagation();
                           }}
                           onMouseDown={(event) => {
                             event.stopPropagation();
                           }}
                           onTouchStart={(event) => {
                             event.stopPropagation();
-                            event.preventDefault();
-                            // Cycle to next image on mobile
-                            handleManualNext();
                           }}
-                          className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-all duration-300 hover:bg-orange-500 hover:text-white cursor-pointer z-[70]"
-                          aria-label={`Next image in ${collection.title}`}
                         >
                           <IconArrowRight className="h-5 w-5 pointer-events-none" />
-                        </button>
+                        </a>
                       </div>
                     )}
                   </div>
@@ -226,8 +234,23 @@ export const AnimatedCollection = ({
             </AnimatePresence>
           </div>
 
-          {/* Navigation Arrows - Removed from desktop per user request */}
-          {/* Mobile users can swipe/drag instead */}
+          {/* Navigation Arrows - Desktop only */}
+          <div className="hidden md:flex gap-4 justify-center mt-10 md:mt-12 md:justify-start">
+            <button
+              onClick={handleManualPrev}
+              className="group/button flex h-12 w-12 items-center justify-center rounded-full bg-black hover:bg-orange-500 transition-all duration-300 shadow-md hover:shadow-xl hover:scale-110"
+              aria-label="Previous image"
+            >
+              <IconArrowLeft className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:-translate-x-0.5" />
+            </button>
+            <button
+              onClick={handleManualNext}
+              className="group/button flex h-12 w-12 items-center justify-center rounded-full bg-black hover:bg-orange-500 transition-all duration-300 shadow-md hover:shadow-xl hover:scale-110"
+              aria-label="Next image"
+            >
+              <IconArrowRight className="h-5 w-5 text-white transition-transform duration-300 group-hover/button:translate-x-0.5" />
+            </button>
+          </div>
 
           {/* Mobile: EXPLORE COLLECTION button centered */}
           <div className="flex justify-center mt-12 md:hidden">
