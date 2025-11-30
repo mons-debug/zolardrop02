@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/CartContext'
 import CartIcon from '@/components/CartIcon'
-import { Lens } from '@/components/ui/lens'
+// Lens zoom removed - was causing image display issues
 
 interface Product {
   id: string
@@ -70,8 +70,7 @@ export default function ProductPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const [zoomedImageUrl, setZoomedImageUrl] = useState('')
+  // Zoom functionality removed - was causing image display issues
 
   useEffect(() => {
     if (slug) {
@@ -433,33 +432,14 @@ export default function ProductPage() {
               className="aspect-[3/4] relative bg-gray-50 overflow-hidden group"
             >
               {allImages.length > 0 && !imageError ? (
-                <div 
-                  className="w-full h-full relative"
-                  onClick={() => {
-                    // On click, open full zoom modal (especially useful on mobile)
-                    setZoomedImageUrl(allImages[currentImageIndex])
-                    setIsZoomed(true)
-                  }}
-                >
-                  <Lens zoomFactor={2} lensSize={200}>
-                    <Image
-                      src={allImages[currentImageIndex]}
-                      alt={displayTitle}
-                      fill
-                      className="object-cover"
-                      onError={() => setImageError(true)}
-                      unoptimized
-                    />
-                  </Lens>
-                  {/* Zoom hint overlay - only show on hover/touch */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300 flex items-center justify-center pointer-events-none">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-                      <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
+                <Image
+                  src={allImages[currentImageIndex]}
+                  alt={displayTitle}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  onError={() => setImageError(true)}
+                  unoptimized
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
                   <div className="text-center p-8">
@@ -847,78 +827,6 @@ export default function ProductPage() {
       </div>
 
       {/* Zoom Modal */}
-      {isZoomed && (
-        <div 
-          className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setIsZoomed(false)}
-        >
-          {/* Close Button */}
-          <button
-            onClick={() => setIsZoomed(false)}
-            className="absolute top-6 right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-3 rounded-full transition-all duration-300 hover:scale-110"
-            aria-label="Close zoom"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Navigation Arrows */}
-          {allImages.length > 1 && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const newIndex = currentImageIndex > 0 ? currentImageIndex - 1 : allImages.length - 1
-                  setCurrentImageIndex(newIndex)
-                  setZoomedImageUrl(allImages[newIndex])
-                }}
-                className="absolute left-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
-                aria-label="Previous image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const newIndex = currentImageIndex < allImages.length - 1 ? currentImageIndex + 1 : 0
-                  setCurrentImageIndex(newIndex)
-                  setZoomedImageUrl(allImages[newIndex])
-                }}
-                className="absolute right-6 z-50 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-4 rounded-full transition-all duration-300 hover:scale-110"
-                aria-label="Next image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </>
-          )}
-
-          {/* Zoomed Image */}
-          <div className="relative w-full h-full flex items-center justify-center">
-            <div className="relative max-w-7xl max-h-full w-full h-full">
-              <Image
-                src={zoomedImageUrl}
-                alt={product.title}
-                fill
-                className="object-contain"
-                unoptimized
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          </div>
-
-          {/* Image Counter */}
-          {allImages.length > 1 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-              {currentImageIndex + 1} / {allImages.length}
-            </div>
-          )}
-        </div>
-      )}
     </div>
     </>
   )
