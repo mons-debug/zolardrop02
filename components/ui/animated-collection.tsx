@@ -149,16 +149,25 @@ export const AnimatedCollection = ({
                   style={{ transformStyle: "preserve-3d", pointerEvents: isCurrent ? "auto" : "none" }}
                   onMouseEnter={pauseAutoplay}
                   onTouchStart={pauseAutoplay}
-                  drag={isCurrent && !isOverArrowButton ? "x" : false}
+                  drag={isCurrent ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
                   dragPropagation={false}
                   onDragStart={(event, info) => {
                     const target = event.target as HTMLElement;
+                    // Don't allow drag to start from arrow button area
                     if (arrowButtonRef.current && arrowButtonRef.current.contains(target)) {
                       return false;
                     }
                     if (target.closest('a[href]')) {
+                      return false;
+                    }
+                    // Check if drag started in bottom-right corner (arrow area)
+                    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+                    const clickX = info.point.x - rect.left;
+                    const clickY = info.point.y - rect.top;
+                    const isBottomRight = clickX > rect.width - 100 && clickY > rect.height - 100;
+                    if (isBottomRight) {
                       return false;
                     }
                     pauseAutoplay();
