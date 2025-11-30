@@ -216,8 +216,8 @@ export default function ProductPage() {
   const displaySizeInventory = variantSizeInventory.length > 0 ? variantSizeInventory : sizeInventory
 
   // Dynamic display values based on selected variant
-  const displayTitle = selectedVariant && selectedVariant.description
-    ? `${product.title} - ${selectedVariant.color}`
+  const displayTitle = selectedVariant && selectedVariant.color
+    ? `${product.title} - ${selectedVariant.color.toUpperCase()}`
     : product.title
 
   const displayDescription = (selectedVariant && selectedVariant.description)
