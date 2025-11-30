@@ -86,6 +86,7 @@ export default function ProductPage() {
           setProduct(data.product)
           console.log('🔍 URL variant ID:', preSelectedVariantId)
           console.log('🔍 Available variants:', data.product.variants?.map((v: any) => ({ id: v.id, color: v.color })))
+          console.log('🔍 Main product color:', data.product.color)
           
           if (data.product && data.product.variants && data.product.variants.length > 0) {
             // FIRST PRIORITY: Check if variant is specified in URL
@@ -102,7 +103,21 @@ export default function ProductPage() {
               }
             }
             
-            // SECOND PRIORITY: Check if this is an Essence product - prioritize Eclipse Black
+            // SECOND PRIORITY: If main product color is Eclipse Black and no variant specified, don't select any variant
+            // This allows the main product (Eclipse Black) to be displayed instead of defaulting to first variant
+            const mainProductColor = data.product.color?.toLowerCase().trim()
+            if (mainProductColor && (
+              mainProductColor === 'eclipse black' ||
+              mainProductColor.includes('eclipse black') ||
+              mainProductColor.includes('eclipse') && mainProductColor.includes('black')
+            )) {
+              console.log('✅ Main product IS Eclipse Black - not selecting any variant')
+              // Don't set selectedVariant - let main product display
+              setLoading(false)
+              return
+            }
+            
+            // THIRD PRIORITY: Check if this is an Essence product - try to find Eclipse Black variant
             const isEssenceProduct = (data.product.sku && data.product.sku.startsWith('ESS-')) || 
                                      (data.product.title && data.product.title.toLowerCase().includes('essence'))
             
@@ -225,10 +240,12 @@ export default function ProductPage() {
   // Prioritize variant size inventory over product size inventory
   const displaySizeInventory = variantSizeInventory.length > 0 ? variantSizeInventory : sizeInventory
 
-  // Dynamic display values based on selected variant
+  // Dynamic display values based on selected variant OR main product color
   const displayTitle = selectedVariant && selectedVariant.color
     ? `${product.title} - ${selectedVariant.color.toUpperCase()}`
-    : product.title
+    : product.color
+      ? `${product.title} - ${product.color.toUpperCase()}`
+      : product.title
 
   const displayDescription = (selectedVariant && selectedVariant.description)
     ? selectedVariant.description
