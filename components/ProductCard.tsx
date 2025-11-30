@@ -282,11 +282,30 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Color Variants - Only show if product has variants */}
-          {hasVariants && (
+          {/* Color Variants - Show main product color + variants */}
+          {(product.color || hasVariants) && (
             <div className="mb-4">
               <div className="flex flex-wrap gap-1.5">
-                {product.variants.map((variant) => (
+                {/* Show main product color first if it exists */}
+                {product.color && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      // Clicking main product color clears variant selection
+                      setSelectedVariant(null)
+                    }}
+                    className={`w-5 h-5 transition-all duration-300 border-2 ${
+                      !selectedVariant
+                        ? 'border-black ring-2 ring-offset-2 ring-black'
+                        : 'border-gray-300 hover:border-gray-600'
+                    } ${colorMap[product.color] || 'bg-gray-200'}`}
+                    title={`${product.color} - Main product`}
+                    aria-label={`Select ${product.color} color`}
+                  />
+                )}
+                {/* Show variants */}
+                {hasVariants && product.variants.map((variant) => (
                   <button
                     key={variant.id}
                     onClick={(e) => {
