@@ -60,13 +60,33 @@ export default function ProductCard({ product }: ProductCardProps) {
   const parentSku = (product as any)._parentProductSku || product.sku
   const variantId = (product as any)._variantId
   
-  // For variant products, find the specific variant
-  // For regular products, don't pre-select a variant (let product images show first)
-  const initialVariant = hasVariants && isVariantProduct && variantId
-    ? product.variants.find(v => v.id === variantId) || null
-    : null
+  // Get initial variant
+  const getInitialVariant = () => {
+    if (hasVariants && isVariantProduct && variantId) {
+      return product.variants.find(v => v.id === variantId) || null
+    }
+    
+    // Check if this is an Essence product
+    const isEssenceProduct = product.title?.toLowerCase().includes('essence') || 
+                             product.sku?.startsWith('ESS-')
+    
+    if (hasVariants && isEssenceProduct) {
+      // Prioritize Eclipse Black for Essence products
+      const eclipseBlackVariant = product.variants.find(v => 
+        v.color && (
+          v.color.toLowerCase().includes('eclipse black') ||
+          v.color.toLowerCase() === 'eclipse black'
+        )
+      )
+      if (eclipseBlackVariant) {
+        return eclipseBlackVariant
+      }
+    }
+    
+    return null
+  }
   
-  const [selectedVariant, setSelectedVariant] = useState(initialVariant)
+  const [selectedVariant, setSelectedVariant] = useState(getInitialVariant())
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageError, setImageError] = useState(false)
   const { addItem } = useCart()
@@ -145,22 +165,9 @@ export default function ProductCard({ product }: ProductCardProps) {
       return `/product/${parentSku}?variant=${variantId}`
     }
     
-    // Check if product SKU or title contains ESSENCE-SWEATSHIRT
-    const isEssenceSweatshirt = product.sku.toUpperCase().includes('ESSENCE-SWEATSHIRT') || 
-                                product.sku.toUpperCase().includes('ESS-SW') ||
-                                product.title.toUpperCase().includes('ESSENCE') && product.title.toUpperCase().includes('SWEATSHIRT')
-    
-    if (isEssenceSweatshirt && hasVariants) {
-      // Find Eclipse Black or Black variant
-      const eclipseBlackVariant = product.variants.find(v => 
-        v.color.toLowerCase() === 'eclipse black' || 
-        v.color.toLowerCase() === 'black' ||
-        (v.color.toLowerCase().includes('black') && v.color.toLowerCase().includes('eclipse'))
-      )
-      
-      if (eclipseBlackVariant) {
-        return `/product/${product.sku}?variant=${eclipseBlackVariant.id}`
-      }
+    // If a variant is already selected (like Eclipse Black), pass it in the URL
+    if (selectedVariant) {
+      return `/product/${product.sku}?variant=${selectedVariant.id}`
     }
     
     return `/product/${product.sku}`

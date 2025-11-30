@@ -85,20 +85,47 @@ export default function ProductPage() {
         .then(data => {
           setProduct(data.product)
           if (data.product && data.product.variants && data.product.variants.length > 0) {
+            // Check if this is an Essence product
+            const isEssenceProduct = (data.product.sku && data.product.sku.startsWith('ESS-')) || 
+                                     (data.product.title && data.product.title.toLowerCase().includes('essence'))
+            
+            // Prioritize Eclipse Black for Essence products
+            let eclipseBlackVariant = null
+            if (isEssenceProduct) {
+              eclipseBlackVariant = data.product.variants.find((v: any) => 
+                v.color && (
+                  v.color.toLowerCase().includes('eclipse black') ||
+                  v.color.toLowerCase() === 'eclipse black'
+                )
+              )
+            }
+            
             // Check if variants have sizes
             const variantsWithSizes = data.product.variants.filter((v: any) => v.size)
             if (variantsWithSizes.length > 0) {
-              // Set initial size to first available size
-              setSelectedSize(variantsWithSizes[0].size)
-              // Set initial variant to first variant with that size
-              const firstVariantWithSize = data.product.variants.find((v: any) => v.size === variantsWithSizes[0].size)
-              if (firstVariantWithSize) {
-                setSelectedVariant(firstVariantWithSize)
+              // ALWAYS prioritize Eclipse Black first if it exists
+              if (eclipseBlackVariant) {
+                setSelectedVariant(eclipseBlackVariant)
+                if (eclipseBlackVariant.size) {
+                  setSelectedSize(eclipseBlackVariant.size)
+                }
+              } else {
+                // Set initial size to first available size
+                setSelectedSize(variantsWithSizes[0].size)
+                // Set initial variant to first variant with that size
+                const firstVariantWithSize = data.product.variants.find((v: any) => v.size === variantsWithSizes[0].size)
+                if (firstVariantWithSize) {
+                  setSelectedVariant(firstVariantWithSize)
+                }
               }
             } else {
-              // No sizes, select first variant with stock, or just first variant
-              const firstAvailableVariant = data.product.variants.find((v: any) => v.stock > 0) || data.product.variants[0]
-              setSelectedVariant(firstAvailableVariant)
+              // No sizes, prioritize Eclipse Black for essence products, otherwise first variant with stock
+              if (eclipseBlackVariant) {
+                setSelectedVariant(eclipseBlackVariant)
+              } else {
+                const firstAvailableVariant = data.product.variants.find((v: any) => v.stock > 0) || data.product.variants[0]
+                setSelectedVariant(firstAvailableVariant)
+              }
             }
           }
           setLoading(false)
