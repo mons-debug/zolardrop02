@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from './CartContext'
+import SizeSelectorModal from './SizeSelectorModal'
 
 interface Product {
   id: string
@@ -107,6 +108,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [selectedVariant, setSelectedVariant] = useState(getInitialVariant())
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageError, setImageError] = useState(false)
+  const [showSizeModal, setShowSizeModal] = useState(false)
   const { addItem } = useCart()
 
   // Safely parse images with error handling
@@ -161,7 +163,32 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? selectedVariant.stock 
     : (hasVariants ? totalStock : product.stock)
 
+  // Parse size inventory
+  const parseSizeInventory = (sizeStr: string | null | undefined): Array<{ size: string; quantity: number }> => {
+    if (!sizeStr) return []
+    try {
+      return sizeStr.split(',').map(item => {
+        const [size, qty] = item.trim().split('=')
+        return { size: size.trim(), quantity: parseInt(qty) || 0 }
+      }).filter(item => item.size && !isNaN(item.quantity))
+    } catch {
+      return []
+    }
+  }
+
+  const sizeInventory = parseSizeInventory(
+    selectedVariant?.sizeInventory || (product as any).sizeInventory
+  )
+  const hasSizes = sizeInventory.length > 0
+
   const handleAddToCart = () => {
+    // If product has sizes, show modal instead of adding directly
+    if (hasSizes) {
+      setShowSizeModal(true)
+      return
+    }
+
+    // No sizes - add directly to cart
     const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
     const productImgs = parseImages(product.images)
     const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
@@ -174,6 +201,23 @@ export default function ProductCard({ product }: ProductCardProps) {
       title: product.title,
       image: firstImage,
       variantName: selectedVariant?.color || 'Default'
+    })
+  }
+
+  const handleAddFromModal = (size: string, quantity: number) => {
+    const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
+    const productImgs = parseImages(product.images)
+    const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
+    
+    addItem({
+      productId: product.id,
+      variantId: selectedVariant?.id || product.id,
+      qty: quantity,
+      priceCents: displayPrice,
+      title: product.title,
+      image: firstImage,
+      variantName: selectedVariant?.color || 'Default',
+      size: size
     })
   }
 
@@ -375,6 +419,16 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
       </Link>
+
+      {/* Size Selector Modal */}
+      {showSizeModal && (
+        <SizeSelectorModal
+          product={product}
+          selectedVariant={selectedVariant}
+          onClose={() => setShowSizeModal(false)}
+          onAddToCart={handleAddFromModal}
+        />
+      )}
     </div>
   )
 }
