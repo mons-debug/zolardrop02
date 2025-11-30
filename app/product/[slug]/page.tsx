@@ -85,11 +85,23 @@ export default function ProductPage() {
         .then(data => {
           setProduct(data.product)
           if (data.product && data.product.variants && data.product.variants.length > 0) {
-            // Check if this is an Essence product
+            // FIRST PRIORITY: Check if variant is specified in URL
+            if (preSelectedVariantId) {
+              const urlVariant = data.product.variants.find((v: any) => v.id === preSelectedVariantId)
+              if (urlVariant) {
+                setSelectedVariant(urlVariant)
+                if (urlVariant.size) {
+                  setSelectedSize(urlVariant.size)
+                }
+                setLoading(false)
+                return
+              }
+            }
+            
+            // SECOND PRIORITY: Check if this is an Essence product - prioritize Eclipse Black
             const isEssenceProduct = (data.product.sku && data.product.sku.startsWith('ESS-')) || 
                                      (data.product.title && data.product.title.toLowerCase().includes('essence'))
             
-            // Prioritize Eclipse Black for Essence products
             let eclipseBlackVariant = null
             if (isEssenceProduct) {
               eclipseBlackVariant = data.product.variants.find((v: any) => 
@@ -103,7 +115,7 @@ export default function ProductPage() {
             // Check if variants have sizes
             const variantsWithSizes = data.product.variants.filter((v: any) => v.size)
             if (variantsWithSizes.length > 0) {
-              // ALWAYS prioritize Eclipse Black first if it exists
+              // Prioritize Eclipse Black first if it exists
               if (eclipseBlackVariant) {
                 setSelectedVariant(eclipseBlackVariant)
                 if (eclipseBlackVariant.size) {
@@ -136,21 +148,7 @@ export default function ProductPage() {
           setLoading(false)
         })
     }
-  }, [slug])
-
-  // Pre-select variant from URL parameter
-  useEffect(() => {
-    if (preSelectedVariantId && product?.variants) {
-      const variant = product.variants.find(v => v.id === preSelectedVariantId)
-      if (variant) {
-        setSelectedVariant(variant)
-        if (variant.size) {
-          setSelectedSize(variant.size)
-        }
-        setCurrentImageIndex(0)
-      }
-    }
-  }, [preSelectedVariantId, product])
+  }, [slug, preSelectedVariantId])
 
   if (loading) {
     return (
