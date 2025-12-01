@@ -381,9 +381,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 )}
               </>
             ) : hasVariants ? (
-              <span>{totalStock > 0 ? (totalStock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
+              <span className={totalStock > 0 ? (totalStock <= 10 ? 'text-orange-600' : 'text-green-600') : 'text-gray-500'}>
+                {totalStock > 0 ? (totalStock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
+              </span>
             ) : (
-              <span>{product.stock > 0 ? (product.stock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}</span>
+              <span className={product.stock > 0 ? (product.stock <= 10 ? 'text-orange-600' : 'text-green-600') : 'text-gray-500'}>
+                {product.stock > 0 ? (product.stock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
+              </span>
             )}
           </div>
 
