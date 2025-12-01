@@ -370,12 +370,24 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="text-xs text-gray-500 mb-4">
             {hasVariants && selectedVariant ? (
               <>
-                <span className="font-normal">{selectedVariant.color}</span>
+                <span className="font-normal uppercase">{selectedVariant.color}</span>
                 {selectedVariant.stock > 0 && (
                   <>
                     <span className="mx-2">•</span>
                     <span className={selectedVariant.stock <= 10 ? 'text-orange-600' : 'text-green-600'}>
                       {selectedVariant.stock <= 10 ? 'Low Stock' : 'In Stock'}
+                    </span>
+                  </>
+                )}
+              </>
+            ) : hasVariants && product.color ? (
+              <>
+                <span className="font-normal uppercase">{product.color}</span>
+                {totalStock > 0 && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <span className={totalStock <= 10 ? 'text-orange-600' : 'text-green-600'}>
+                      {totalStock <= 10 ? 'Low Stock' : 'In Stock'}
                     </span>
                   </>
                 )}
