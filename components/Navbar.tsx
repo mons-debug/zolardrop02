@@ -21,14 +21,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [isDarkBackground, setIsDarkBackground] = useState(true) // Default to true (light background)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<any[]>([])
-  const [showSearchResults, setShowSearchResults] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   
-  // Force black text on pages with white backgrounds
+  // Determine if current page has white background (should show black navbar)
   const isProductsPage = pathname === '/products' || pathname === '/shop'
   const isProductDetailPage = pathname?.startsWith('/product/')
   const isAboutPage = pathname === '/about'
@@ -36,10 +31,18 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const isSearchPage = pathname === '/search'
   const isCheckoutPage = pathname === '/checkout'
   const isThankYouPage = pathname === '/thank-you'
+  const isWhiteBackgroundPage = isProductsPage || isProductDetailPage || isAboutPage || 
+                                isContactPage || isSearchPage || isCheckoutPage || isThankYouPage
+  
+  // Default to true (light background) for white background pages, false for homepage
+  const [isDarkBackground, setIsDarkBackground] = useState(isWhiteBackgroundPage)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   
   // Show black text on white background pages or when scrolled
-  const shouldBeBlack = isScrolled || isProductsPage || isProductDetailPage || isAboutPage || 
-                        isContactPage || isSearchPage || isCheckoutPage || isThankYouPage || isDarkBackground
+  const shouldBeBlack = isScrolled || isWhiteBackgroundPage || isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
@@ -50,8 +53,14 @@ export default function Navbar({ className = '' }: NavbarProps) {
     return () => window.removeEventListener('scroll', updateScroll)
   }, [])
 
-  // Detect background color behind navbar
+  // Detect background color behind navbar (only for homepage)
   useEffect(() => {
+    // Skip detection for white background pages - they should always be black
+    if (isWhiteBackgroundPage) {
+      setIsDarkBackground(true)
+      return
+    }
+    
     const detectBackground = () => {
       try {
         // Get the element behind the navbar
@@ -95,7 +104,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
     return () => {
       window.removeEventListener('scroll', detectBackground)
     }
-  }, [pathname])
+  }, [pathname, isWhiteBackgroundPage])
 
   // Check if user is logged in as admin
   useEffect(() => {
