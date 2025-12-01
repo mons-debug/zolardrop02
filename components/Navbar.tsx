@@ -28,9 +28,10 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   
-  // Force black text on products/shop page
+  // Force black text on products/shop/product detail pages
   const isProductsPage = pathname === '/products' || pathname === '/shop'
-  const shouldBeBlack = isScrolled || isProductsPage || !isDarkBackground
+  const isProductDetailPage = pathname?.startsWith('/product/')
+  const shouldBeBlack = isScrolled || isProductsPage || isProductDetailPage || !isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
