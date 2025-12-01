@@ -34,8 +34,8 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const isWhiteBackgroundPage = isProductsPage || isProductDetailPage || isAboutPage || 
                                 isContactPage || isSearchPage || isCheckoutPage || isThankYouPage
   
-  // Default to true (light background) for white background pages, false for homepage
-  const [isDarkBackground, setIsDarkBackground] = useState(isWhiteBackgroundPage)
+  // Default to true (light background) for white background pages to show black icons immediately
+  const [isDarkBackground, setIsDarkBackground] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
@@ -43,7 +43,8 @@ export default function Navbar({ className = '' }: NavbarProps) {
   
   // Show black text on white background pages OR when isDarkBackground is true (light background detected)
   // Show white text when isDarkBackground is false (dark background detected)
-  const shouldBeBlack = isWhiteBackgroundPage || isDarkBackground
+  // On homepage, use state. On white pages, force black. Default to black for safety.
+  const shouldBeBlack = isWhiteBackgroundPage ? true : isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
@@ -56,11 +57,14 @@ export default function Navbar({ className = '' }: NavbarProps) {
 
   // Detect background color behind navbar (only for homepage)
   useEffect(() => {
-    // Skip detection for white background pages - they should always be black
+    // Skip detection for white background pages - they should always show black icons
     if (isWhiteBackgroundPage) {
-      setIsDarkBackground(true)
+      setIsDarkBackground(true) // Ensure black icons
       return
     }
+    
+    // For homepage, default to false (dark background/hero section)
+    setIsDarkBackground(false)
     
     const detectBackground = () => {
       try {
