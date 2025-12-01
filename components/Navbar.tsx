@@ -210,7 +210,8 @@ export default function Navbar({ className = '' }: NavbarProps) {
           background: isScrolled 
             ? 'linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)' 
             : 'transparent',
-          backdropFilter: isScrolled ? 'blur(30px) saturate(150%)' : 'blur(5px)',
+          backdropFilter: isScrolled ? 'blur(30px) saturate(150%)' : 'none',
+          WebkitBackdropFilter: isScrolled ? 'blur(30px) saturate(150%)' : 'none',
           borderBottom: isScrolled 
             ? '1px solid rgba(255, 255, 255, 0.08)' 
             : 'none',
