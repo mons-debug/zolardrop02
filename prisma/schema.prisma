@@ -22,7 +22,7 @@ model Product {
   currency       String    @default("USD")
   stock          Int
   sizeInventory  String?   // Store sizes and quantities like "M=25, L=15, S=10"
-  sizeGuide      String?   // JSON: Size guide table data
+  sizeGuide      String?   @db.Text // Size guide HTML content
   category       String?
   tags           String?
   status         String    @default("published") // draft, published, archived

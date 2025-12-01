@@ -197,6 +197,10 @@ export default async function handler(
     res.status(200).json({ product })
   } catch (error) {
     console.error('Error updating product:', error)
-    res.status(500).json({ message: 'Internal server error' })
+    console.error('Error details:', error instanceof Error ? error.message : String(error))
+    res.status(500).json({ 
+      message: 'Internal server error',
+      error: error instanceof Error ? error.message : String(error)
+    })
   }
 }
