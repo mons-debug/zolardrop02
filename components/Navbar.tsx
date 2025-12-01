@@ -82,10 +82,11 @@ export default function Navbar({ className = '' }: NavbarProps) {
             // Calculate relative luminance
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
             
-            // If luminance is LOW (dark background like black), we need WHITE text
-            // If luminance is HIGH (light background like white), we need BLACK text
-            // isDarkBackground TRUE means light bg (show black text), FALSE means dark bg (show white text)
-            setIsDarkBackground(luminance >= 0.5)
+            // Show WHITE text (isDarkBackground = false) only for VERY dark backgrounds (< 0.15)
+            // This includes hero section and archive section (black backgrounds)
+            // Show BLACK text (isDarkBackground = true) for everything else
+            // Collection sections with white/light backgrounds will show black text
+            setIsDarkBackground(luminance >= 0.15)
           }
         }
       } catch (error) {
