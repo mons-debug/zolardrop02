@@ -4,21 +4,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom cursor styling */
-* {
-  cursor: default !important;
-}
-
-a, button, [role="button"], input[type="submit"], input[type="button"] {
-  cursor: pointer !important;
-}
-
-input[type="text"], input[type="email"], input[type="tel"], input[type="search"], input[type="password"], textarea, select {
-  cursor: text !important;
-}
-
-input[type="text"]:focus, input[type="email"]:focus, input[type="tel"]:focus, input[type="search"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
-  cursor: text !important;
+@layer utilities {
+  /* Override all cursor styles to use standard browser cursors */
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
+  
+  .cursor-not-allowed {
+    cursor: not-allowed !important;
+  }
+  
+  .cursor-default {
+    cursor: default !important;
+  }
+  
+  .cursor-text {
+    cursor: text !important;
+  }
 }
 
 /* CSS Variables */
