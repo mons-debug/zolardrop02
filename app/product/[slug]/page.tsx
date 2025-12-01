@@ -70,7 +70,8 @@ export default function ProductPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [loading, setLoading] = useState(true)
   const [imageError, setImageError] = useState(false)
-  // Zoom functionality removed - was causing image display issues
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
     if (slug) {
@@ -475,17 +476,34 @@ export default function ProductPage() {
           {/* Image Gallery */}
           <div className="space-y-3">
             <div 
-              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group"
+              className="aspect-[3/4] relative bg-gray-50 overflow-hidden group cursor-zoom-in"
+              onClick={() => setIsZoomed(true)}
+              onMouseMove={(e) => {
+                if (!isZoomed) {
+                  const rect = e.currentTarget.getBoundingClientRect()
+                  const x = ((e.clientX - rect.left) / rect.width) * 100
+                  const y = ((e.clientY - rect.top) / rect.height) * 100
+                  setZoomPosition({ x, y })
+                }
+              }}
             >
               {allImages.length > 0 && !imageError ? (
-                <Image
-                  src={allImages[currentImageIndex]}
-                  alt={displayTitle}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={() => setImageError(true)}
-                  unoptimized
-                />
+                <>
+                  <Image
+                    src={allImages[currentImageIndex]}
+                    alt={displayTitle}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={() => setImageError(true)}
+                    unoptimized
+                  />
+                  {/* Zoom icon overlay */}
+                  <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                    </svg>
+                  </div>
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
                   <div className="text-center p-8">
