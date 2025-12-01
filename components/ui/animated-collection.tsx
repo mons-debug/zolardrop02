@@ -29,7 +29,7 @@ export const AnimatedCollection = ({
   const autoplayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const arrowButtonRef = useRef<HTMLAnchorElement | null>(null);
   const images = collection.images.length > 0 ? collection.images : ['/placeholder.jpg'];
-
+  
   // Alternate layout: even index = image left, odd index = image right
   const isEven = index % 2 === 0;
 
@@ -74,7 +74,7 @@ export const AnimatedCollection = ({
     return () => {
       if (autoplayIntervalRef.current) {
         clearInterval(autoplayIntervalRef.current);
-    }
+      }
     };
   }, [autoplay, images.length, isPaused, advanceSlide]);
 
@@ -141,7 +141,7 @@ export const AnimatedCollection = ({
                     y: {
                       duration: 3,
                       repeat: Infinity,
-                    ease: "easeInOut",
+                      ease: "easeInOut",
                       repeatType: "reverse",
                     },
                   }}
@@ -149,25 +149,16 @@ export const AnimatedCollection = ({
                   style={{ transformStyle: "preserve-3d", pointerEvents: isCurrent ? "auto" : "none" }}
                   onMouseEnter={pauseAutoplay}
                   onTouchStart={pauseAutoplay}
-                  drag={isCurrent ? "x" : false}
+                  drag={isCurrent && !isOverArrowButton ? "x" : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
                   dragPropagation={false}
                   onDragStart={(event, info) => {
                     const target = event.target as HTMLElement;
-                    // Don't allow drag to start from arrow button area
                     if (arrowButtonRef.current && arrowButtonRef.current.contains(target)) {
                       return false;
                     }
                     if (target.closest('a[href]')) {
-                      return false;
-                    }
-                    // Check if drag started in bottom-right corner (arrow area)
-                    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-                    const clickX = info.point.x - rect.left;
-                    const clickY = info.point.y - rect.top;
-                    const isBottomRight = clickX > rect.width - 100 && clickY > rect.height - 100;
-                    if (isBottomRight) {
                       return false;
                     }
                     pauseAutoplay();
@@ -197,10 +188,10 @@ export const AnimatedCollection = ({
                     />
                     {/* Overlay on hover */}
                     <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-                    {/* Arrow button - Mobile only */}
+                    {/* Non-draggable zone for arrow button */}
                     {isCurrent && (
                       <div 
-                        className="md:hidden absolute bottom-0 right-0 w-20 h-20 z-[60]"
+                        className="absolute bottom-0 right-0 w-20 h-20 z-[60]"
                         onMouseEnter={() => setIsOverArrowButton(true)}
                         onMouseLeave={() => setIsOverArrowButton(false)}
                         onMouseDown={(e) => {
