@@ -22,6 +22,7 @@ const ShatteredBackground = dynamic(() => import('@/components/ShatteredBackgrou
 import { Cover } from '@/components/ui/cover'
 import { Spotlight } from '@/components/ui/spotlight'
 import { AnimatedCollection } from '@/components/ui/animated-collection'
+import { EtherealDust } from '@/components/ui/ethereal-dust'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -562,9 +563,16 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative rounded-lg md:rounded-2xl bg-white"
+              className="relative rounded-lg md:rounded-2xl bg-white overflow-hidden"
             >
-              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
+              {/* Subtle Ethereal Dust Effect */}
+              <EtherealDust 
+                particleCount={15}
+                particleColor="#000000"
+                particleOpacity={0.02}
+              />
+              
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16 relative z-10">
                 <AnimatedCollection
                   collection={{
                     title: essenceTitle,
