@@ -105,11 +105,24 @@ export default function ThankYouPage() {
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `receipt-${orderId.slice(0, 8).toUpperCase()}.pdf`
+        a.download = `receipt-${orderId.slice(0, 8).toUpperCase()}.html`
         document.body.appendChild(a)
         a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
+        
+        // Also open in new window for print
+        const printWindow = window.open(url, '_blank')
+        if (printWindow) {
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.print()
+            }, 500)
+          }
+        }
+        
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url)
+          document.body.removeChild(a)
+        }, 1000)
       } else {
         alert('Failed to download receipt. Please try again later.')
       }

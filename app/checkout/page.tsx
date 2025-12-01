@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useCart } from '@/components/CartContext'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -17,16 +17,37 @@ export default function CheckoutPage() {
     city: ''
   })
   
+  const [cities, setCities] = useState<string[]>([])
+  const [loadingCities, setLoadingCities] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
   const [orderId, setOrderId] = useState('')
+  
+  // Fetch available cities
+  useEffect(() => {
+    fetchCities()
+  }, [])
+  
+  const fetchCities = async () => {
+    try {
+      const response = await fetch('/api/settings/cities')
+      if (response.ok) {
+        const data = await response.json()
+        setCities(data.cities || [])
+      }
+    } catch (error) {
+      console.error('Error fetching cities:', error)
+    } finally {
+      setLoadingCities(false)
+    }
+  }
 
   // Calculate totals - handle undefined items
   const subtotal = items?.reduce((sum, item) => sum + (item.priceCents * item.qty), 0) || 0
   const shipping = 0 // Free shipping
   const total = subtotal + shipping
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
@@ -223,15 +244,30 @@ export default function CheckoutPage() {
                   <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
                     City *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="city"
                     value={formData.city}
                     onChange={handleChange}
                     required
-                    placeholder="Enter your city"
-                    className="w-full px-4 py-3 border border-gray-300 bg-white text-sm focus:border-black focus:outline-none transition-colors"
-                  />
+                    disabled={loadingCities}
+                    className="w-full px-4 py-3 border border-gray-300 bg-white text-sm focus:border-black focus:outline-none transition-colors appearance-none cursor-pointer"
+                    style={{
+                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 0.75rem center',
+                      backgroundSize: '1.25em 1.25em'
+                    }}
+                  >
+                    <option value="">Select your city</option>
+                    {cities.map((city) => (
+                      <option key={city} value={city}>
+                        {city}
+                      </option>
+                    ))}
+                  </select>
+                  {loadingCities && (
+                    <p className="text-xs text-gray-500 mt-1">Loading cities...</p>
+                  )}
                 </div>
 
                 <div className="pt-4">
