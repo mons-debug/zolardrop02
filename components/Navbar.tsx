@@ -33,9 +33,15 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const isThankYouPage = pathname === '/thank-you'
   const isWhiteBackgroundPage = isProductsPage || isProductDetailPage || isAboutPage || 
                                 isContactPage || isSearchPage || isCheckoutPage || isThankYouPage
+  const isHomePage = pathname === '/'
   
-  // Default to true (light background) for white background pages to show black icons immediately
-  const [isDarkBackground, setIsDarkBackground] = useState(true)
+  // Default state based on page type:
+  // - White background pages: true (light bg = black text)
+  // - Homepage: false (starts in hero with dark bg = white text)
+  // - Other pages: true (safe default = black text)
+  const [isDarkBackground, setIsDarkBackground] = useState(
+    isHomePage ? false : true
+  )
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
@@ -63,8 +69,8 @@ export default function Navbar({ className = '' }: NavbarProps) {
       return
     }
     
-    // For homepage, default to false (dark background/hero section)
-    setIsDarkBackground(false)
+    // For homepage, start with false (dark background/hero section) - already set in useState
+    // Don't override it here on mount
     
     const detectBackground = () => {
       try {
