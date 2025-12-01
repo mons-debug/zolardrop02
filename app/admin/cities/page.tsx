@@ -4,12 +4,30 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function CitiesPage() {
-  const [cities, setCities] = useState<string[]>([])
+  // Initialize with default cities immediately
+  const [cities, setCities] = useState<string[]>([
+    'Casablanca',
+    'Rabat',
+    'Marrakech',
+    'Fes',
+    'Tangier',
+    'Agadir',
+    'Meknes',
+    'Oujda',
+    'Kenitra',
+    'Tetouan',
+    'Safi',
+    'El Jadida',
+    'Beni Mellal',
+    'Nador',
+    'Khouribga'
+  ])
   const [newCity, setNewCity] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    // Fetch cities from API to sync with backend
     fetchCities()
   }, [])
 
@@ -18,12 +36,13 @@ export default function CitiesPage() {
       const response = await fetch('/api/settings/cities')
       if (response.ok) {
         const data = await response.json()
-        setCities(data.cities || [])
+        if (data.cities && data.cities.length > 0) {
+          setCities(data.cities)
+        }
       }
     } catch (error) {
       console.error('Error fetching cities:', error)
-    } finally {
-      setLoading(false)
+      // Keep default cities if fetch fails
     }
   }
 
