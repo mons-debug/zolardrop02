@@ -82,15 +82,15 @@ export default function AboutPage() {
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight text-black mb-8 leading-[0.9]">
-              Made for<br />
-              <span className="font-medium">Movement.</span>
+              Limited Drops.<br />
+              <span className="font-medium">Unlimited Style.</span>
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-700 font-light max-w-3xl mx-auto leading-relaxed mb-4">
-              Modern streetwear for people who want more from themselves.
+              Exclusive streetwear crafted in limited quantities for those who value uniqueness.
             </p>
             <p className="text-lg text-gray-600 font-light max-w-2xl mx-auto leading-relaxed">
-              Better days. Better energy. Better versions.
+              We don't follow trends. We create them.
             </p>
           </motion.div>
         </div>
@@ -147,22 +147,23 @@ export default function AboutPage() {
               </div>
               
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-black mb-8 leading-tight">
-                A Brand Built on<br />
-                <span className="font-medium">Forward Energy</span>
+                Crafted in Morocco.<br />
+                <span className="font-medium">Worn Worldwide.</span>
               </h2>
               
               <div className="space-y-6 text-gray-700 text-base sm:text-lg leading-relaxed font-light">
                 <p>
-                  ZOLAR started with a simple belief: clothing should move with you, not against you. 
-                  We create modern essentials for people who refuse to stand still.
+                  ZOLAR is a Moroccan streetwear brand that produces exclusive, limited-edition pieces. 
+                  Each drop is carefully crafted in limited quantities, ensuring that what you wear is truly unique.
                 </p>
                 <p>
-                  Born in Morocco, inspired by global streetwear culture, ZOLAR represents a new 
-                  generation of style—clean lines, bold identity, and everyday ambition.
+                  We don't mass-produce. We don't chase fast fashion. Every ZOLAR piece is designed and 
+                  manufactured by us, combining quality craftsmanship with bold, contemporary design.
                 </p>
                 <p>
-                  We're not here to follow trends. We're here to build a movement of people who 
-                  wear what moves them forward.
+                  From concept to creation, we control every step. This means better materials, better 
+                  construction, and designs that stand out. When you wear ZOLAR, you're wearing something 
+                  that won't be everywhere—because we make it that way.
                 </p>
               </div>
 
@@ -223,16 +224,16 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: 'Timeless Design',
-                description: 'We create pieces that last beyond seasons, focusing on enduring style rather than fleeting trends.'
+                title: 'Limited Production',
+                description: 'Each drop is produced in strictly limited quantities. Once they\'re gone, they\'re gone. No restocks, no mass production.'
               },
               {
-                title: 'Premium Materials',
-                description: 'Only the finest fabrics and materials make it into our collections, ensuring comfort and durability.'
+                title: 'In-House Manufacturing',
+                description: 'We design and produce everything ourselves in Morocco, maintaining complete control over quality and craftsmanship.'
               },
               {
-                title: 'Ethical Production',
-                description: 'Every piece is crafted with care, respecting both artisans and the environment.'
+                title: 'Exclusive Designs',
+                description: 'Our pieces are created to stand out. Unique graphics, premium materials, and attention to detail in every stitch.'
               }
             ].map((item, index) => (
               <motion.div
@@ -290,16 +291,16 @@ export default function AboutPage() {
               <div className="space-y-6">
                 {[
                   {
-                    title: 'Authenticity',
-                    text: 'We stay true to our vision, never compromising on quality or design principles.'
+                    title: 'Quality Over Quantity',
+                    text: 'We produce limited drops, not mass inventory. Every piece is made with intention and care.'
                   },
                   {
-                    title: 'Innovation',
-                    text: 'While respecting tradition, we constantly push boundaries in design and production.'
+                    title: 'Direct to You',
+                    text: 'No middlemen, no markups. We sell directly to our community, keeping prices fair and quality high.'
                   },
                   {
-                    title: 'Community',
-                    text: 'Our customers are part of the Zolar family. Your feedback shapes our future collections.'
+                    title: 'Made by Us',
+                    text: 'From the first sketch to the final stitch, ZOLAR pieces are created in-house by our team in Morocco.'
                   }
                 ].map((value, index) => (
                   <div key={index} className="border-l-2 border-black pl-4">
@@ -328,10 +329,10 @@ export default function AboutPage() {
               className="text-3xl md:text-5xl font-light tracking-tight mb-6"
               style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
             >
-              Explore the Collection
+              Join the Next Drop
             </h2>
             <p className="text-gray-300 text-sm mb-8 max-w-2xl mx-auto font-light">
-              Discover pieces that reflect your unique style and commitment to quality.
+              Limited quantities. Exclusive designs. Don't miss out on our latest releases.
             </p>
             <Link
               href="/products"

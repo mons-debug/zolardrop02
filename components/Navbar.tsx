@@ -21,11 +21,16 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [isDarkBackground, setIsDarkBackground] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [showSearchResults, setShowSearchResults] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const pathname = usePathname()
   
   // Force black text on products/shop page
   const isProductsPage = pathname === '/products' || pathname === '/shop'
-  const shouldBeBlack = isScrolled || isProductsPage
+  const shouldBeBlack = isScrolled || isProductsPage || !isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
@@ -35,6 +40,53 @@ export default function Navbar({ className = '' }: NavbarProps) {
     window.addEventListener('scroll', updateScroll)
     return () => window.removeEventListener('scroll', updateScroll)
   }, [])
+
+  // Detect background color behind navbar
+  useEffect(() => {
+    const detectBackground = () => {
+      try {
+        // Get the element behind the navbar
+        const navbarHeight = 80 // Approximate navbar height
+        const elementBehind = document.elementFromPoint(window.innerWidth / 2, navbarHeight + 10)
+        
+        if (elementBehind) {
+          const computedStyle = window.getComputedStyle(elementBehind)
+          const bgColor = computedStyle.backgroundColor
+          
+          // Parse RGB values
+          const rgbMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
+          if (rgbMatch) {
+            const r = parseInt(rgbMatch[1])
+            const g = parseInt(rgbMatch[2])
+            const b = parseInt(rgbMatch[3])
+            
+            // Calculate relative luminance
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+            
+            // If luminance is low (dark background), set to true
+            setIsDarkBackground(luminance < 0.5)
+          }
+        }
+      } catch (error) {
+        // Fallback to false (light background) if detection fails
+        setIsDarkBackground(false)
+      }
+    }
+
+    // Detect on mount and scroll
+    detectBackground()
+    window.addEventListener('scroll', detectBackground)
+    
+    // Also detect on route change
+    const handleRouteChange = () => {
+      setTimeout(detectBackground, 100)
+    }
+    handleRouteChange()
+
+    return () => {
+      window.removeEventListener('scroll', detectBackground)
+    }
+  }, [pathname])
 
   // Check if user is logged in as admin
   useEffect(() => {
@@ -55,6 +107,33 @@ export default function Navbar({ className = '' }: NavbarProps) {
     checkSession()
   }, [])
 
+  // Handle search with debounce
+  useEffect(() => {
+    const delaySearch = setTimeout(async () => {
+      if (searchQuery.trim().length > 1) {
+        setIsSearching(true)
+        try {
+          const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`)
+          if (response.ok) {
+            const data = await response.json()
+            setSearchResults(data.products || [])
+            setShowSearchResults(true)
+          }
+        } catch (error) {
+          // Silently handle error
+          setSearchResults([])
+        } finally {
+          setIsSearching(false)
+        }
+      } else {
+        setSearchResults([])
+        setShowSearchResults(false)
+      }
+    }, 300)
+
+    return () => clearTimeout(delaySearch)
+  }, [searchQuery])
+
   // Prevent body scroll when menu is open
   useEffect(() => {
     if (isMenuOpen) {
@@ -71,8 +150,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
     {
       title: 'SHOP',
       links: [
-        { href: '/products', label: 'ALL PRODUCTS' },
-        { href: '/category/sweatshirts', label: 'SWEATSHIRTS' },
+        { href: '/products', label: 'SHOP' },
       ],
     },
     {
@@ -84,7 +162,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
       ],
     },
     {
-      title: 'EXPLORE',
+      title: '',
       links: [
         { href: '/about', label: 'ABOUT' },
         { href: '/contact', label: 'CONTACT' },
@@ -218,10 +296,85 @@ export default function Navbar({ className = '' }: NavbarProps) {
 
             {/* Right Icons - Enhanced */}
             <div className="flex items-center space-x-3 lg:space-x-5">
-              {/* Search Link - Icon + Text */}
+              {/* Inline Search - Desktop */}
+              <div className="hidden md:block relative">
+                <div className="relative">
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => searchQuery.length > 1 && setShowSearchResults(true)}
+                    onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
+                    placeholder="Search..."
+                    className={`w-0 focus:w-48 lg:focus:w-56 transition-all duration-300 pl-8 pr-3 py-1.5 border rounded-full text-sm outline-none ${
+                      shouldBeBlack 
+                        ? 'bg-white border-gray-300 text-black placeholder-gray-400 focus:border-orange-500' 
+                        : 'bg-white/10 border-white/20 text-white placeholder-white/60 focus:bg-white/20 focus:border-white/40'
+                    }`}
+                  />
+                  <svg 
+                    className={`w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+                      shouldBeBlack ? 'text-gray-400' : 'text-white/60'
+                    }`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+
+                {/* Search Results Dropdown */}
+                {showSearchResults && (
+                  <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+                    {isSearching ? (
+                      <div className="p-4 text-center text-gray-500">
+                        <div className="inline-block w-5 h-5 border-2 border-gray-300 border-t-orange-500 rounded-full animate-spin"></div>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="py-2">
+                        {searchResults.slice(0, 5).map((product: any) => {
+                          const images = JSON.parse(product.images)
+                          return (
+                            <Link
+                              key={product.id}
+                              href={`/product/${product.sku}`}
+                              className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+                            >
+                              <img
+                                src={images[0]}
+                                alt={product.title}
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{product.title}</p>
+                                <p className="text-xs text-gray-500">{(product.priceCents / 100).toFixed(2)} MAD</p>
+                              </div>
+                            </Link>
+                          )
+                        })}
+                        {searchResults.length > 5 && (
+                          <Link
+                            href={`/search?q=${encodeURIComponent(searchQuery)}`}
+                            className="block px-4 py-2 text-center text-sm text-orange-500 hover:bg-gray-50"
+                          >
+                            View all {searchResults.length} results
+                          </Link>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center text-gray-500 text-sm">
+                        No products found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Search Link */}
               <Link
                 href="/search"
-                className={`group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
+                className={`md:hidden group flex items-center space-x-1.5 hover:text-orange-500 transition-all duration-300 ${
                   shouldBeBlack ? 'text-black' : 'text-white'
                 }`}
                 aria-label="Search"
@@ -230,9 +383,6 @@ export default function Navbar({ className = '' }: NavbarProps) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                <span className="hidden sm:block text-xs tracking-wider uppercase font-medium">
-                SEARCH
-                </span>
               </Link>
 
               {/* Shopping Bag - Enhanced with Badge */}
@@ -354,17 +504,19 @@ export default function Navbar({ className = '' }: NavbarProps) {
                     className="mb-12"
                   >
                     {/* Section Title with Enhanced Orange Accent */}
-                    <div className="flex items-center mb-6">
-                      <motion.div 
-                        className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3"
-                        initial={{ width: 0 }}
-                        animate={{ width: 32 }}
-                        transition={{ delay: 0.15 * (sectionIndex + 1) + 0.2, duration: 0.5 }}
-                      />
-                      <h3 className="text-xs tracking-[0.25em] text-gray-500 uppercase font-semibold">
-                      {section.title}
-                    </h3>
-                    </div>
+                    {section.title && (
+                      <div className="flex items-center mb-6">
+                        <motion.div 
+                          className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3"
+                          initial={{ width: 0 }}
+                          animate={{ width: 32 }}
+                          transition={{ delay: 0.15 * (sectionIndex + 1) + 0.2, duration: 0.5 }}
+                        />
+                        <h3 className="text-xs tracking-[0.25em] text-gray-500 uppercase font-semibold">
+                        {section.title}
+                      </h3>
+                      </div>
+                    )}
 
                     {/* Section Links - Enhanced with Smooth Animations */}
                     <ul className="space-y-3">
@@ -411,68 +563,6 @@ export default function Navbar({ className = '' }: NavbarProps) {
                   </motion.div>
                 ))}
 
-                {/* Utility Links Section */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ 
-                    delay: 0.5,
-                    duration: 0.5,
-                    ease: [0.22, 1, 0.36, 1]
-                  }}
-                  className="border-t border-gray-200 pt-8 mt-8"
-                >
-                  <div className="flex items-center mb-6">
-                    <motion.div 
-                      className="h-0.5 bg-gradient-to-r from-orange-500 to-red-500 mr-3"
-                      initial={{ width: 0 }}
-                      animate={{ width: 32 }}
-                      transition={{ delay: 0.6, duration: 0.5 }}
-                    />
-                    <h3 className="text-xs tracking-[0.25em] text-gray-500 uppercase font-semibold">
-                      SUPPORT
-                    </h3>
-                  </div>
-                  <ul className="space-y-3">
-                    <li className="lg:hidden">
-                      <Link
-                        href="/search"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="group flex items-center text-lg font-light text-black hover:text-orange-500 transition-all duration-300 uppercase"
-                      >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        SEARCH
-                      </Link>
-                    </li>
-                    <li className="lg:hidden">
-                      <Link
-                        href="/account"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="group flex items-center text-lg font-light text-black hover:text-orange-500 transition-all duration-300 uppercase"
-                      >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        ACCOUNT
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="/contact"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="group flex items-center text-lg font-light text-black hover:text-orange-500 transition-all duration-300 uppercase"
-                      >
-                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        CONTACT US
-                      </Link>
-                    </li>
-                    {/* Admin access intentionally hidden on mobile drawer */}
-                  </ul>
-                </motion.div>
 
                 {/* Footer Info with Staggered Animations */}
                 <motion.div
