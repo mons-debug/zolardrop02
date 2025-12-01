@@ -88,11 +88,15 @@ export const WavyBackground = ({
       ctx.beginPath();
       ctx.lineWidth = waveWidth || 50;
       ctx.strokeStyle = waveColors[i % waveColors.length];
-      // Draw waves WAY beyond canvas boundaries for truly seamless effect
+      ctx.lineCap = "round"; // Smooth line endings
+      ctx.lineJoin = "round"; // Smooth line joins
+      // Draw smooth silk-like waves across full width
       // Start at -50% and end at 150% of canvas width
-      for (x = -w * 0.5; x < w * 1.5; x += 5) {
-        var y = noise(x / 800, 0.3 * i, nt) * 100;
-        ctx.lineTo(x, y + h * 0.5); // adjust for height, currently at 50% of the container
+      for (x = -w * 0.5; x < w * 1.5; x += 2) { // Smaller steps for smoother curves
+        // More gentle wave with increased frequency divisor (1200 instead of 800)
+        // Reduced amplitude (60 instead of 100) for softer, silk-like waves
+        var y = noise(x / 1200, 0.2 * i, nt) * 60;
+        ctx.lineTo(x, y + h * 0.5);
       }
       ctx.stroke();
       ctx.closePath();

@@ -561,32 +561,32 @@ export default function Home() {
                   </motion.div>
 
           {/* ESSENCE & FRAGMENT - STAGGERED LAYOUT */}
-          <div className="relative space-y-6 md:space-y-0">
+          <div className="relative space-y-6 md:space-y-0 -mx-4 sm:-mx-6 lg:-mx-8">
             {/* ESSENCE COLLECTION */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative rounded-lg md:rounded-2xl"
+              className="relative overflow-hidden"
             >
               {/* Wavy Background - Sweatshirt Colors */}
-              <div className="absolute inset-0 -z-10 pointer-events-none rounded-lg md:rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 w-full h-full pointer-events-none">
                 <WavyBackground
                   containerClassName="w-full h-full absolute inset-0"
                   className="w-full h-full"
                   colors={["#1a1a1a", "#6b7280", "#047857", "#1e40af"]}
-                  waveWidth={70}
-                  backgroundFill="#f9fafb"
-                  blur={8}
+                  waveWidth={40}
+                  backgroundFill="white"
+                  blur={6}
                   speed="fast"
-                  waveOpacity={0.75}
+                  waveOpacity={0.8}
                 >
                   <div />
                 </WavyBackground>
               </div>
               
-              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16 relative z-10">
                 <AnimatedCollection
                   collection={{
                     title: essenceTitle,
