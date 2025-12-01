@@ -17,6 +17,7 @@ interface Customer {
 
 interface Order {
   id: string
+  orderId?: string
   totalCents: number
   paymentMethod: string
   status: string
@@ -53,7 +54,7 @@ export default function OrdersPage() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim()
       filtered = filtered.filter(order => {
-        const orderId = order.id.toLowerCase()
+        const orderId = (order.orderId || order.id).toLowerCase()
         const customerName = order.customer?.name?.toLowerCase() || ''
         const customerPhone = order.customer?.phone?.toLowerCase() || ''
         const customerCity = order.customer?.city?.toLowerCase() || ''
@@ -362,7 +363,7 @@ export default function OrdersPage() {
                             {order.customer?.name || 'Unknown Customer'}
                           </Link>
                           <span className="text-xs text-gray-400 mt-1 font-mono">
-                            #{order.id.slice(0, 8).toUpperCase()}
+                            #{order.orderId || order.id.slice(0, 8).toUpperCase()}
                           </span>
                           {isNewOrder(order.createdAt) && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white mt-1 animate-pulse">

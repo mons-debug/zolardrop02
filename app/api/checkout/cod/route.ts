@@ -146,9 +146,20 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Generate unique order ID (e.g., ORD-20251201-A1B2C3)
+    const generateOrderId = () => {
+      const date = new Date()
+      const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '')
+      const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
+      return `ORD-${dateStr}-${randomStr}`
+    }
+
+    const uniqueOrderId = generateOrderId()
+
     // Create order linked to customer
     const order = await prisma.order.create({
       data: {
+        orderId: uniqueOrderId,
         customerId: dbCustomer.id,
         subtotalCents,
         taxCents,

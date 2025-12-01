@@ -33,6 +33,7 @@ export default function ThankYouPage() {
   const [trackingSettings, setTrackingSettings] = useState<TrackingSettings | null>(null)
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
   const [loadingItems, setLoadingItems] = useState(false)
+  const [orderData, setOrderData] = useState<any>(null)
   
   const orderId = searchParams.get('orderId')
   const total = searchParams.get('total')
@@ -59,6 +60,7 @@ export default function ThankYouPage() {
       const response = await fetch(`/api/admin/orders/${orderId}`)
       if (response.ok) {
         const data = await response.json()
+        setOrderData(data.order) // Store full order data
         const items = JSON.parse(data.order.items || '[]') as OrderItem[]
         
         // Fetch product details for each item
@@ -306,7 +308,7 @@ export default function ThankYouPage() {
               className="mb-8 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-xl p-6 border border-orange-200"
             >
               <p className="text-gray-700 text-sm mb-2 font-medium">
-                Order ID: <span className="font-mono text-orange-600 font-bold">{orderId?.slice(0, 8).toUpperCase()}</span>
+                Order ID: <span className="font-mono text-orange-600 font-bold">{orderData?.orderId || orderId?.slice(0, 8).toUpperCase()}</span>
               </p>
               {total && (
                 <p className="text-2xl font-bold text-gray-900 mt-3">

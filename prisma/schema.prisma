@@ -73,6 +73,7 @@ model Customer {
 
 model Order {
   id            String    @id @default(uuid())
+  orderId       String?   @unique // Human-readable order ID (e.g., ORD-20251201-A1B2C3)
   customerId    String?
   customer      Customer? @relation(fields: [customerId], references: [id])
   userId        String?
