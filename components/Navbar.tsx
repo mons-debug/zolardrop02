@@ -69,25 +69,23 @@ export default function Navbar({ className = '' }: NavbarProps) {
         const elementBehind = document.elementFromPoint(window.innerWidth / 2, navbarHeight + 10)
         
         if (elementBehind) {
-          const computedStyle = window.getComputedStyle(elementBehind)
-          const bgColor = computedStyle.backgroundColor
+          // Check if we're in a section with bg-black class (hero or archive)
+          let currentElement: Element | null = elementBehind
+          let isInBlackSection = false
           
-          // Parse RGB values
-          const rgbMatch = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/)
-          if (rgbMatch) {
-            const r = parseInt(rgbMatch[1])
-            const g = parseInt(rgbMatch[2])
-            const b = parseInt(rgbMatch[3])
-            
-            // Calculate relative luminance
-            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-            
-            // Show WHITE text (isDarkBackground = false) only for VERY dark backgrounds (< 0.25)
-            // This includes pure black hero section and archive section
-            // Show BLACK text (isDarkBackground = true) for medium-gray and lighter
-            // This includes hero carousel (gray ~0.3-0.5), collection sections (white ~1.0)
-            setIsDarkBackground(luminance >= 0.25)
+          // Traverse up to find section with bg-black
+          while (currentElement && currentElement !== document.body) {
+            const classList = currentElement.classList
+            if (classList.contains('bg-black')) {
+              isInBlackSection = true
+              break
+            }
+            currentElement = currentElement.parentElement
           }
+          
+          // Show WHITE text only in black sections (hero and archive)
+          // Show BLACK text everywhere else (collections, gallery, newsletter)
+          setIsDarkBackground(!isInBlackSection)
         }
       } catch (error) {
         // Fallback to true (light background) if detection fails
