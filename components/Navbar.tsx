@@ -41,8 +41,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   
-  // Show black text on white background pages or when scrolled
-  const shouldBeBlack = isScrolled || isWhiteBackgroundPage || isDarkBackground
+  // Show black text on white background pages OR when isDarkBackground is true (light background detected)
+  // Show white text when isDarkBackground is false (dark background detected)
+  const shouldBeBlack = isWhiteBackgroundPage || isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
@@ -81,7 +82,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
             // Calculate relative luminance
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
             
-            // If luminance is high (light background), set to true
+            // If luminance is LOW (dark background like black), we need WHITE text
+            // If luminance is HIGH (light background like white), we need BLACK text
+            // isDarkBackground TRUE means light bg (show black text), FALSE means dark bg (show white text)
             setIsDarkBackground(luminance >= 0.5)
           }
         }
