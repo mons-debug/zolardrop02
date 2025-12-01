@@ -6,6 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/components/CartContext'
 import CartIcon from '@/components/CartIcon'
+import { formatPrice as formatPriceCurrency } from '@/lib/currency'
 // Lens zoom removed - was causing image display issues
 
 interface Product {
@@ -317,7 +318,7 @@ export default function ProductPage() {
   }
 
   const formatPrice = (cents: number) => {
-    return `${(cents / 100).toFixed(2)} MAD`
+    return formatPriceCurrency(cents)
   }
 
   // Update quantity for a specific size

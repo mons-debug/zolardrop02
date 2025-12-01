@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from './CartContext'
 import SizeSelectorModal from './SizeSelectorModal'
+import { formatPrice as formatPriceCurrency } from '@/lib/currency'
 
 interface Product {
   id: string
@@ -144,7 +145,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   const formatPrice = (cents: number) => {
-    return `${(cents / 100).toFixed(2)} MAD`
+    return formatPriceCurrency(cents)
   }
 
   // Calculate total stock - handle products without variants

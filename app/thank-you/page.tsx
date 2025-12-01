@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatPrice as formatPriceCurrency } from '@/lib/currency'
 
 interface TrackingSettings {
   googleAdsId: string | null
@@ -257,8 +258,8 @@ export default function ThankYouPage() {
   }
 
   const formatPrice = (cents: string | null) => {
-    if (!cents) return '0.00 MAD'
-    return `${(parseFloat(cents) / 100).toFixed(2)} MAD`
+    if (!cents) return formatPriceCurrency(0)
+    return formatPriceCurrency(parseFloat(cents))
   }
 
   return (

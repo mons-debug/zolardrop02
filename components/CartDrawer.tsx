@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from './CartContext'
+import { formatPrice } from '@/lib/currency'
 
 export default function CartDrawer() {
   const { state, removeItem, updateQuantity, toggleCart, getSubtotal, getItemCount, clearCart } = useCart()
@@ -16,10 +17,6 @@ export default function CartDrawer() {
     address: '',
     phone: ''
   })
-
-  const formatPrice = (cents: number) => {
-    return `${(cents / 100).toFixed(2)} MAD`
-  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerInfo({

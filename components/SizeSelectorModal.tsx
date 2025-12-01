@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { formatPrice as formatPriceCurrency } from '@/lib/currency'
 
 interface SizeSelectorModalProps {
   product: {
@@ -66,7 +67,7 @@ export default function SizeSelectorModal({
   const firstImage = displayImages[0] || '/placeholder.jpg'
 
   const formatPrice = (cents: number) => {
-    return `${(cents / 100).toFixed(2)} MAD`
+    return formatPriceCurrency(cents)
   }
 
   const getStockForSize = (size: string): number => {

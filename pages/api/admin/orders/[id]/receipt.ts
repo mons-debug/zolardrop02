@@ -82,7 +82,7 @@ export default async function handler(
 
 function generateReceiptHTML(order: any, items: OrderItem[], customer: any) {
   const formatPrice = (cents: number) => {
-    return `${(cents / 100).toFixed(2)} MAD`
+    return `${(cents / 100).toFixed(2)} DH`
   }
 
   const formatDate = (date: string) => {

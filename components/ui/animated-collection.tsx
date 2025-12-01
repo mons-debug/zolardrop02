@@ -29,7 +29,7 @@ export const AnimatedCollection = ({
   const autoplayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const arrowButtonRef = useRef<HTMLAnchorElement | null>(null);
   const images = collection.images.length > 0 ? collection.images : ['/placeholder.jpg'];
-  
+
   // Alternate layout: even index = image left, odd index = image right
   const isEven = index % 2 === 0;
 
@@ -74,7 +74,7 @@ export const AnimatedCollection = ({
     return () => {
       if (autoplayIntervalRef.current) {
         clearInterval(autoplayIntervalRef.current);
-      }
+    }
     };
   }, [autoplay, images.length, isPaused, advanceSlide]);
 
@@ -141,7 +141,7 @@ export const AnimatedCollection = ({
                     y: {
                       duration: 3,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                    ease: "easeInOut",
                       repeatType: "reverse",
                     },
                   }}
