@@ -1,36 +1,31 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+
+// Default Moroccan cities - can be customized
+let availableCities = [
+  'Casablanca',
+  'Rabat',
+  'Marrakech',
+  'Fes',
+  'Tangier',
+  'Agadir',
+  'Meknes',
+  'Oujda',
+  'Kenitra',
+  'Tetouan',
+  'Safi',
+  'El Jadida',
+  'Beni Mellal',
+  'Nador',
+  'Khouribga'
+]
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === 'GET') {
-    try {
-      // Public endpoint - no auth required for checkout
-      const settings = await prisma.settings.findFirst({
-        where: { key: 'available_cities' }
-      })
-      
-      const cities = settings?.value ? JSON.parse(settings.value) : [
-        'Casablanca',
-        'Rabat',
-        'Marrakech',
-        'Fes',
-        'Tangier',
-        'Agadir',
-        'Meknes',
-        'Oujda',
-        'Kenitra',
-        'Tetouan'
-      ]
-      
-      return res.status(200).json({ cities })
-    } catch (error) {
-      console.error('Error fetching cities:', error)
-      return res.status(500).json({ message: 'Failed to fetch cities' })
-    }
+    return res.status(200).json({ cities: availableCities })
   }
   
   if (req.method === 'PUT') {
@@ -45,17 +40,10 @@ export default async function handler(
         return res.status(400).json({ message: 'Cities must be an array' })
       }
       
-      // Update or create settings
-      await prisma.settings.upsert({
-        where: { key: 'available_cities' },
-        update: { value: JSON.stringify(cities) },
-        create: {
-          key: 'available_cities',
-          value: JSON.stringify(cities)
-        }
-      })
+      // Update cities in memory
+      availableCities = cities
       
-      return res.status(200).json({ success: true, cities })
+      return res.status(200).json({ success: true, cities: availableCities })
     } catch (error) {
       console.error('Error updating cities:', error)
       return res.status(500).json({ message: 'Failed to update cities' })

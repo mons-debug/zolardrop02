@@ -17,30 +17,28 @@ export default function CheckoutPage() {
     city: ''
   })
   
-  const [cities, setCities] = useState<string[]>([])
-  const [loadingCities, setLoadingCities] = useState(true)
+  // Default Moroccan cities
+  const cities = [
+    'Casablanca',
+    'Rabat',
+    'Marrakech',
+    'Fes',
+    'Tangier',
+    'Agadir',
+    'Meknes',
+    'Oujda',
+    'Kenitra',
+    'Tetouan',
+    'Safi',
+    'El Jadida',
+    'Beni Mellal',
+    'Nador',
+    'Khouribga'
+  ]
+  
   const [submitting, setSubmitting] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
   const [orderId, setOrderId] = useState('')
-  
-  // Fetch available cities
-  useEffect(() => {
-    fetchCities()
-  }, [])
-  
-  const fetchCities = async () => {
-    try {
-      const response = await fetch('/api/settings/cities')
-      if (response.ok) {
-        const data = await response.json()
-        setCities(data.cities || [])
-      }
-    } catch (error) {
-      console.error('Error fetching cities:', error)
-    } finally {
-      setLoadingCities(false)
-    }
-  }
 
   // Calculate totals - handle undefined items
   const subtotal = items?.reduce((sum, item) => sum + (item.priceCents * item.qty), 0) || 0
@@ -249,7 +247,6 @@ export default function CheckoutPage() {
                     value={formData.city}
                     onChange={handleChange}
                     required
-                    disabled={loadingCities}
                     className="w-full px-4 py-3 border border-gray-300 bg-white text-sm focus:border-black focus:outline-none transition-colors appearance-none cursor-pointer"
                     style={{
                       backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6 9 12 15 18 9\'%3e%3c/polyline%3e%3c/svg%3e")',
@@ -265,9 +262,6 @@ export default function CheckoutPage() {
                       </option>
                     ))}
                   </select>
-                  {loadingCities && (
-                    <p className="text-xs text-gray-500 mt-1">Loading cities...</p>
-                  )}
                 </div>
 
                 <div className="pt-4">

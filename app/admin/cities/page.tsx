@@ -1,12 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import AdminLayout from '@/components/admin/AdminLayout'
 
 export default function CitiesPage() {
-  const router = useRouter()
   const [cities, setCities] = useState<string[]>([])
   const [newCity, setNewCity] = useState('')
   const [loading, setLoading] = useState(true)
@@ -69,7 +66,7 @@ export default function CitiesPage() {
   }
 
   return (
-    <AdminLayout>
+    <div className="min-h-full">
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -156,7 +153,7 @@ export default function CitiesPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </div>
   )
 }
 
