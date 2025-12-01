@@ -24,6 +24,12 @@ const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').t
   loading: () => null
 })
 
+// Lazy load Sparkles for essence collection
+const Sparkles = dynamic(() => import('@/components/ui/sparkles').then(mod => ({ default: mod.Sparkles })), {
+  ssr: false,
+  loading: () => null
+})
+
 // Import Cover directly for hero text effect (fix deployment issue)
 import { Cover } from '@/components/ui/cover'
 import { Spotlight } from '@/components/ui/spotlight'
@@ -568,19 +574,33 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative rounded-lg md:rounded-2xl"
+              className="relative rounded-lg md:rounded-2xl overflow-hidden"
             >
-              {/* Wavy Background */}
-              <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none">
+              {/* Sparkles Background */}
+              <div className="absolute inset-0 -z-10 pointer-events-none">
+                <Sparkles
+                  id="essence-sparkles"
+                  className="w-full h-full"
+                  background="transparent"
+                  minSize={1}
+                  maxSize={2.5}
+                  speed={3}
+                  particleColor="#000000"
+                  particleDensity={80}
+                />
+              </div>
+              
+              {/* Wavy Background (subtle, behind sparkles) */}
+              <div className="absolute top-0 left-0 w-full h-full -z-20 pointer-events-none opacity-30">
                 <WavyBackground
                   containerClassName="w-full h-full"
                   className="w-full h-full"
-                  colors={["#d5d5d5", "#c8c8c8", "#bdbdbd", "#cacaca", "#c0c0c0"]}
+                  colors={["#f5f5f5", "#eeeeee", "#e8e8e8", "#f0f0f0", "#ebebeb"]}
                   waveWidth={50}
                   backgroundFill="white"
-                  blur={10}
+                  blur={15}
                   speed="slow"
-                  waveOpacity={0.5}
+                  waveOpacity={0.3}
                 >
                   <div />
                 </WavyBackground>
