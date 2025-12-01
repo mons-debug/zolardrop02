@@ -20,6 +20,7 @@ interface Product {
   currency: string
   stock: number
   sizeInventory?: string | null
+  sizeGuide?: string | null
   category?: string
   variants: Array<{
     id: string

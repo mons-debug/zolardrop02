@@ -256,7 +256,8 @@ export default function EditProductPage() {
           sizeGuide: sizeGuide || null,
           category,
           images,
-          variants: variants.length > 0 ? variants : undefined
+          // Only send variants if there are any - don't send empty array or undefined to avoid deletion
+          ...(variants.length > 0 && { variants })
         })
       })
 
