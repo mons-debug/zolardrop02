@@ -114,13 +114,14 @@ export const EtherealDust = ({
   }, [particleCount, particleColor, particleOpacity])
 
   return (
-    <div className={cn('absolute inset-0 overflow-hidden', containerClassName)}>
+    <div className={cn('absolute inset-0 overflow-hidden pointer-events-none', containerClassName)}>
       <canvas
         ref={canvasRef}
         className={cn('w-full h-full', className)}
         style={{ 
           pointerEvents: 'none',
-          mixBlendMode: 'multiply' // Blend mode for subtle effect
+          mixBlendMode: 'normal', // Changed from multiply for better visibility
+          opacity: 0.5 // Added overall opacity control
         }}
       />
     </div>

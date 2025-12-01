@@ -567,9 +567,10 @@ export default function Home() {
             >
               {/* Subtle Ethereal Dust Effect */}
               <EtherealDust 
-                particleCount={15}
+                particleCount={20}
                 particleColor="#000000"
-                particleOpacity={0.02}
+                particleOpacity={0.08}
+                containerClassName="z-0"
               />
               
               <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16 relative z-10">
