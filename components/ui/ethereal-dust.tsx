@@ -47,10 +47,10 @@ export const EtherealDust = ({
       constructor() {
         this.x = Math.random() * canvas.width
         this.y = Math.random() * canvas.height
-        this.size = Math.random() * 80 + 40 // Size between 40-120
-        this.speedX = (Math.random() - 0.5) * 0.3 // Very slow horizontal movement
-        this.speedY = (Math.random() - 0.5) * 0.3 // Very slow vertical movement
-        this.opacity = Math.random() * particleOpacity
+        this.size = Math.random() * 120 + 60 // Size between 60-180 (larger)
+        this.speedX = (Math.random() - 0.5) * 0.5 // Slightly faster horizontal movement
+        this.speedY = (Math.random() - 0.5) * 0.5 // Slightly faster vertical movement
+        this.opacity = Math.random() * particleOpacity + particleOpacity * 0.5 // More visible
       }
 
       update() {
@@ -120,8 +120,8 @@ export const EtherealDust = ({
         className={cn('w-full h-full', className)}
         style={{ 
           pointerEvents: 'none',
-          mixBlendMode: 'normal', // Changed from multiply for better visibility
-          opacity: 0.5 // Added overall opacity control
+          mixBlendMode: 'normal',
+          opacity: 0.8 // Increased overall opacity
         }}
       />
     </div>

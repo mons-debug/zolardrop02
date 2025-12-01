@@ -567,9 +567,9 @@ export default function Home() {
             >
               {/* Subtle Ethereal Dust Effect */}
               <EtherealDust 
-                particleCount={20}
+                particleCount={30}
                 particleColor="#000000"
-                particleOpacity={0.08}
+                particleOpacity={0.15}
                 containerClassName="z-0"
               />
               
