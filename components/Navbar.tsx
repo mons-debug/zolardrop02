@@ -21,7 +21,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [user, setUser] = useState<User | null>(null)
-  const [isDarkBackground, setIsDarkBackground] = useState(false)
+  const [isDarkBackground, setIsDarkBackground] = useState(true) // Default to true (light background)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
@@ -31,7 +31,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
   // Force black text on products/shop/product detail pages
   const isProductsPage = pathname === '/products' || pathname === '/shop'
   const isProductDetailPage = pathname?.startsWith('/product/')
-  const shouldBeBlack = isScrolled || isProductsPage || isProductDetailPage || !isDarkBackground
+  const shouldBeBlack = isScrolled || isProductsPage || isProductDetailPage || isDarkBackground
 
   useEffect(() => {
     const updateScroll = () => {
@@ -64,13 +64,13 @@ export default function Navbar({ className = '' }: NavbarProps) {
             // Calculate relative luminance
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
             
-            // If luminance is low (dark background), set to true
-            setIsDarkBackground(luminance < 0.5)
+            // If luminance is high (light background), set to true
+            setIsDarkBackground(luminance >= 0.5)
           }
         }
       } catch (error) {
-        // Fallback to false (light background) if detection fails
-        setIsDarkBackground(false)
+        // Fallback to true (light background) if detection fails
+        setIsDarkBackground(true)
       }
     }
 
