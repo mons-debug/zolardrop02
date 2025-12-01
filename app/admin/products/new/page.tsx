@@ -198,13 +198,62 @@ export default function NewProductPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Description
                 </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="Describe your product..."
-                />
+                <div className="space-y-2">
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={12}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono text-sm"
+                    placeholder="Enter product description with formatting..."
+                  />
+                  <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+                    <p className="font-semibold mb-2">Formatting Guide:</p>
+                    <ul className="space-y-1 ml-4">
+                      <li>• <span className="font-mono bg-white px-1">**Bold Text**</span> for bold</li>
+                      <li>• <span className="font-mono bg-white px-1"># Headline</span> for large headlines</li>
+                      <li>• <span className="font-mono bg-white px-1">## Sub-headline</span> for sub-headlines</li>
+                      <li>• <span className="font-mono bg-white px-1">• Item</span> for bullet points</li>
+                      <li>• Press Enter twice for new paragraphs</li>
+                      <li>• Single Enter creates line breaks</li>
+                    </ul>
+                  </div>
+                  {description && (
+                    <div className="mt-4 p-4 border border-gray-300 rounded-lg bg-white">
+                      <p className="text-sm font-semibold text-gray-700 mb-2">Preview:</p>
+                      <div className="prose prose-sm max-w-none">
+                        {description.split('\n').map((line, idx) => {
+                          // Headline
+                          if (line.startsWith('# ')) {
+                            return <h2 key={idx} className="text-xl font-bold mt-4 mb-2">{line.replace('# ', '')}</h2>
+                          }
+                          // Sub-headline
+                          if (line.startsWith('## ')) {
+                            return <h3 key={idx} className="text-lg font-semibold mt-3 mb-2">{line.replace('## ', '')}</h3>
+                          }
+                          // Bullet point
+                          if (line.startsWith('• ') || line.startsWith('- ')) {
+                            return <li key={idx} className="ml-4">{line.replace(/^[•-] /, '')}</li>
+                          }
+                          // Bold text
+                          if (line.includes('**')) {
+                            const parts = line.split('**')
+                            return (
+                              <p key={idx} className="mb-2">
+                                {parts.map((part, i) => i % 2 === 1 ? <strong key={i}>{part}</strong> : part)}
+                              </p>
+                            )
+                          }
+                          // Empty line
+                          if (line.trim() === '') {
+                            return <br key={idx} />
+                          }
+                          // Regular text
+                          return <p key={idx} className="mb-2">{line}</p>
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

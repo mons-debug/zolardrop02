@@ -590,9 +590,37 @@ export default function ProductPage() {
 
             {/* Description */}
             <div>
-              <p className="text-sm text-gray-600 leading-relaxed">
-                {displayDescription}
-              </p>
+              <div className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none">
+                {displayDescription && displayDescription.split('\n').map((line, idx) => {
+                  // Headline
+                  if (line.startsWith('# ')) {
+                    return <h2 key={idx} className="text-lg font-bold mt-4 mb-2 text-black">{line.replace('# ', '')}</h2>
+                  }
+                  // Sub-headline
+                  if (line.startsWith('## ')) {
+                    return <h3 key={idx} className="text-base font-semibold mt-3 mb-2 text-black">{line.replace('## ', '')}</h3>
+                  }
+                  // Bullet point
+                  if (line.startsWith('• ') || line.startsWith('- ')) {
+                    return <li key={idx} className="ml-4 list-disc">{line.replace(/^[•-] /, '')}</li>
+                  }
+                  // Bold text
+                  if (line.includes('**')) {
+                    const parts = line.split('**')
+                    return (
+                      <p key={idx} className="mb-2">
+                        {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="font-semibold text-black">{part}</strong> : part)}
+                      </p>
+                    )
+                  }
+                  // Empty line
+                  if (line.trim() === '') {
+                    return <br key={idx} />
+                  }
+                  // Regular text
+                  return <p key={idx} className="mb-2">{line}</p>
+                })}
+              </div>
             </div>
 
             {/* Product-Level Size Selection (from sizeInventory or variant sizeInventory) */}
