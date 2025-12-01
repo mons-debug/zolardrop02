@@ -49,6 +49,7 @@ export default function EditProductPage() {
   const [priceCents, setPriceCents] = useState('')
   const [stock, setStock] = useState('')
   const [sizeInventory, setSizeInventory] = useState('')
+  const [sizeGuide, setSizeGuide] = useState('')
   const [category, setCategory] = useState('')
   const [images, setImages] = useState<string[]>([])
   
@@ -86,6 +87,7 @@ export default function EditProductPage() {
         setPriceCents((product.priceCents / 100).toFixed(2))
         setStock(product.stock.toString())
         setSizeInventory(product.sizeInventory || '')
+        setSizeGuide(product.sizeGuide || '')
         setCategory(product.category || '')
         
         // Parse images
@@ -251,6 +253,7 @@ export default function EditProductPage() {
           priceCents: Math.round(parseFloat(priceCents) * 100),
           stock: parseInt(stock),
           sizeInventory: sizeInventory || null,
+          sizeGuide: sizeGuide || null,
           category,
           images,
           variants: variants.length > 0 ? variants : undefined
@@ -474,6 +477,35 @@ export default function EditProductPage() {
                 <p className="text-sm text-gray-500 mt-1">
                   Enter sizes and quantities separated by commas
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  Size Guide / Measurements (Optional)
+                </label>
+                <div className="space-y-2">
+                  <textarea
+                    value={sizeGuide}
+                    onChange={(e) => setSizeGuide(e.target.value)}
+                    rows={8}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono text-sm"
+                    placeholder="S | 50 | 68 | 19&#10;M | 52 | 70 | 20&#10;L | 54 | 72 | 21&#10;XL | 56 | 74 | 22"
+                  />
+                  <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded border border-gray-200">
+                    <p className="font-semibold mb-2">📐 Format: Size | Chest | Length | Shoulder</p>
+                    <p className="mb-2">Enter one size per line, values separated by | (pipe)</p>
+                    <code className="block bg-white px-2 py-1 rounded mb-2">
+                      S | 50 | 68 | 19<br/>
+                      M | 52 | 70 | 20<br/>
+                      L | 54 | 72 | 21<br/>
+                      XL | 56 | 74 | 22
+                    </code>
+                    <p className="text-xs">Measurements in cm: Chest Width | Length | Shoulder Width</p>
+                  </div>
+                </div>
               </div>
               </div>
             </div>

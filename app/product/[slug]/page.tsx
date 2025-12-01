@@ -72,6 +72,7 @@ export default function ProductPage() {
   const [imageError, setImageError] = useState(false)
   const [isZoomed, setIsZoomed] = useState(false)
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
 
   useEffect(() => {
     if (slug) {
@@ -626,7 +627,20 @@ export default function ProductPage() {
             {/* Product-Level Size Selection (from sizeInventory or variant sizeInventory) */}
             {displaySizeInventory.length > 0 && (
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-3">Select Size</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-900">Select Size</h3>
+                  {product.sizeGuide && (
+                    <button
+                      onClick={() => setShowSizeGuide(true)}
+                      className="flex items-center gap-1 text-xs text-gray-600 hover:text-black transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      Size Guide
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {displaySizeInventory.map(({ size, quantity }) => {
                     const isAvailable = quantity > 0
@@ -702,7 +716,20 @@ export default function ProductPage() {
             {/* Size Selection (from variants) - fallback if no sizeInventory */}
             {displaySizeInventory.length === 0 && getAvailableSizes().length > 0 && (
               <div>
-                <h3 className="text-xs uppercase tracking-wider text-gray-900 mb-3">Select Size</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-900">Select Size</h3>
+                  {product.sizeGuide && (
+                    <button
+                      onClick={() => setShowSizeGuide(true)}
+                      className="flex items-center gap-1 text-xs text-gray-600 hover:text-black transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      Size Guide
+                    </button>
+                  )}
+                </div>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {getAvailableSizes().map((size) => {
                     // Find variant for this size to get stock
@@ -987,6 +1014,82 @@ export default function ProductPage() {
               {currentImageIndex + 1} / {allImages.length}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Size Guide Modal */}
+      {showSizeGuide && product?.sizeGuide && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowSizeGuide(false)}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-gray-900">Size Guide</h3>
+              </div>
+              <button
+                onClick={() => setShowSizeGuide(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+                aria-label="Close"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="p-6">
+              <p className="text-sm text-gray-600 mb-4">All measurements in centimeters (cm)</p>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-900">SIZE</th>
+                      <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-900">CHEST WIDTH</th>
+                      <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-900">LENGTH</th>
+                      <th className="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-900">SHOULDER</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {product.sizeGuide.split('\n').filter(line => line.trim()).map((line, idx) => {
+                      const parts = line.split('|').map(p => p.trim())
+                      if (parts.length >= 4) {
+                        return (
+                          <tr key={idx} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 px-4 py-3 font-semibold text-gray-900">{parts[0]}</td>
+                            <td className="border border-gray-300 px-4 py-3 text-gray-700">{parts[1]}</td>
+                            <td className="border border-gray-300 px-4 py-3 text-gray-700">{parts[2]}</td>
+                            <td className="border border-gray-300 px-4 py-3 text-gray-700">{parts[3]}</td>
+                          </tr>
+                        )
+                      }
+                      return null
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-900 font-medium mb-2">📏 How to Measure:</p>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• <strong>Chest Width:</strong> Measure across the chest from armpit to armpit</li>
+                  <li>• <strong>Length:</strong> Measure from the highest point of the shoulder to the bottom hem</li>
+                  <li>• <strong>Shoulder:</strong> Measure from shoulder seam to shoulder seam</li>
+                </ul>
+                <p className="text-xs text-blue-700 mt-3">
+                  💡 Tip: This product follows an oversized fit. For a regular fit, consider sizing down.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
