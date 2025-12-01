@@ -385,9 +385,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                 {totalStock > 0 ? (totalStock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
               </span>
             ) : (
-              <span className={product.stock > 0 ? (product.stock <= 10 ? 'text-orange-600' : 'text-green-600') : 'text-gray-500'}>
-                {product.stock > 0 ? (product.stock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
-              </span>
+              <>
+                {product.color && <span className="font-normal uppercase">{product.color}</span>}
+                {product.stock > 0 && product.color && <span className="mx-2">•</span>}
+                <span className={product.stock > 0 ? (product.stock <= 10 ? 'text-orange-600' : 'text-green-600') : 'text-gray-500'}>
+                  {product.stock > 0 ? (product.stock <= 10 ? 'Low Stock' : 'In Stock') : 'Out of Stock'}
+                </span>
+              </>
             )}
           </div>
 
