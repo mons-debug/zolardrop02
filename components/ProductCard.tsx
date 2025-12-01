@@ -80,8 +80,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                              product.sku?.startsWith('ESS-')
     
     if (hasVariants && isEssenceProduct) {
-      console.log('🔍 Product variants:', product.variants.map(v => ({ id: v.id, color: v.color })))
-      
       // Prioritize Eclipse Black for Essence products - robust matching
       const eclipseBlackVariant = product.variants.find(v => {
         if (!v.color) return false
@@ -94,8 +92,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           (color.includes('eclipse') && color.includes('black'))
         )
       })
-      
-      console.log('✅ Eclipse Black variant found:', eclipseBlackVariant)
       
       if (eclipseBlackVariant) {
         return eclipseBlackVariant
