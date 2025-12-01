@@ -82,11 +82,11 @@ export default function Navbar({ className = '' }: NavbarProps) {
             // Calculate relative luminance
             const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
             
-            // Show WHITE text (isDarkBackground = false) only for VERY dark backgrounds (< 0.15)
-            // This includes hero section and archive section (black backgrounds)
-            // Show BLACK text (isDarkBackground = true) for everything else
-            // Collection sections with white/light backgrounds will show black text
-            setIsDarkBackground(luminance >= 0.15)
+            // Show WHITE text (isDarkBackground = false) only for VERY dark backgrounds (< 0.25)
+            // This includes pure black hero section and archive section
+            // Show BLACK text (isDarkBackground = true) for medium-gray and lighter
+            // This includes hero carousel (gray ~0.3-0.5), collection sections (white ~1.0)
+            setIsDarkBackground(luminance >= 0.25)
           }
         }
       } catch (error) {
