@@ -18,12 +18,6 @@ const ShatteredBackground = dynamic(() => import('@/components/ShatteredBackgrou
   loading: () => null
 })
 
-// Lazy load WavyBackground for essence collection
-const WavyBackground = dynamic(() => import('@/components/ui/wavy-background').then(mod => ({ default: mod.WavyBackground })), {
-  ssr: false,
-  loading: () => null
-})
-
 // Import Cover directly for hero text effect (fix deployment issue)
 import { Cover } from '@/components/ui/cover'
 import { Spotlight } from '@/components/ui/spotlight'
@@ -561,32 +555,16 @@ export default function Home() {
                   </motion.div>
 
           {/* ESSENCE & FRAGMENT - STAGGERED LAYOUT */}
-          <div className="relative space-y-6 md:space-y-0 -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="relative space-y-6 md:space-y-0">
             {/* ESSENCE COLLECTION */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative overflow-hidden"
+              className="relative rounded-lg md:rounded-2xl bg-white"
             >
-              {/* Wavy Background - Sweatshirt Colors */}
-              <div className="absolute inset-0 w-full h-full pointer-events-none">
-                <WavyBackground
-                  containerClassName="w-full h-full absolute inset-0"
-                  className="w-full h-full"
-                  colors={["#1a1a1a", "#6b7280", "#047857", "#1e40af"]}
-                  waveWidth={40}
-                  backgroundFill="white"
-                  blur={6}
-                  speed="fast"
-                  waveOpacity={0.8}
-                >
-                  <div />
-                </WavyBackground>
-              </div>
-              
-              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16 relative z-10">
+              <div className="max-w-6xl mx-auto px-4 md:px-8 lg:px-12 py-8 md:py-16">
                 <AnimatedCollection
                   collection={{
                     title: essenceTitle,
