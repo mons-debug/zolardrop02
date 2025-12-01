@@ -571,16 +571,16 @@ export default function Home() {
               className="relative rounded-lg md:rounded-2xl"
             >
               {/* Wavy Background - Sweatshirt Colors */}
-              <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none rounded-lg md:rounded-2xl overflow-hidden">
+              <div className="absolute inset-0 -z-10 pointer-events-none rounded-lg md:rounded-2xl overflow-hidden">
                 <WavyBackground
-                  containerClassName="w-full h-full"
+                  containerClassName="w-full h-full absolute inset-0"
                   className="w-full h-full"
                   colors={["#1a1a1a", "#6b7280", "#047857", "#1e40af"]}
-                  waveWidth={60}
-                  backgroundFill="#f5f5f5"
-                  blur={12}
-                  speed="slow"
-                  waveOpacity={0.6}
+                  waveWidth={70}
+                  backgroundFill="#f9fafb"
+                  blur={8}
+                  speed="fast"
+                  waveOpacity={0.75}
                 >
                   <div />
                 </WavyBackground>
