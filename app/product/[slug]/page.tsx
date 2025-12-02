@@ -624,35 +624,73 @@ export default function ProductPage() {
             {/* Description */}
             <div>
               <div className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none">
-                {displayDescription && displayDescription.split('\n').map((line: string, idx: number) => {
-                  // Headline
-                  if (line.startsWith('# ')) {
-                    return <h2 key={idx} className="text-lg font-bold mt-4 mb-2 text-black">{line.replace('# ', '')}</h2>
+                {displayDescription && (() => {
+                  // Handle both actual newlines and escaped \n
+                  const lines = displayDescription.replace(/\\n/g, '\n').split('\n')
+                  const elements: JSX.Element[] = []
+                  let bulletItems: JSX.Element[] = []
+                  
+                  lines.forEach((line: string, idx: number) => {
+                    const trimmedLine = line.trim()
+                    
+                    // If we were collecting bullets and hit a non-bullet, close the list
+                    if (bulletItems.length > 0 && !trimmedLine.startsWith('• ') && !trimmedLine.startsWith('- ')) {
+                      elements.push(<ul key={`ul-${idx}`} className="ml-4 mb-3 space-y-1">{bulletItems}</ul>)
+                      bulletItems = []
+                    }
+                    
+                    // Headline
+                    if (trimmedLine.startsWith('# ')) {
+                      elements.push(
+                        <h2 key={idx} className="text-lg font-bold mt-4 mb-2 text-black">
+                          {trimmedLine.replace('# ', '')}
+                        </h2>
+                      )
+                    }
+                    // Sub-headline
+                    else if (trimmedLine.startsWith('## ')) {
+                      elements.push(
+                        <h3 key={idx} className="text-base font-semibold mt-3 mb-2 text-black">
+                          {trimmedLine.replace('## ', '')}
+                        </h3>
+                      )
+                    }
+                    // Bullet point
+                    else if (trimmedLine.startsWith('• ') || trimmedLine.startsWith('- ')) {
+                      bulletItems.push(
+                        <li key={idx} className="list-disc ml-5">
+                          {trimmedLine.replace(/^[•-]\s*/, '')}
+                        </li>
+                      )
+                    }
+                    // Bold text
+                    else if (trimmedLine.includes('**')) {
+                      const parts = trimmedLine.split('**')
+                      elements.push(
+                        <p key={idx} className="mb-2">
+                          {parts.map((part: string, i: number) => 
+                            i % 2 === 1 ? <strong key={i} className="font-semibold text-black">{part}</strong> : part
+                          )}
+                        </p>
+                      )
+                    }
+                    // Empty line
+                    else if (trimmedLine === '') {
+                      elements.push(<div key={idx} className="h-2" />)
+                    }
+                    // Regular text
+                    else if (trimmedLine) {
+                      elements.push(<p key={idx} className="mb-2">{trimmedLine}</p>)
+                    }
+                  })
+                  
+                  // Close any remaining bullet list
+                  if (bulletItems.length > 0) {
+                    elements.push(<ul key="ul-final" className="ml-4 mb-3 space-y-1">{bulletItems}</ul>)
                   }
-                  // Sub-headline
-                  if (line.startsWith('## ')) {
-                    return <h3 key={idx} className="text-base font-semibold mt-3 mb-2 text-black">{line.replace('## ', '')}</h3>
-                  }
-                  // Bullet point
-                  if (line.startsWith('• ') || line.startsWith('- ')) {
-                    return <li key={idx} className="ml-4 list-disc">{line.replace(/^[•-] /, '')}</li>
-                  }
-                  // Bold text
-                  if (line.includes('**')) {
-                    const parts = line.split('**')
-                    return (
-                      <p key={idx} className="mb-2">
-                        {parts.map((part: string, i: number) => i % 2 === 1 ? <strong key={i} className="font-semibold text-black">{part}</strong> : part)}
-                      </p>
-                    )
-                  }
-                  // Empty line
-                  if (line.trim() === '') {
-                    return <br key={idx} />
-                  }
-                  // Regular text
-                  return <p key={idx} className="mb-2">{line}</p>
-                })}
+                  
+                  return elements
+                })()}
               </div>
             </div>
 
