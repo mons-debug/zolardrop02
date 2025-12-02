@@ -62,7 +62,7 @@ export default function ProductPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const slug = params?.slug as string
-  const preSelectedVariantId = searchParams.get('variant')
+  const preSelectedVariantId = searchParams?.get('variant') || null
   const { addItem } = useCart()
 
   const [product, setProduct] = useState<Product | null>(null)
@@ -624,7 +624,7 @@ export default function ProductPage() {
             {/* Description */}
             <div>
               <div className="text-sm text-gray-600 leading-relaxed prose prose-sm max-w-none">
-                {displayDescription && displayDescription.split('\n').map((line, idx) => {
+                {displayDescription && displayDescription.split('\n').map((line: string, idx: number) => {
                   // Headline
                   if (line.startsWith('# ')) {
                     return <h2 key={idx} className="text-lg font-bold mt-4 mb-2 text-black">{line.replace('# ', '')}</h2>
@@ -642,7 +642,7 @@ export default function ProductPage() {
                     const parts = line.split('**')
                     return (
                       <p key={idx} className="mb-2">
-                        {parts.map((part, i) => i % 2 === 1 ? <strong key={i} className="font-semibold text-black">{part}</strong> : part)}
+                        {parts.map((part: string, i: number) => i % 2 === 1 ? <strong key={i} className="font-semibold text-black">{part}</strong> : part)}
                       </p>
                     )
                   }
@@ -704,9 +704,11 @@ export default function ProductPage() {
                 </div>
                 
                 {/* Size Selected - Show Quantity and Stock Status */}
-                {selectedSize && displaySizeInventory.find(s => s.size === selectedSize)?.quantity > 0 && (() => {
+                {selectedSize && (() => {
                   const selectedSizeData = displaySizeInventory.find(s => s.size === selectedSize)
-                  const quantity = selectedSizeData?.quantity || 0
+                  if (!selectedSizeData || selectedSizeData.quantity === 0) return null
+                  
+                  const quantity = selectedSizeData.quantity
                   const isLowStock = quantity > 0 && quantity <= 10
                   const currentQty = sizeQuantities[selectedSize] || 1
                   
@@ -1091,8 +1093,8 @@ export default function ProductPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {product.sizeGuide.split('\n').filter(line => line.trim()).map((line, idx) => {
-                      const parts = line.split('|').map(p => p.trim())
+                    {product.sizeGuide.split('\n').filter((line: string) => line.trim()).map((line: string, idx: number) => {
+                      const parts = line.split('|').map((p: string) => p.trim())
                       if (parts.length >= 4) {
                         return (
                           <tr key={idx} className="hover:bg-gray-50">
