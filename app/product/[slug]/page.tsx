@@ -387,17 +387,9 @@ export default function ProductPage() {
           size: selectedSize
         })
       } else {
-        // No variant found, use product directly
-        addItem({
-          productId: product.id,
-          variantId: product.id,
-          qty: qty,
-          priceCents: product.priceCents,
-          title: product.title,
-          image: firstImage,
-          variantName: `${product.color || 'Default'} - ${selectedSize}`,
-          size: selectedSize
-        })
+        // No variant found - this shouldn't happen with properly configured products
+        alert('This product variant is not available. Please select a different option or contact support.')
+        return
       }
     } else {
       // No sizes - single item logic
@@ -414,16 +406,25 @@ export default function ProductPage() {
           image: variantImage,
           variantName: `${selectedVariant.color}${selectedVariant.size ? ` - ${selectedVariant.size}` : ''}`
         })
-      } else {
+      } else if (product.variants && product.variants.length > 0) {
+        // Auto-select first variant if none selected
+        const firstVariant = product.variants[0]
+        const variantImgs = parseImages(firstVariant.images)
+        const variantImage = variantImgs[0] || firstImage
+
         addItem({
           productId: product.id,
-          variantId: product.id,
+          variantId: firstVariant.id,
           qty: 1,
-          priceCents: product.priceCents,
+          priceCents: firstVariant.priceCents,
           title: product.title,
-          image: firstImage,
-          variantName: `${product.color || 'Default'}${selectedSize ? ` - ${selectedSize}` : ''}`
+          image: variantImage,
+          variantName: `${firstVariant.color}${firstVariant.size ? ` - ${firstVariant.size}` : ''}`
         })
+      } else {
+        // No variants available - this shouldn't happen with properly configured products
+        alert('This product is not available. Please contact support.')
+        return
       }
     }
 

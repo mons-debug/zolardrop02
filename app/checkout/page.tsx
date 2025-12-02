@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { formatPrice } from '@/lib/currency'
 
 export default function CheckoutPage() {
-  const { state, clearCart } = useCart()
+  const { state, clearCart, removeItem } = useCart()
   const router = useRouter()
   const items = state.items
   
@@ -17,6 +17,25 @@ export default function CheckoutPage() {
     phone: '',
     city: ''
   })
+
+  // Validate cart items on mount - remove any with invalid UUIDs
+  useEffect(() => {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    
+    let hasInvalidItems = false
+    items?.forEach(item => {
+      // Check if variantId is a valid UUID
+      if (!uuidRegex.test(item.variantId)) {
+        console.warn('Removing invalid cart item:', item)
+        removeItem(item.productId, item.variantId, item.size)
+        hasInvalidItems = true
+      }
+    })
+
+    if (hasInvalidItems) {
+      alert('Some items in your cart were outdated and have been removed. Please add items again from the products page.')
+    }
+  }, []) // Run once on mount
   
   // Default Moroccan cities
   const cities = [
@@ -93,7 +112,19 @@ export default function CheckoutPage() {
         // Redirect to thank you page with order details
         router.push(`/thank-you?orderId=${data.orderId}&total=${total}&items=${items.length}`)
       } else {
-        alert(data.message || data.error || 'Order failed. Please try again.')
+        // Handle specific error cases
+        if (data.message && data.message.includes('not found')) {
+          // Cart has invalid items - offer to clear cart
+          const shouldClear = confirm(
+            'Your cart contains outdated items. Would you like to clear your cart and start fresh?'
+          )
+          if (shouldClear) {
+            clearCart()
+            router.push('/products')
+          }
+        } else {
+          alert(data.message || data.error || 'Order failed. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Checkout error:', error)

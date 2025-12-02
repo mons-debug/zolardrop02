@@ -73,13 +73,39 @@ export async function POST(request: NextRequest) {
     // Calculate subtotal and validate stock for each item
     let subtotalCents = 0
     const stockValidationPromises = items.map(async (item) => {
-      const variant = await prisma.variant.findUnique({
+      // First try to find as a variant
+      let variant = await prisma.variant.findUnique({
         where: { id: item.variantId },
         include: { product: true }
       })
 
+      // If not found, check if it's a product ID (fallback for products without variants)
       if (!variant) {
-        throw new Error(`Variant ${item.variantId} not found`)
+        const product = await prisma.product.findUnique({
+          where: { id: item.variantId },
+          include: {
+            variants: {
+              take: 1,
+              orderBy: { createdAt: 'asc' }
+            }
+          }
+        })
+
+        if (product && product.variants.length > 0) {
+          // Use the first variant of the product
+          const firstVariant = await prisma.variant.findUnique({
+            where: { id: product.variants[0].id },
+            include: { product: true }
+          })
+          variant = firstVariant
+        } else if (product) {
+          // Product exists but has no variants - this shouldn't happen
+          throw new Error(`Product "${product.title}" has no variants. Please contact support.`)
+        }
+      }
+
+      if (!variant) {
+        throw new Error(`Product or variant not found. Please refresh your cart and try again.`)
       }
 
       if (variant.stock < item.qty) {
