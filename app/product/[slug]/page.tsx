@@ -366,13 +366,46 @@ export default function ProductPage() {
     if (hasSizes && selectedSize) {
       const qty = sizeQuantities[selectedSize] || 1
       
-      // Find variant for this size and color
-      const variantForSize = product.variants?.find((v: any) => 
-        v.size === selectedSize && 
-        (selectedVariant ? v.color === selectedVariant.color : true)
-      ) || selectedVariant
+      // Check if size is available in displaySizeInventory
+      const sizeData = displaySizeInventory.find(s => s.size === selectedSize)
+      if (!sizeData || sizeData.quantity === 0) {
+        alert('This size is out of stock. Please select a different size.')
+        return
+      }
 
-      if (variantForSize) {
+      // If using sizeInventory (JSON-based sizes), use selected variant or first variant
+      if (displaySizeInventory.length > 0) {
+        const variantToUse = selectedVariant || product.variants[0]
+        if (!variantToUse) {
+          alert('This product is not available. Please contact support.')
+          return
+        }
+
+        const variantImgs = parseImages(variantToUse.images)
+        const variantImage = variantImgs[0] || firstImage
+
+        addItem({
+          productId: product.id,
+          variantId: variantToUse.id,
+          qty: qty,
+          priceCents: variantToUse.priceCents,
+          title: product.title,
+          image: variantImage,
+          variantName: `${variantToUse.color || product.color || 'Default'} - ${selectedSize}`,
+          size: selectedSize
+        })
+      } else {
+        // Using variant-based sizes - find variant with matching size and color
+        const variantForSize = product.variants?.find((v: any) => 
+          v.size === selectedSize && 
+          (selectedVariant ? v.color === selectedVariant.color : true)
+        )
+
+        if (!variantForSize) {
+          alert('This product variant is not available. Please select a different option.')
+          return
+        }
+
         const variantImgs = parseImages(variantForSize.images)
         const variantImage = variantImgs[0] || firstImage
 
@@ -386,10 +419,6 @@ export default function ProductPage() {
           variantName: `${variantForSize.color || product.color || 'Default'} - ${selectedSize}`,
           size: selectedSize
         })
-      } else {
-        // No variant found - this shouldn't happen with properly configured products
-        alert('This product variant is not available. Please select a different option or contact support.')
-        return
       }
     } else {
       // No sizes - single item logic
