@@ -4,6 +4,7 @@ import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 type Collection = {
   title: string;
@@ -24,13 +25,43 @@ export const AnimatedCollection = ({
   index?: number;
   locked?: boolean;
 }) => {
+  const pathname = usePathname();
   const [active, setActive] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isOverArrowButton, setIsOverArrowButton] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const autoplayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const arrowButtonRef = useRef<HTMLAnchorElement | null>(null);
   const images = collection.images.length > 0 ? collection.images : ['/placeholder.jpg'];
+
+  // Reset state and reinitialize when route changes or component mounts
+  useEffect(() => {
+    // Reset to initial state
+    setActive(0);
+    setIsPaused(false);
+    setIsOverArrowButton(false);
+    setIsMounted(false);
+
+    // Clear any existing intervals
+    if (autoplayIntervalRef.current) {
+      clearInterval(autoplayIntervalRef.current);
+      autoplayIntervalRef.current = null;
+    }
+    if (pauseTimeoutRef.current) {
+      clearTimeout(pauseTimeoutRef.current);
+      pauseTimeoutRef.current = null;
+    }
+
+    // Small delay to allow component to properly reinitialize
+    const mountTimeout = setTimeout(() => {
+      setIsMounted(true);
+    }, 100);
+
+    return () => {
+      clearTimeout(mountTimeout);
+    };
+  }, [pathname]);
 
   // Alternate layout: even index = image left, odd index = image right
   const isEven = index % 2 === 0;
@@ -67,7 +98,8 @@ export const AnimatedCollection = ({
   };
 
   useEffect(() => {
-    if (!autoplay || images.length <= 1 || isPaused) return;
+    // Only start autoplay after component is properly mounted
+    if (!isMounted || !autoplay || images.length <= 1 || isPaused) return;
 
     autoplayIntervalRef.current = setInterval(() => {
       advanceSlide(1);
@@ -78,7 +110,7 @@ export const AnimatedCollection = ({
         clearInterval(autoplayIntervalRef.current);
       }
     };
-  }, [autoplay, images.length, isPaused, advanceSlide]);
+  }, [isMounted, autoplay, images.length, isPaused, advanceSlide]);
 
   useEffect(() => {
     return () => {
@@ -107,7 +139,7 @@ export const AnimatedCollection = ({
             className="relative h-96 md:h-[500px] w-full max-w-md mx-auto"
             style={{ perspective: "1200px" }}
           >
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {images.map((image, index) => {
                 const stackState = getStackState(index);
                 const isCurrent = stackState === "current";
@@ -129,7 +161,7 @@ export const AnimatedCollection = ({
                       z: isCurrent ? 80 : isNext ? 20 : isPrev ? 20 : -60,
                       zIndex: isCurrent ? 50 : isNext || isPrev ? 30 : 10,
                       x: isNext ? 32 : isPrev ? -32 : 0,
-                      y: isCurrent ? [0, -18, 0] : 28,
+                      y: isCurrent ? 0 : 28,
                       rotateY: isNext ? -6 : isPrev ? 6 : 0,
                     }}
                     exit={{
@@ -140,12 +172,6 @@ export const AnimatedCollection = ({
                     transition={{
                       duration: 0.5,
                       ease: [0.4, 0, 0.2, 1],
-                      y: {
-                        duration: 3,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        repeatType: "reverse",
-                      },
                     }}
                     className="absolute inset-0 origin-bottom"
                     style={{ transformStyle: "preserve-3d", pointerEvents: isCurrent ? "auto" : "none" }}
