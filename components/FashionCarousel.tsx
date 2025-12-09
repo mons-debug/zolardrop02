@@ -10,6 +10,7 @@ interface CarouselImage {
   url: string
   alt: string
   size: 'small' | 'medium' | 'large'
+  linkUrl?: string  // Optional link - if not set, image won't be clickable
 }
 
 export default function FashionCarousel() {
@@ -59,7 +60,7 @@ export default function FashionCarousel() {
     <section className="relative py-24 md:py-32 lg:py-40 bg-white overflow-hidden">
       {/* Subtle Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 via-white to-gray-50/50" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header - Clean & Minimal */}
         <motion.div
@@ -82,8 +83,8 @@ export default function FashionCarousel() {
             </span>
             <div className="h-px w-12 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
           </motion.div>
-          
-          <motion.h2 
+
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -92,7 +93,7 @@ export default function FashionCarousel() {
           >
             Style in Motion
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -106,16 +107,10 @@ export default function FashionCarousel() {
 
         {/* Modern Lookbook Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16">
-          {images.slice(0, 3).map((image, index) => (
-            <motion.div
-              key={image.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
-              className="group relative overflow-hidden"
-            >
-              <Link href="/products" className="block">
+          {images.slice(0, 3).map((image, index) => {
+            // Common image content
+            const imageContent = (
+              <>
                 {/* Image Container with Modern Aspect */}
                 <div className="relative aspect-[4/5] overflow-hidden bg-gray-100">
                   {imageErrors[image.id] ? (
@@ -140,10 +135,10 @@ export default function FashionCarousel() {
                       unoptimized
                     />
                   )}
-                  
+
                   {/* Subtle Overlay on Hover */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-                  
+
                   {/* Orange Glow on Hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     <div className="absolute inset-0 bg-gradient-to-t from-orange-500/30 via-transparent to-transparent" />
@@ -151,36 +146,60 @@ export default function FashionCarousel() {
                 </div>
 
                 {/* Floating Label on Hover */}
-                <motion.div 
+                <motion.div
                   className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300"
                   initial={{ y: -10 }}
                   whileHover={{ y: 0 }}
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] font-semibold text-black">
-                    Drop 02
+                  <p className="text-xs uppercase tracking-[0.2em] font-semibold text-orange-500">
+                    New Release
                   </p>
                 </motion.div>
 
-                {/* Bottom CTA Bar */}
-                <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-sm p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">ZOLAR</p>
-                      <p className="text-sm font-medium text-black">View Collection</p>
+                {/* Bottom CTA Bar - only show if image has a link */}
+                {image.linkUrl && (
+                  <div className="absolute inset-x-0 bottom-0 bg-white/95 backdrop-blur-sm p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-wider text-gray-500 mb-1">ZOLAR</p>
+                        <p className="text-sm font-medium text-black">View Collection</p>
+                      </div>
+                      <svg
+                        className="w-5 h-5 text-orange-500 transform group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
                     </div>
-                    <svg 
-                      className="w-5 h-5 text-orange-500 transform group-hover:translate-x-1 transition-transform duration-300" 
-                      fill="none" 
-                      stroke="currentColor" 
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                )}
+              </>
+            )
+
+            return (
+              <motion.div
+                key={image.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.15 }}
+                className="group relative overflow-hidden"
+              >
+                {/* Conditionally wrap in Link or render as div */}
+                {image.linkUrl ? (
+                  <Link href={image.linkUrl} className="block">
+                    {imageContent}
+                  </Link>
+                ) : (
+                  <div className="block cursor-default">
+                    {imageContent}
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
         </div>
 
         {/* CTA Section */}
@@ -196,17 +215,17 @@ export default function FashionCarousel() {
             className="group relative inline-flex items-center gap-4 px-12 py-5 bg-black text-white text-sm uppercase tracking-[0.25em] font-medium overflow-hidden transition-all duration-500 hover:shadow-2xl hover:scale-[1.02]"
           >
             <span className="relative z-10">Shop the Look</span>
-            <motion.svg 
-              className="w-5 h-5 relative z-10" 
-              fill="none" 
-              stroke="currentColor" 
+            <motion.svg
+              className="w-5 h-5 relative z-10"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
               animate={{ x: [0, 4, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </motion.svg>
-            
+
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-orange-500 to-orange-600"
               initial={{ x: '-100%' }}
@@ -214,8 +233,8 @@ export default function FashionCarousel() {
               transition={{ duration: 0.5 }}
             />
           </Link>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}

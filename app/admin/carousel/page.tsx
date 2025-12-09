@@ -8,6 +8,7 @@ interface CarouselImage {
   url: string
   alt: string
   size: 'small' | 'medium' | 'large'
+  linkUrl?: string  // Optional product/page link
   order: number
   isActive: boolean
 }
@@ -42,6 +43,7 @@ export default function FashionCarouselManagementPage() {
       url: '',
       alt: `Fashion Image ${images.length + 1}`,
       size: 'medium',
+      linkUrl: '',  // Empty by default - won't be clickable
       order: images.length,
       isActive: true
     }
@@ -132,13 +134,13 @@ export default function FashionCarouselManagementPage() {
 
     const newImages = [...images]
     const targetIndex = direction === 'up' ? index - 1 : index + 1
-    ;[newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]]
-    
+      ;[newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]]
+
     // Update order values
     newImages.forEach((img, i) => {
       img.order = i
     })
-    
+
     setImages(newImages)
   }
 
@@ -195,11 +197,10 @@ export default function FashionCarouselManagementPage() {
 
           <div className="space-y-4">
             {images.map((image, index) => (
-              <div 
-                key={image.id || index} 
-                className={`border-2 rounded-lg p-5 ${
-                  image.isActive ? 'border-gray-200 bg-white' : 'border-gray-300 bg-gray-50'
-                }`}
+              <div
+                key={image.id || index}
+                className={`border-2 rounded-lg p-5 ${image.isActive ? 'border-gray-200 bg-white' : 'border-gray-300 bg-gray-50'
+                  }`}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
@@ -258,7 +259,7 @@ export default function FashionCarouselManagementPage() {
                     />
                     {!image.url && (
                       <p className="text-xs text-gray-500 mt-1">
-                        Or paste URL: 
+                        Or paste URL:
                         <input
                           type="url"
                           value={image.url}
@@ -302,14 +303,29 @@ export default function FashionCarouselManagementPage() {
                   />
                 </div>
 
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Link URL <span className="text-gray-400 font-normal">(optional - leave empty for no link)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={image.linkUrl || ''}
+                    onChange={(e) => handleImageChange(index, 'linkUrl', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm"
+                    placeholder="/products or /product/SKU-001 or https://..."
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    If empty, the image won't be clickable. Add a URL to make it link to a product or page.
+                  </p>
+                </div>
+
                 {/* Image Preview */}
                 {image.url && (
                   <div className="flex items-start gap-4">
-                    <div className={`relative border border-gray-200 rounded overflow-hidden ${
-                      image.size === 'large' ? 'w-32 h-48' : 
-                      image.size === 'medium' ? 'w-32 h-32' : 
-                      'w-48 h-32'
-                    }`}>
+                    <div className={`relative border border-gray-200 rounded overflow-hidden ${image.size === 'large' ? 'w-32 h-48' :
+                        image.size === 'medium' ? 'w-32 h-32' :
+                          'w-48 h-32'
+                      }`}>
                       <img
                         src={image.url}
                         alt={image.alt}
@@ -349,18 +365,18 @@ export default function FashionCarouselManagementPage() {
         {images.filter(img => img.url && img.isActive).length > 0 && (
           <div className="mt-8 bg-gradient-to-b from-gray-50 via-white to-gray-50 rounded-lg shadow border border-gray-200 p-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">Carousel Preview</h2>
-            
+
             <div className="overflow-hidden">
               <div className="flex gap-6 items-center">
                 {images.filter(img => img.url && img.isActive).slice(0, 6).map((image, index) => {
-                  const sizeClasses = 
+                  const sizeClasses =
                     image.size === 'large' ? 'h-96 w-64' :
-                    image.size === 'medium' ? 'h-72 w-56' :
-                    'h-56 w-80'
-                  
+                      image.size === 'medium' ? 'h-72 w-56' :
+                        'h-56 w-80'
+
                   return (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className={`relative flex-shrink-0 ${sizeClasses} rounded overflow-hidden border-2 border-gray-200 shadow-lg`}
                     >
                       <img

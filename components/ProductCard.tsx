@@ -64,22 +64,22 @@ const colorMap: Record<string, string> = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const hasVariants = product.variants && product.variants.length > 0
-  
+
   // Check if this is a variant product (separate product representing a specific variant)
   const isVariantProduct = (product as any)._isVariantProduct || false
   const parentSku = (product as any)._parentProductSku || product.sku
   const variantId = (product as any)._variantId
-  
+
   // Get initial variant
   const getInitialVariant = () => {
     if (hasVariants && isVariantProduct && variantId) {
       return product.variants.find(v => v.id === variantId) || null
     }
-    
+
     // Check if this is an Essence product
-    const isEssenceProduct = product.title?.toLowerCase().includes('essence') || 
-                             product.sku?.startsWith('ESS-')
-    
+    const isEssenceProduct = product.title?.toLowerCase().includes('essence') ||
+      product.sku?.startsWith('ESS-')
+
     if (hasVariants && isEssenceProduct) {
       // Prioritize Eclipse Black for Essence products - robust matching
       const eclipseBlackVariant = product.variants.find(v => {
@@ -93,15 +93,15 @@ export default function ProductCard({ product }: ProductCardProps) {
           (color.includes('eclipse') && color.includes('black'))
         )
       })
-      
+
       if (eclipseBlackVariant) {
         return eclipseBlackVariant
       }
     }
-    
+
     return null
   }
-  
+
   const [selectedVariant, setSelectedVariant] = useState(getInitialVariant())
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [imageError, setImageError] = useState(false)
@@ -125,18 +125,32 @@ export default function ProductCard({ product }: ProductCardProps) {
   // - For regular products without variant selected: use product's primary images
   const productImages = parseImages(product.images)
   const variantImages = selectedVariant ? parseImages(selectedVariant.images) : []
-  
+
   let allImages: string[]
+  let imageSource: string  // For debugging
   if (isVariantProduct) {
     // Variant product - only show variant images
     allImages = variantImages.length > 0 ? variantImages : productImages
+    imageSource = 'variant product'
   } else if (selectedVariant && variantImages.length > 0) {
     // Regular product with variant selected - show variant images
     allImages = variantImages
+    imageSource = `variant: ${selectedVariant.color}`
   } else {
     // Regular product without variant selected - show product images
     allImages = productImages
+    imageSource = `main product: ${product.color || 'no color'}`
   }
+
+  // Debug logging - can remove after fixing
+  console.log(`[ProductCard] ${product.title}:`, {
+    productColor: product.color,
+    selectedVariantColor: selectedVariant?.color,
+    imageSource,
+    productImagesCount: productImages.length,
+    variantImagesCount: variantImages.length,
+    firstImage: allImages[0]?.substring(0, 50) + '...'
+  })
 
   // Change image when variant changes
   const handleVariantChange = (variant: typeof selectedVariant) => {
@@ -149,15 +163,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   }
 
   // Calculate total stock - handle products without variants
-  const totalStock = hasVariants 
+  const totalStock = hasVariants
     ? product.variants.reduce((sum, variant) => sum + variant.stock, 0)
     : product.stock
 
   // Get price - use variant price if available, otherwise product price
   const displayPrice = selectedVariant ? selectedVariant.priceCents : product.priceCents
   // Get stock - if variant selected use variant stock, if no variant but has variants use total, otherwise use product stock
-  const displayStock = selectedVariant 
-    ? selectedVariant.stock 
+  const displayStock = selectedVariant
+    ? selectedVariant.stock
     : (hasVariants ? totalStock : product.stock)
 
   // Parse size inventory
@@ -189,7 +203,17 @@ export default function ProductCard({ product }: ProductCardProps) {
     const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
     const productImgs = parseImages(product.images)
     const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
-    
+
+    // Determine correct variant name: use selected variant color, fall back to product color
+    const variantName = selectedVariant?.color || product.color || 'Default'
+
+    console.log('Adding to cart:', {
+      productTitle: product.title,
+      selectedVariantColor: selectedVariant?.color,
+      productColor: product.color,
+      finalVariantName: variantName
+    })
+
     addItem({
       productId: product.id,
       variantId: selectedVariant?.id || product.id,
@@ -197,7 +221,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       priceCents: displayPrice,
       title: product.title,
       image: firstImage,
-      variantName: selectedVariant?.color || 'Default'
+      variantName: variantName
     })
   }
 
@@ -205,7 +229,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     const variantImgs = selectedVariant ? parseImages(selectedVariant.images) : []
     const productImgs = parseImages(product.images)
     const firstImage = variantImgs[0] || productImgs[0] || '/placeholder.jpg'
-    
+
+    // Determine correct variant name: use selected variant color, fall back to product color
+    const variantName = selectedVariant?.color || product.color || 'Default'
+
     addItem({
       productId: product.id,
       variantId: selectedVariant?.id || product.id,
@@ -213,7 +240,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       priceCents: displayPrice,
       title: product.title,
       image: firstImage,
-      variantName: selectedVariant?.color || 'Default',
+      variantName: variantName,
       size: size
     })
   }
@@ -223,20 +250,20 @@ export default function ProductCard({ product }: ProductCardProps) {
     if (isVariantProduct) {
       return `/product/${parentSku}?variant=${variantId}`
     }
-    
+
     // If a variant is already selected (like Eclipse Black), pass it in the URL
     if (selectedVariant) {
       return `/product/${product.sku}?variant=${selectedVariant.id}`
     }
-    
+
     return `/product/${product.sku}`
   }
 
   return (
     <div className="group h-full flex flex-col">
-      <Link 
-        href={getProductLink()} 
-        className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col" 
+      <Link
+        href={getProductLink()}
+        className="bg-white border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.02] h-full flex flex-col"
         style={{ willChange: 'transform' }}
       >
         {/* Image Section */}
@@ -278,11 +305,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                     e.preventDefault()
                     setCurrentImageIndex(index)
                   }}
-                  className={`transition-all duration-300 ${
-                    index === currentImageIndex 
-                      ? 'bg-black w-6 h-1' 
-                      : 'bg-gray-400 w-6 h-1 hover:bg-gray-600'
-                  }`}
+                  className={`transition-all duration-300 ${index === currentImageIndex
+                    ? 'bg-black w-6 h-1'
+                    : 'bg-gray-400 w-6 h-1 hover:bg-gray-600'
+                    }`}
                   aria-label={`View image ${index + 1}`}
                 />
               ))}
@@ -326,11 +352,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                       // Clicking main product color clears variant selection
                       setSelectedVariant(null)
                     }}
-                    className={`w-5 h-5 transition-all duration-300 border-2 ${
-                      !selectedVariant
-                        ? 'border-black ring-2 ring-offset-2 ring-black'
-                        : 'border-gray-300 hover:border-gray-600'
-                    } ${colorMap[product.color] || 'bg-gray-200'}`}
+                    className={`w-5 h-5 transition-all duration-300 border-2 ${!selectedVariant
+                      ? 'border-black ring-2 ring-offset-2 ring-black'
+                      : 'border-gray-300 hover:border-gray-600'
+                      } ${colorMap[product.color] || 'bg-gray-200'}`}
                     title={`${product.color} - Main product`}
                     aria-label={`Select ${product.color} color`}
                   />
@@ -344,11 +369,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                       e.stopPropagation()
                       handleVariantChange(variant)
                     }}
-                    className={`w-5 h-5 transition-all duration-300 border-2 ${
-                      selectedVariant?.id === variant.id
-                        ? 'border-black ring-2 ring-offset-2 ring-black'
-                        : 'border-gray-300 hover:border-gray-600'
-                    } ${colorMap[variant.color] || 'bg-gray-200'}`}
+                    className={`w-5 h-5 transition-all duration-300 border-2 ${selectedVariant?.id === variant.id
+                      ? 'border-black ring-2 ring-offset-2 ring-black'
+                      : 'border-gray-300 hover:border-gray-600'
+                      } ${colorMap[variant.color] || 'bg-gray-200'}`}
                     title={`${variant.color} - ${variant.stock} in stock`}
                     aria-label={`Select ${variant.color} color`}
                   />
@@ -415,11 +439,10 @@ export default function ProductCard({ product }: ProductCardProps) {
                 handleAddToCart()
               }}
               disabled={displayStock === 0}
-              className={`px-3 py-2 text-xs uppercase tracking-wider transition-colors duration-300 ${
-                displayStock > 0
-                  ? 'bg-black text-white hover:bg-gray-800'
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              }`}
+              className={`px-3 py-2 text-xs uppercase tracking-wider transition-colors duration-300 ${displayStock > 0
+                ? 'bg-black text-white hover:bg-gray-800'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                }`}
             >
               {displayStock > 0 ? 'Add' : 'Sold Out'}
             </button>

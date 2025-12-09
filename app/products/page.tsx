@@ -30,17 +30,17 @@ export default function ProductsPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const collectionFilter = searchParams.get('collection')
-  
+
   const [products, setProducts] = useState<Product[]>([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<'all' | 'essence' | 'fragment' | 'recode' | 'sweatshirts'>('all')
+  const [filter, setFilter] = useState<'all' | 'essence' | 'fragment' | 'genesis' | 'sweatshirts'>('all')
   const [sortBy, setSortBy] = useState<'default' | 'price-low' | 'price-high' | 'name'>('default')
 
   // Set filter from URL parameter
   useEffect(() => {
-    if (collectionFilter && ['essence', 'fragment', 'recode'].includes(collectionFilter)) {
-      setFilter(collectionFilter as 'essence' | 'fragment' | 'recode')
+    if (collectionFilter && ['essence', 'fragment', 'genesis'].includes(collectionFilter)) {
+      setFilter(collectionFilter as 'essence' | 'fragment' | 'genesis')
     }
   }, [collectionFilter])
 
@@ -73,12 +73,12 @@ export default function ProductsPage() {
 
     // Filter by category or collection
     if (filter !== 'all') {
-    if (filter === 'sweatshirts') {
-      result = result.filter(p => 
-        p.title.toLowerCase().includes('sweatshirt') ||
-        p.category?.toLowerCase() === 'sweatshirts' ||
-        p.category?.toLowerCase() === 'sweatshirt'
-      )
+      if (filter === 'sweatshirts') {
+        result = result.filter(p =>
+          p.title.toLowerCase().includes('sweatshirt') ||
+          p.category?.toLowerCase() === 'sweatshirts' ||
+          p.category?.toLowerCase() === 'sweatshirt'
+        )
       } else {
         // Filter by collection (essence, fragment, recode)
         result = result.filter(p => p.category?.toLowerCase() === filter.toLowerCase())
@@ -114,8 +114,8 @@ export default function ProductsPage() {
               transition={{ delay: 0.1 }}
               className="mb-6"
             >
-              <span className="text-xs font-normal uppercase tracking-widest text-gray-500">
-                Drop 02
+              <span className="text-xs font-medium uppercase tracking-widest text-orange-500">
+                New Release
               </span>
             </motion.div>
 
@@ -154,11 +154,10 @@ export default function ProductsPage() {
                       setFilter('all')
                       router.push('/products')
                     }}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
-                      filter === 'all'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${filter === 'all'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     All
                   </button>
@@ -167,11 +166,10 @@ export default function ProductsPage() {
                       setFilter('essence')
                       router.push('/products?collection=essence')
                     }}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
-                      filter === 'essence'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${filter === 'essence'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     Essence
                   </button>
@@ -180,37 +178,34 @@ export default function ProductsPage() {
                       setFilter('fragment')
                       router.push('/products?collection=fragment')
                     }}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
-                      filter === 'fragment'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${filter === 'fragment'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     Fragment
                   </button>
                   <button
                     onClick={() => {
-                      setFilter('recode')
-                      router.push('/products?collection=recode')
+                      setFilter('genesis')
+                      router.push('/products?collection=genesis')
                     }}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
-                      filter === 'recode'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${filter === 'genesis'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
-                    Recode
+                    Genesis
                   </button>
                   <button
                     onClick={() => {
                       setFilter('sweatshirts')
                       router.push('/products')
                     }}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${
-                      filter === 'sweatshirts'
-                        ? 'bg-black text-white'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }`}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider transition-all duration-300 ${filter === 'sweatshirts'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
                   >
                     Sweatshirts
                   </button>

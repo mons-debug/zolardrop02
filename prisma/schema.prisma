@@ -137,6 +137,7 @@ model FashionCarousel {
   url       String
   alt       String
   size      String // 'small', 'medium', 'large'
+  linkUrl   String?  // Optional link URL - if not set, image won't be clickable
   order     Int // Display order
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

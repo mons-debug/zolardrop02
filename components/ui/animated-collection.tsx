@@ -17,10 +17,12 @@ export const AnimatedCollection = ({
   collection,
   autoplay = true,
   index = 0,
+  locked = false,
 }: {
   collection: Collection;
   autoplay?: boolean;
   index?: number;
+  locked?: boolean;
 }) => {
   const [active, setActive] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -74,7 +76,7 @@ export const AnimatedCollection = ({
     return () => {
       if (autoplayIntervalRef.current) {
         clearInterval(autoplayIntervalRef.current);
-    }
+      }
     };
   }, [autoplay, images.length, isPaused, advanceSlide]);
 
@@ -113,124 +115,138 @@ export const AnimatedCollection = ({
                 const isPrev = stackState === "previous";
 
                 return (
-                <motion.div
-                  key={`${image}-${index}`}
-                  initial={{
-                    opacity: 0,
-                    scale: 0.85,
-                    z: -100,
-                  }}
-                  animate={{
-                    opacity:
-                      stackState === "rest" ? 0 : stackState === "current" ? 1 : 0.65,
-                    scale: isCurrent ? 1 : 0.94,
-                    z: isCurrent ? 80 : isNext ? 20 : isPrev ? 20 : -60,
-                    zIndex: isCurrent ? 50 : isNext || isPrev ? 30 : 10,
-                    x: isNext ? 32 : isPrev ? -32 : 0,
-                    y: isCurrent ? [0, -18, 0] : 28,
-                    rotateY: isNext ? -6 : isPrev ? 6 : 0,
-                  }}
-                  exit={{
-                    opacity: 0,
-                    scale: 0.85,
-                    z: 100,
-                  }}
-                  transition={{
-                    duration: 0.5,
-                    ease: [0.4, 0, 0.2, 1],
-                    y: {
-                      duration: 3,
-                      repeat: Infinity,
-                    ease: "easeInOut",
-                      repeatType: "reverse",
-                    },
-                  }}
-                  className="absolute inset-0 origin-bottom"
-                  style={{ transformStyle: "preserve-3d", pointerEvents: isCurrent ? "auto" : "none" }}
-                  onMouseEnter={pauseAutoplay}
-                  onTouchStart={pauseAutoplay}
-                  drag={isCurrent && !isOverArrowButton ? "x" : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.2}
-                  dragPropagation={false}
-                  onDragStart={(event, info) => {
-                    const target = event.target as HTMLElement;
-                    if (arrowButtonRef.current && arrowButtonRef.current.contains(target)) {
-                      return false;
-                    }
-                    if (target.closest('a[href]')) {
-                      return false;
-                    }
-                    pauseAutoplay();
-                  }}
-                  onDragEnd={(_, info) => {
-                    if (Math.abs(info.offset.x) < 40) return;
-                    if (info.offset.x < -40) {
-                      handleManualNext();
-                    } else if (info.offset.x > 40) {
-                      handleManualPrev();
-                    }
-                  }}
-                >
-                  <div
-                    className="relative h-full w-full rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 group"
+                  <motion.div
+                    key={`${image}-${index}`}
+                    initial={{
+                      opacity: 0,
+                      scale: 0.85,
+                      z: -100,
+                    }}
+                    animate={{
+                      opacity:
+                        stackState === "rest" ? 0 : stackState === "current" ? 1 : 0.65,
+                      scale: isCurrent ? 1 : 0.94,
+                      z: isCurrent ? 80 : isNext ? 20 : isPrev ? 20 : -60,
+                      zIndex: isCurrent ? 50 : isNext || isPrev ? 30 : 10,
+                      x: isNext ? 32 : isPrev ? -32 : 0,
+                      y: isCurrent ? [0, -18, 0] : 28,
+                      rotateY: isNext ? -6 : isPrev ? 6 : 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      scale: 0.85,
+                      z: 100,
+                    }}
+                    transition={{
+                      duration: 0.5,
+                      ease: [0.4, 0, 0.2, 1],
+                      y: {
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        repeatType: "reverse",
+                      },
+                    }}
+                    className="absolute inset-0 origin-bottom"
+                    style={{ transformStyle: "preserve-3d", pointerEvents: isCurrent ? "auto" : "none" }}
+                    onMouseEnter={pauseAutoplay}
+                    onTouchStart={pauseAutoplay}
+                    drag={isCurrent && !isOverArrowButton ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    dragPropagation={false}
+                    onDragStart={(event, info) => {
+                      const target = event.target as HTMLElement;
+                      if (arrowButtonRef.current && arrowButtonRef.current.contains(target)) {
+                        return false;
+                      }
+                      if (target.closest('a[href]')) {
+                        return false;
+                      }
+                      pauseAutoplay();
+                    }}
+                    onDragEnd={(_, info) => {
+                      if (Math.abs(info.offset.x) < 40) return;
+                      if (info.offset.x < -40) {
+                        handleManualNext();
+                      } else if (info.offset.x > 40) {
+                        handleManualPrev();
+                      }
+                    }}
                   >
-                    <Image
-                      src={image}
-                      alt={collection.title}
-                      fill
-                      className="object-cover object-center transition-transform duration-500 group-hover:scale-105 pointer-events-none"
-                      unoptimized
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = '/placeholder.jpg';
-                      }}
-                    />
-                    {/* Overlay on hover */}
-                    <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
-                    {/* Non-draggable zone for arrow button */}
-                    {isCurrent && (
-                      <div 
-                        className="absolute bottom-0 right-0 w-20 h-20 z-[60]"
-                        onMouseEnter={() => setIsOverArrowButton(true)}
-                        onMouseLeave={() => setIsOverArrowButton(false)}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
+                    <div
+                      className={`relative h-full w-full rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-300 group ${locked ? 'pointer-events-none' : ''}`}
+                    >
+                      <Image
+                        src={image}
+                        alt={collection.title}
+                        fill
+                        className={`object-cover object-center transition-transform duration-500 group-hover:scale-105 pointer-events-none ${locked ? 'blur-[4px] grayscale-[30%]' : ''}`}
+                        unoptimized
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder.jpg';
                         }}
-                        onTouchStart={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                        }}
-                        style={{ pointerEvents: 'auto' }}
-                      >
-                        <a
-                          ref={arrowButtonRef}
-                          href={collection.link}
-                          className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-all duration-300 hover:bg-orange-500 hover:text-white cursor-pointer z-[70]"
-                          aria-label={`View ${collection.title} collection`}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            event.preventDefault();
-                            window.location.href = collection.link;
+                      />
+                      {/* Lock overlay for locked collections */}
+                      {locked && isCurrent && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-[65]">
+                          <div className="text-center">
+                            <div className="w-14 h-14 mx-auto mb-3 bg-white/95 rounded-full flex items-center justify-center shadow-lg">
+                              <svg className="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                              </svg>
+                            </div>
+                            <p className="text-white font-semibold text-sm uppercase tracking-wider drop-shadow-lg">Coming Soon</p>
+                          </div>
+                        </div>
+                      )}
+                      {/* Overlay on hover */}
+                      <div className="pointer-events-none absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                      {/* Non-draggable zone for arrow button - hidden when locked */}
+                      {isCurrent && !locked && (
+                        <div
+                          className="absolute bottom-0 right-0 w-20 h-20 z-[60]"
+                          onMouseEnter={() => setIsOverArrowButton(true)}
+                          onMouseLeave={() => setIsOverArrowButton(false)}
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
                           }}
-                          onPointerDown={(event) => {
-                            event.stopPropagation();
+                          onTouchStart={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
                           }}
-                          onMouseDown={(event) => {
-                            event.stopPropagation();
-                          }}
-                          onTouchStart={(event) => {
-                            event.stopPropagation();
-                          }}
+                          style={{ pointerEvents: 'auto' }}
                         >
-                          <IconArrowRight className="h-5 w-5 pointer-events-none" />
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </motion.div>
-              )})}
+                          <a
+                            ref={arrowButtonRef}
+                            href={collection.link}
+                            className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-black shadow-lg transition-all duration-300 hover:bg-orange-500 hover:text-white cursor-pointer z-[70]"
+                            aria-label={`View ${collection.title} collection`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              event.preventDefault();
+                              window.location.href = collection.link;
+                            }}
+                            onPointerDown={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onMouseDown={(event) => {
+                              event.stopPropagation();
+                            }}
+                            onTouchStart={(event) => {
+                              event.stopPropagation();
+                            }}
+                          >
+                            <IconArrowRight className="h-5 w-5 pointer-events-none" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )
+              })}
             </AnimatePresence>
           </div>
 
@@ -252,15 +268,24 @@ export const AnimatedCollection = ({
             </button>
           </div>
 
-          {/* Mobile: EXPLORE COLLECTION button centered */}
+          {/* Mobile: EXPLORE COLLECTION button centered - disabled when locked */}
           <div className="flex justify-center mt-12 md:hidden">
-            <a
-              href={collection.link}
-              className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] hover:bg-orange-500 transition-colors rounded-none"
-            >
-              EXPLORE COLLECTION
-              <IconArrowRight className="h-4 w-4" />
-            </a>
+            {locked ? (
+              <span className="inline-flex items-center gap-3 px-8 py-3 bg-gray-400 text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] cursor-not-allowed rounded-none">
+                COMING SOON
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </span>
+            ) : (
+              <a
+                href={collection.link}
+                className="inline-flex items-center gap-3 px-8 py-3 bg-black text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] hover:bg-orange-500 transition-colors rounded-none"
+              >
+                EXPLORE COLLECTION
+                <IconArrowRight className="h-4 w-4" />
+              </a>
+            )}
           </div>
         </div>
 
@@ -283,13 +308,22 @@ export const AnimatedCollection = ({
               {collection.description}
             </p>
 
-            <a
-              href={collection.link}
-              className="hidden md:inline-flex items-center gap-3 px-8 py-3 bg-black text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] hover:bg-orange-500 transition-colors rounded-none"
-            >
-              EXPLORE COLLECTION
-              <IconArrowRight className="h-4 w-4" />
-            </a>
+            {locked ? (
+              <span className="hidden md:inline-flex items-center gap-3 px-8 py-3 bg-gray-400 text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] cursor-not-allowed rounded-none">
+                COMING SOON
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </span>
+            ) : (
+              <a
+                href={collection.link}
+                className="hidden md:inline-flex items-center gap-3 px-8 py-3 bg-black text-white text-xs sm:text-sm font-semibold uppercase tracking-[0.35em] hover:bg-orange-500 transition-colors rounded-none"
+              >
+                EXPLORE COLLECTION
+                <IconArrowRight className="h-4 w-4" />
+              </a>
+            )}
           </div>
         </div>
       </div>

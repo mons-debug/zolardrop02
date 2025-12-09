@@ -25,7 +25,7 @@ export default async function handler(
     }
   } else if (req.method === 'POST') {
     try {
-      const { url, alt, size, order } = req.body
+      const { url, alt, size, order, linkUrl } = req.body
 
       if (!url || !alt || !size) {
         return res.status(400).json({ message: 'URL, alt text, and size are required' })
@@ -45,15 +45,16 @@ export default async function handler(
           url,
           alt,
           size,
+          linkUrl: linkUrl || null,  // Optional link URL
           order: imageOrder,
           isActive: true
         }
       })
 
-      res.status(201).json({ 
+      res.status(201).json({
         success: true,
         image,
-        message: 'Image added successfully' 
+        message: 'Image added successfully'
       })
     } catch (error) {
       console.error('Error creating fashion carousel image:', error)
@@ -61,7 +62,7 @@ export default async function handler(
     }
   } else if (req.method === 'PUT') {
     try {
-      const { id, url, alt, size, order, isActive } = req.body
+      const { id, url, alt, size, order, isActive, linkUrl } = req.body
 
       if (!id) {
         return res.status(400).json({ message: 'Image ID is required' })
@@ -73,16 +74,17 @@ export default async function handler(
       if (size !== undefined) updateData.size = size
       if (order !== undefined) updateData.order = order
       if (isActive !== undefined) updateData.isActive = isActive
+      if (linkUrl !== undefined) updateData.linkUrl = linkUrl || null
 
       const image = await prisma.fashionCarousel.update({
         where: { id },
         data: updateData
       })
 
-      res.status(200).json({ 
+      res.status(200).json({
         success: true,
         image,
-        message: 'Image updated successfully' 
+        message: 'Image updated successfully'
       })
     } catch (error) {
       console.error('Error updating fashion carousel image:', error)
@@ -100,9 +102,9 @@ export default async function handler(
         where: { id }
       })
 
-      res.status(200).json({ 
+      res.status(200).json({
         success: true,
-        message: 'Image deleted successfully' 
+        message: 'Image deleted successfully'
       })
     } catch (error) {
       console.error('Error deleting fashion carousel image:', error)
