@@ -271,7 +271,7 @@ export async function POST(request: NextRequest) {
 
           // Send push notification for low stock
           try {
-            await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/push/send`, {
+            await fetch(`${process.env.NEXTAUTH_URL || 'https://zolar.ma'}/api/push/send`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -359,7 +359,7 @@ export async function POST(request: NextRequest) {
 
     // Send push notification to admin devices
     try {
-      await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/push/send`, {
+      await fetch(`${process.env.NEXTAUTH_URL || 'https://zolar.ma'}/api/push/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
