@@ -57,8 +57,8 @@ export default async function handler(
     const payload = JSON.stringify({
       title,
       body,
-      icon: icon || '/favicon.png',
-      badge: '/favicon.png',
+      icon: icon || '/zolar-icon.svg',
+      badge: '/zolar-icon.svg',
       url: url || '/zolargestion',
       tag: 'new-order',
       requireInteraction: true,

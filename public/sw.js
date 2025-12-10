@@ -29,8 +29,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'Zolar Admin',
     body: 'New notification',
-    icon: '/favicon.png',
-    badge: '/favicon.png',
+    icon: '/zolar-icon.svg',
+    badge: '/zolar-icon.svg',
     tag: 'default',
     requireInteraction: true,
     vibrate: [200, 100, 200, 100, 200], // Longer vibration pattern
@@ -76,7 +76,7 @@ self.addEventListener('push', (event) => {
           {
             action: 'view',
             title: 'View Order',
-            icon: '/favicon.png'
+            icon: '/zolar-icon.svg'
           },
           {
             action: 'close',
@@ -111,7 +111,7 @@ self.addEventListener('push', (event) => {
           {
             action: 'view',
             title: 'View Order',
-            icon: '/favicon.png'
+            icon: '/zolar-icon.svg'
           },
           {
             action: 'close',

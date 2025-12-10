@@ -18,8 +18,8 @@ export const metadata: Metadata = {
     telephone: false
   },
   icons: {
-    icon: '/favicon.png',
-    apple: '/favicon.png'
+    icon: '/zolar-icon.svg',
+    apple: '/zolar-icon.svg'
   },
   keywords: ['streetwear', 'fashion', 'modern clothing', 'limited edition', 'Morocco', 'ZOLAR'],
   openGraph: {
@@ -51,7 +51,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="ZOLAR" />
-        <link rel="apple-touch-icon" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/zolar-icon.svg" />
 
         {/* Service Worker Registration */}
         <script
