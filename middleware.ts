@@ -27,11 +27,10 @@ export function middleware(request: NextRequest) {
 
     // For admin routes (except login), check for authentication
     if (isAdminRoute && !isAdminLogin) {
-        // If no token, redirect to homepage (not login page - to hide admin exists)
+        // If no token, redirect to login page
         if (!adminToken) {
-            // Redirect to homepage to hide the fact that admin panel exists
             const url = request.nextUrl.clone()
-            url.pathname = '/'
+            url.pathname = '/zolargestion/login'
             const response = NextResponse.redirect(url)
 
             // Add security headers
