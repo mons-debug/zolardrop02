@@ -171,8 +171,8 @@ export default function FashionCarouselManagementPage() {
         <div className="px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Fashion Carousel</h1>
-              <p className="text-gray-600 mt-1">Manage the images displayed in the Fashion Edit carousel section</p>
+              <h1 className="text-3xl font-bold text-gray-900">Style in Motion</h1>
+              <p className="text-gray-600 mt-1">Manage the images displayed in the "Style in Motion" gallery on the homepage</p>
             </div>
             <button
               onClick={handleAddImage}
@@ -188,10 +188,10 @@ export default function FashionCarouselManagementPage() {
         {/* Images List */}
         <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Carousel Images</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Gallery Images</h2>
             <p className="text-sm text-gray-600">
-              These images will appear in the infinite scrolling carousel on the homepage.
-              Mix different sizes for visual variety: Tall (vertical), Square, and Horizontal (wide).
+              These images will appear in the "Style in Motion" gallery section on the homepage.
+              The first 3 active images will be displayed in a grid layout.
             </p>
           </div>
 
@@ -323,8 +323,8 @@ export default function FashionCarouselManagementPage() {
                 {image.url && (
                   <div className="flex items-start gap-4">
                     <div className={`relative border border-gray-200 rounded overflow-hidden ${image.size === 'large' ? 'w-32 h-48' :
-                        image.size === 'medium' ? 'w-32 h-32' :
-                          'w-48 h-32'
+                      image.size === 'medium' ? 'w-32 h-32' :
+                        'w-48 h-32'
                       }`}>
                       <img
                         src={image.url}
@@ -364,7 +364,7 @@ export default function FashionCarouselManagementPage() {
         {/* Preview Section */}
         {images.filter(img => img.url && img.isActive).length > 0 && (
           <div className="mt-8 bg-gradient-to-b from-gray-50 via-white to-gray-50 rounded-lg shadow border border-gray-200 p-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Carousel Preview</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-6">Gallery Preview</h2>
 
             <div className="overflow-hidden">
               <div className="flex gap-6 items-center">
@@ -394,7 +394,7 @@ export default function FashionCarouselManagementPage() {
             </div>
 
             <p className="text-sm text-gray-600 mt-4 text-center">
-              This is how your images will appear in the carousel. The actual carousel will scroll infinitely.
+              This is how your images will appear in the gallery. The first 3 active images are shown on the homepage.
             </p>
           </div>
         )}

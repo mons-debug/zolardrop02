@@ -20,9 +20,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter()
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSectionsMenu, setShowSectionsMenu] = useState(
-    pathname.includes('/zolargestion/hero') || 
-    pathname.includes('/zolargestion/carousel') || 
-    pathname.includes('/zolargestion/archive') || 
+    pathname.includes('/zolargestion/hero') ||
+    pathname.includes('/zolargestion/carousel') ||
+    pathname.includes('/zolargestion/archive') ||
     pathname.includes('/zolargestion/collection-stacks')
   )
 
@@ -42,9 +42,9 @@ export default function Sidebar({ user }: SidebarProps) {
       icon: '🎬'
     },
     {
-      name: 'Fashion Carousel',
+      name: 'Style in Motion',
       href: '/zolargestion/carousel',
-      icon: '🎠'
+      icon: '📸'
     },
     {
       name: 'Collection Stacks',
@@ -214,11 +214,10 @@ export default function Sidebar({ user }: SidebarProps) {
           <Link
             key={item.name}
             href={item.href}
-            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-              isActive(item.href)
+            className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${isActive(item.href)
                 ? 'bg-gray-800 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
+              }`}
           >
             {item.icon}
             <span className="font-medium">{item.name}</span>
@@ -229,11 +228,10 @@ export default function Sidebar({ user }: SidebarProps) {
         <div className="space-y-1">
           <button
             onClick={() => setShowSectionsMenu(!showSectionsMenu)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
-              showSectionsMenu
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${showSectionsMenu
                 ? 'bg-gray-800 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-3">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,10 +239,10 @@ export default function Sidebar({ user }: SidebarProps) {
               </svg>
               <span className="font-medium">Edit Sections</span>
             </div>
-            <svg 
-              className={`w-4 h-4 transition-transform ${showSectionsMenu ? 'rotate-180' : ''}`} 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className={`w-4 h-4 transition-transform ${showSectionsMenu ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -258,11 +256,10 @@ export default function Sidebar({ user }: SidebarProps) {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-all text-sm ${
-                    isActive(item.href)
+                  className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-all text-sm ${isActive(item.href)
                       ? 'bg-orange-500 text-white'
                       : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="text-base">{item.icon}</span>
                   <span className="font-medium">{item.name}</span>

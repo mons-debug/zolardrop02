@@ -79,7 +79,7 @@ export default function FashionCarousel() {
           >
             <div className="h-px w-12 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
             <span className="mx-4 text-xs font-medium uppercase tracking-[0.3em] text-orange-500">
-              Lookbook
+              In Action
             </span>
             <div className="h-px w-12 bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
           </motion.div>
@@ -101,7 +101,7 @@ export default function FashionCarousel() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-lg text-gray-600 max-w-2xl mx-auto font-light"
           >
-            See how our pieces come to life.
+            ZOLAR on the streets.
           </motion.p>
         </motion.div>
 

@@ -103,9 +103,21 @@ export default function Navbar({ className = '' }: NavbarProps) {
       }
     }
 
-    // Detect on mount and scroll
+    // Throttle detection to prevent shaking on mobile
+    let lastScrollTime = 0
+    const throttleMs = 100 // Only check every 100ms
+
+    const throttledDetectBackground = () => {
+      const now = Date.now()
+      if (now - lastScrollTime >= throttleMs) {
+        lastScrollTime = now
+        detectBackground()
+      }
+    }
+
+    // Detect on mount and scroll (throttled)
     detectBackground()
-    window.addEventListener('scroll', detectBackground)
+    window.addEventListener('scroll', throttledDetectBackground, { passive: true })
 
     // Also detect on route change
     const handleRouteChange = () => {
@@ -114,7 +126,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
     handleRouteChange()
 
     return () => {
-      window.removeEventListener('scroll', detectBackground)
+      window.removeEventListener('scroll', throttledDetectBackground)
     }
   }, [pathname, isWhiteBackgroundPage])
 
