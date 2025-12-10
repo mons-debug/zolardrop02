@@ -35,7 +35,7 @@ export default async function handler(
     // Check if web-push is configured
     if (!vapidKeys.publicKey || !vapidKeys.privateKey) {
       console.warn('Web push not configured - skipping push notifications')
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: 'Push notifications not configured',
         sent: 0
       })
@@ -48,7 +48,7 @@ export default async function handler(
     })
 
     if (subscriptions.length === 0) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: 'No subscriptions found',
         sent: 0
       })
@@ -57,9 +57,9 @@ export default async function handler(
     const payload = JSON.stringify({
       title,
       body,
-      icon: icon || '/icon-192x192.png',
-      badge: '/icon-72x72.png',
-      url: url || '/admin',
+      icon: icon || '/favicon.png',
+      badge: '/favicon.png',
+      url: url || '/zolargestion',
       tag: 'new-order',
       requireInteraction: true,
       vibrate: [200, 100, 200]
@@ -81,14 +81,14 @@ export default async function handler(
           return { success: true, endpoint: sub.endpoint }
         } catch (error: any) {
           console.error('Failed to send push to:', sub.endpoint, error)
-          
+
           // If subscription is invalid (410 or 404), remove it
           if (error.statusCode === 410 || error.statusCode === 404) {
             await prisma.pushSubscription.delete({
               where: { id: sub.id }
             }).catch(err => console.error('Failed to delete invalid subscription:', err))
           }
-          
+
           return { success: false, endpoint: sub.endpoint, error: error.message }
         }
       })
