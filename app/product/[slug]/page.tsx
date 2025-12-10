@@ -371,12 +371,12 @@ export default function ProductPage() {
         // 1. User selected a variant color (e.g., Eclipse Black) -> use selectedVariant
         // 2. User selected main product color (e.g., Pink Fragment) -> selectedVariant is null, use product data
 
-        // Get the variant to use for pricing/ID (fallback to first variant if main product selected)
+        // Get the variant to use for pricing/ID (fallback to product data if no variants)
         const variantToUse = selectedVariant || product.variants[0]
-        if (!variantToUse) {
-          alert('This product is not available. Please contact support.')
-          return
-        }
+
+        // Use product data if no variant available
+        const priceToUse = variantToUse?.priceCents || product.priceCents
+        const variantIdToUse = variantToUse?.id || product.id
 
         // CRITICAL FIX: Use correct image source
         // - If selectedVariant exists: use selectedVariant.images
@@ -409,9 +409,9 @@ export default function ProductPage() {
 
         addItem({
           productId: product.id,
-          variantId: selectedVariant?.id || variantToUse.id,
+          variantId: variantIdToUse,
           qty: qty,
-          priceCents: selectedVariant?.priceCents || variantToUse.priceCents,
+          priceCents: priceToUse,
           title: product.title,
           image: cartImage,
           variantName: `${displayColorName} - ${selectedSize}`,
@@ -499,9 +499,17 @@ export default function ProductPage() {
           variantName: `${firstVariant.color}${firstVariant.size ? ` - ${firstVariant.size}` : ''}`
         })
       } else {
-        // No variants available - this shouldn't happen with properly configured products
-        alert('This product is not available. Please contact support.')
-        return
+        // No variants available - use product data directly
+        // This handles products configured without variants
+        addItem({
+          productId: product.id,
+          variantId: product.id, // Use product ID as variant ID for tracking
+          qty: 1,
+          priceCents: product.priceCents,
+          title: product.title,
+          image: firstImage,
+          variantName: product.color || 'Default'
+        })
       }
     }
 

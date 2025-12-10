@@ -6,11 +6,11 @@ import { motion, useMotionValue, useSpring } from 'framer-motion'
 export default function CustomCursor() {
   const [isVisible, setIsVisible] = useState(true)
   const [isHovering, setIsHovering] = useState(false)
-  
+
   const cursorX = useMotionValue(-100)
   const cursorY = useMotionValue(-100)
-  
-  const springConfig = { damping: 25, stiffness: 200 }
+
+  const springConfig = { damping: 35, stiffness: 150, mass: 0.5 }
   const cursorXSpring = useSpring(cursorX, springConfig)
   const cursorYSpring = useSpring(cursorY, springConfig)
 
@@ -27,7 +27,7 @@ export default function CustomCursor() {
       setIsVisible(true)
       setIsHovering(true)
     }
-    
+
     const handleMouseLeave = () => {
       setIsHovering(false)
     }
@@ -42,10 +42,10 @@ export default function CustomCursor() {
 
     // Add cursor movement
     window.addEventListener('mousemove', moveCursor)
-    
+
     // Keep cursor visible during scroll
     window.addEventListener('scroll', handleMouseEnterWindow, { passive: true })
-    
+
     // Handle cursor visibility when entering/leaving the page
     document.addEventListener('mouseenter', handleMouseEnterWindow)
     document.addEventListener('mouseleave', handleMouseLeaveWindow)
@@ -89,7 +89,7 @@ export default function CustomCursor() {
           animate={{
             scale: isHovering ? 1.5 : 1,
           }}
-          transition={{ 
+          transition={{
             duration: 0.2,
             ease: 'easeOut'
           }}
@@ -116,7 +116,7 @@ export default function CustomCursor() {
           animate={{
             scale: isHovering ? 0 : 1,
           }}
-          transition={{ 
+          transition={{
             duration: 0.2,
             ease: 'easeOut'
           }}

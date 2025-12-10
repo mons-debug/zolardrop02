@@ -30,6 +30,7 @@ export const AnimatedCollection = ({
   const [isPaused, setIsPaused] = useState(false);
   const [isOverArrowButton, setIsOverArrowButton] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [resetKey, setResetKey] = useState(0); // Force remount key
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const autoplayIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const arrowButtonRef = useRef<HTMLAnchorElement | null>(null);
@@ -61,7 +62,30 @@ export const AnimatedCollection = ({
     return () => {
       clearTimeout(mountTimeout);
     };
-  }, [pathname]);
+  }, [pathname, resetKey]);
+
+  // Handle browser back/forward navigation and page visibility
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Reset when page becomes visible again (e.g., after back navigation)
+        setResetKey(prev => prev + 1);
+      }
+    };
+
+    const handlePopState = () => {
+      // Force reset on browser back/forward
+      setResetKey(prev => prev + 1);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   // Alternate layout: even index = image left, odd index = image right
   const isEven = index % 2 === 0;

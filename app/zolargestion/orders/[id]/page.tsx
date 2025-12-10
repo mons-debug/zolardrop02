@@ -22,6 +22,10 @@ interface OrderItem {
   product?: Product
   color?: string
   size?: string
+  // These fields are stored in cart items and saved to order
+  title?: string
+  image?: string
+  variantName?: string
 }
 
 interface Customer {
@@ -367,15 +371,34 @@ export default function OrderDetailPage() {
               </div>
               <div className="divide-y divide-gray-200">
                 {orderItems.map((item, index) => {
-                  const images = item.product?.images ? JSON.parse(item.product.images) : []
-                  const firstImage = images[0] || '/placeholder.png'
+                  // Try to get image from: 1) fetched product, 2) stored item data, 3) placeholder
+                  let firstImage = '/placeholder.png'
+                  if (item.product?.images) {
+                    try {
+                      const images = JSON.parse(item.product.images)
+                      firstImage = images[0] || item.image || '/placeholder.png'
+                    } catch {
+                      firstImage = item.image || '/placeholder.png'
+                    }
+                  } else if (item.image) {
+                    firstImage = item.image
+                  }
+
+                  // Get product title from: 1) fetched product, 2) stored item data
+                  const productTitle = item.product?.title || item.title || 'Unknown Product'
+
+                  // Get variant info from stored item data or color/size fields
+                  const variantInfo = item.variantName ||
+                    (item.color && item.size ? `${item.color} - ${item.size}` :
+                      item.color ? item.color :
+                        item.size ? `Size: ${item.size}` : null)
 
                   return (
                     <div key={index} className="px-6 py-4 flex items-center space-x-4">
                       <div className="w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                         <Image
                           src={firstImage}
-                          alt={item.product?.title || 'Product'}
+                          alt={productTitle}
                           width={80}
                           height={80}
                           className="w-full h-full object-cover"
@@ -386,13 +409,10 @@ export default function OrderDetailPage() {
                           href={`/product/${item.product?.sku || item.productId}`}
                           className="text-sm font-semibold text-gray-900 hover:text-blue-600 transition-colors"
                         >
-                          {item.product?.title || 'Unknown Product'}
+                          {productTitle}
                         </Link>
                         <p className="text-sm text-gray-500 mt-0.5">
-                          {item.color && `Color: ${item.color}`}
-                          {item.color && item.size && ' • '}
-                          {item.size && `Size: ${item.size}`}
-                          {!item.color && !item.size && 'N/A'}
+                          {variantInfo || 'N/A'}
                           {' • '}SKU: {item.product?.sku || item.productId.slice(0, 8)}
                         </p>
                         <p className="text-sm text-gray-500 mt-0.5">

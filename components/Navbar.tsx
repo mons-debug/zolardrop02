@@ -186,9 +186,9 @@ export default function Navbar({ className = '' }: NavbarProps) {
     {
       title: 'COLLECTIONS',
       links: [
-        { href: '/#essence', label: 'ESSENCE' },
-        { href: '/#fragment', label: 'FRAGMENT' },
-        { href: '/#genesis', label: 'GENESIS' },
+        { href: '/products?collection=essence', label: 'ESSENCE' },
+        { href: '/products?collection=fragment', label: 'FRAGMENT' },
+        { href: '/products?collection=genesis', label: 'GENESIS' },
       ],
     },
     {
@@ -333,8 +333,8 @@ export default function Navbar({ className = '' }: NavbarProps) {
                     onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
                     placeholder="Search..."
                     className={`w-0 focus:w-48 lg:focus:w-56 transition-all duration-300 pl-8 pr-3 py-1.5 border rounded-full text-sm outline-none ${shouldBeBlack
-                        ? 'bg-white border-gray-300 text-black placeholder-gray-400 focus:border-orange-500'
-                        : 'bg-white/10 border-white/20 text-white placeholder-white/60 focus:bg-white/20 focus:border-white/40'
+                      ? 'bg-white border-gray-300 text-black placeholder-gray-400 focus:border-orange-500'
+                      : 'bg-white/10 border-white/20 text-white placeholder-white/60 focus:bg-white/20 focus:border-white/40'
                       }`}
                   />
                   <svg
@@ -413,7 +413,7 @@ export default function Navbar({ className = '' }: NavbarProps) {
                 className="relative"
                 style={{ filter: isScrolled ? 'none' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}
               >
-                <CartIcon isScrolled={isScrolled} />
+                <CartIcon shouldBeBlack={shouldBeBlack} />
               </div>
             </div>
           </div>

@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
         include: { product: true }
       })
 
+      // Track if we're using product data directly (no variant)
+      let useProductDirectly = false
+      let productData: any = null
+
       // If not found, check if it's a product ID (fallback for products without variants)
       if (!variant) {
         const product = await prisma.product.findUnique({
@@ -99,8 +103,26 @@ export async function POST(request: NextRequest) {
           })
           variant = firstVariant
         } else if (product) {
-          // Product exists but has no variants - this shouldn't happen
-          throw new Error(`Product "${product.title}" has no variants. Please contact support.`)
+          // Product exists but has no variants - use product data directly
+          // This is valid for products with sizeInventory directly on the product
+          useProductDirectly = true
+          productData = product
+        }
+      }
+
+      // Handle the case where we're using product data directly
+      if (useProductDirectly && productData) {
+        // Check stock at product level
+        if (productData.stock < item.qty) {
+          throw new Error(`Insufficient stock for ${productData.title}. Available: ${productData.stock}, requested: ${item.qty}`)
+        }
+
+        subtotalCents += productData.priceCents * item.qty
+        return {
+          variant: null,
+          product: productData,
+          qty: item.qty,
+          useProductDirectly: true
         }
       }
 
@@ -113,7 +135,7 @@ export async function POST(request: NextRequest) {
       }
 
       subtotalCents += variant.priceCents * item.qty
-      return { variant, qty: item.qty }
+      return { variant, qty: item.qty, useProductDirectly: false }
     })
 
     const stockResults = await Promise.all(stockValidationPromises)
@@ -194,23 +216,40 @@ export async function POST(request: NextRequest) {
         paymentMethod: 'COD',
         status: 'pending',
         // Store items as JSON string for now (could be improved with proper relations)
-        items: JSON.stringify(items.map(item => ({
-          productId: item.productId,
-          variantId: item.variantId,
-          qty: item.qty,
-          priceCents: stockResults.find(r => r.variant.id === item.variantId)?.variant.priceCents || 0,
-          size: item.size // Include size if available
-        })))
+        items: JSON.stringify(items.map(item => {
+          const result = stockResults.find(r =>
+            (r.variant && r.variant.id === item.variantId) ||
+            (r.product && r.product.id === item.variantId)
+          )
+          const priceCents = result?.variant?.priceCents || result?.product?.priceCents || 0
+          return {
+            productId: item.productId,
+            variantId: item.variantId,
+            qty: item.qty,
+            priceCents,
+            size: item.size // Include size if available
+          }
+        }))
       }
     })
 
-    // Update stock for each variant (decrement)
-    const stockUpdatePromises = stockResults.map(({ variant, qty }) =>
-      prisma.variant.update({
-        where: { id: variant.id },
-        data: { stock: { decrement: qty } }
-      })
-    )
+    // Update stock for each variant or product (decrement)
+    const stockUpdatePromises = stockResults.map((result) => {
+      if (result.useProductDirectly && result.product) {
+        // Product without variants - update product stock directly
+        return prisma.product.update({
+          where: { id: result.product.id },
+          data: { stock: { decrement: result.qty } }
+        })
+      } else if (result.variant) {
+        // Normal variant - update variant stock
+        return prisma.variant.update({
+          where: { id: result.variant.id },
+          data: { stock: { decrement: result.qty } }
+        })
+      }
+      return null
+    }).filter(Boolean)
 
     await Promise.all(stockUpdatePromises)
 
