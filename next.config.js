@@ -44,6 +44,21 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   },
+  // Add redirects for old /admin URLs to new /zolargestion URLs
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/zolargestion',
+        permanent: true,
+      },
+      {
+        source: '/admin/:path*',
+        destination: '/zolargestion/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

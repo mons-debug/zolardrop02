@@ -8,6 +8,10 @@ interface CheckoutItem {
   variantId: string
   qty: number
   size?: string
+  // Optional fields for order display
+  title?: string
+  image?: string
+  variantName?: string
 }
 
 interface CustomerInfo {
@@ -222,12 +226,40 @@ export async function POST(request: NextRequest) {
             (r.product && r.product.id === item.variantId)
           )
           const priceCents = result?.variant?.priceCents || result?.product?.priceCents || 0
+
+          // Get product/variant info for order display
+          const productTitle = result?.variant?.product?.title || result?.product?.title || item.title || 'Unknown Product'
+          const variantColor = result?.variant?.color || item.variantName || ''
+
+          // Determine image - use item.image if provided, otherwise try to get from variant/product
+          let itemImage = item.image || ''
+          if (!itemImage && result?.variant?.images) {
+            try {
+              const variantImages = typeof result.variant.images === 'string'
+                ? JSON.parse(result.variant.images)
+                : result.variant.images
+              itemImage = variantImages[0] || ''
+            } catch { }
+          }
+          if (!itemImage && (result?.variant?.product?.images || result?.product?.images)) {
+            try {
+              const productImages = typeof (result?.variant?.product?.images || result?.product?.images) === 'string'
+                ? JSON.parse(result?.variant?.product?.images || result?.product?.images)
+                : (result?.variant?.product?.images || result?.product?.images)
+              itemImage = productImages[0] || ''
+            } catch { }
+          }
+
           return {
             productId: item.productId,
             variantId: item.variantId,
             qty: item.qty,
             priceCents,
-            size: item.size // Include size if available
+            size: item.size, // Include size if available
+            // Store these for order display
+            title: productTitle,
+            image: itemImage,
+            variantName: variantColor
           }
         }))
       }

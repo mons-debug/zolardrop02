@@ -85,7 +85,11 @@ export default function CheckoutPage() {
             productId: item.productId,
             variantId: item.variantId,
             qty: item.qty,
-            size: item.size // Include size if available
+            size: item.size, // Include size if available
+            // Include these for order display
+            title: item.title,
+            image: item.image,
+            variantName: item.variantName
           })),
           customer: {
             name: formData.name,
