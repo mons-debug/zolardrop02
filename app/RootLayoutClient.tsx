@@ -20,9 +20,9 @@ export default function RootLayoutClient({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  
-  // Check if current path is an admin page
-  const isAdminPage = pathname?.startsWith('/admin')
+
+  // Check if current path is an admin page (both /admin and /zolargestion)
+  const isAdminPage = pathname?.startsWith('/admin') || pathname?.startsWith('/zolargestion')
 
   // Add/remove admin-page class to body based on current page
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function RootLayoutClient({
     } else {
       document.body.classList.remove('admin-page')
     }
-    
+
     return () => {
       document.body.classList.remove('admin-page')
     }

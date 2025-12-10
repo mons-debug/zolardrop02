@@ -110,7 +110,7 @@ export default function AdminDashboard() {
   // We listen for a custom event to refresh data
   useEffect(() => {
     const handleNewOrder = (event: any) => {
-      setToast('­ƒÄë New order received!')
+      setToast('🎉 New order received!')
 
       // Refresh dashboard data
       fetchDashboardData()
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
     const phone = order.customer?.phone || 'Unknown'
     const city = order.customer?.city || 'N/A'
     const total = formatPrice(order.totalCents)
-    return `${phone} ÔÇó ${city} ÔÇó ${total}`
+    return `${phone} • ${city} • ${total}`
   }
 
   const formatDate = (dateString: string) => {
@@ -321,7 +321,7 @@ export default function AdminDashboard() {
                 href="/zolargestion/orders"
                 className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 font-medium"
               >
-                View All ÔåÆ
+                View All →
               </Link>
             </div>
           </div>
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                           </span>
                           {isNewOrder(order.createdAt) && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-blue-500 text-white animate-pulse">
-                              ÔÜí NEW
+                              NEW
                             </span>
                           )}
                         </div>

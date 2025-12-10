@@ -25,19 +25,19 @@ self.addEventListener('activate', (event) => {
 // Push notification event
 self.addEventListener('push', (event) => {
   console.log('Push notification received:', event)
-  
+
   let data = {
     title: 'Zolar Admin',
     body: 'New notification',
-    icon: '/icon-192x192.png',
-    badge: '/icon-72x72.png',
+    icon: '/favicon.png',
+    badge: '/favicon.png',
     tag: 'default',
     requireInteraction: true,
     vibrate: [200, 100, 200, 100, 200], // Longer vibration pattern
     silent: false, // Ensure notification is NOT silent
     sound: '/notification-cash.mp3', // Cash register sound
     data: {
-      url: '/admin'
+      url: '/zolargestion'
     }
   }
 
@@ -48,7 +48,7 @@ self.addEventListener('push', (event) => {
         ...data,
         ...payload,
         data: {
-          url: payload.url || '/admin',
+          url: payload.url || '/zolargestion',
           orderId: payload.orderId
         }
       }
@@ -76,7 +76,7 @@ self.addEventListener('push', (event) => {
           {
             action: 'view',
             title: 'View Order',
-            icon: '/icon-72x72.png'
+            icon: '/favicon.png'
           },
           {
             action: 'close',
@@ -111,7 +111,7 @@ self.addEventListener('push', (event) => {
           {
             action: 'view',
             title: 'View Order',
-            icon: '/icon-72x72.png'
+            icon: '/favicon.png'
           },
           {
             action: 'close',
@@ -130,7 +130,7 @@ function playCashRegisterSound() {
       // Service workers can't use Web Audio API directly, but we can try to use Audio
       // Note: Service workers have limited audio capabilities
       // The system notification sound will play automatically when silent: false
-      
+
       // Try to play sound via message to clients if any are open
       self.clients.matchAll({ type: 'window', includeUncontrolled: true })
         .then(clients => {
@@ -158,21 +158,21 @@ function playCashRegisterSound() {
 // Notification click event
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event)
-  
+
   event.notification.close()
-  
+
   if (event.action === 'close') {
     return
   }
 
-  const urlToOpen = event.notification.data?.url || '/admin'
+  const urlToOpen = event.notification.data?.url || '/zolargestion'
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
         // Check if there's already a window open
         for (const client of clientList) {
-          if (client.url.includes('/admin') && 'focus' in client) {
+          if (client.url.includes('/zolargestion') && 'focus' in client) {
             return client.focus().then(client => {
               // Send message to navigate to specific URL
               return client.postMessage({
@@ -193,7 +193,7 @@ self.addEventListener('notificationclick', (event) => {
 // Message event - handle messages from clients
 self.addEventListener('message', (event) => {
   console.log('Service Worker received message:', event.data)
-  
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
   }
@@ -202,7 +202,7 @@ self.addEventListener('message', (event) => {
 // Background sync for offline functionality (future enhancement)
 self.addEventListener('sync', (event) => {
   console.log('Background sync event:', event.tag)
-  
+
   if (event.tag === 'sync-orders') {
     event.waitUntil(
       // Sync orders when back online

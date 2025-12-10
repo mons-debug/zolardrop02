@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
   // Rate limiting: 5 checkouts per minute per IP
   const identifier = getClientIdentifier(request)
   const rateLimitResult = rateLimit(identifier, { limit: 5, windowSeconds: 60 })
-  
+
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { message: 'Too many checkout attempts. Please try again later.' },
-      { 
+      {
         status: 429,
         headers: {
           'X-RateLimit-Limit': '5',
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       // Update existing customer stats
       const newTotalOrders = dbCustomer.totalOrders + 1
       const newTotalSpent = dbCustomer.totalSpent + totalCents
-      
+
       // Auto-assign loyalty tags
       let tags = ['New']
       if (newTotalOrders >= 10) {
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       } else if (newTotalOrders >= 2) {
         tags = ['Regular']
       }
-      
+
       if (newTotalSpent > 50000) { // $500+
         tags.push('High Value')
       }
@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
       })
 
       const lowStockItems = updatedVariants.filter(v => v.stock < 5 && v.stock > 0)
-      
+
       if (lowStockItems.length > 0) {
         for (const item of lowStockItems) {
           // Store low stock notification in database
@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
               body: JSON.stringify({
                 title: '⚠️ Low Stock Alert',
                 body: `${item.product.title} (${item.color}) - Only ${item.stock} left`,
-                url: `/admin/products/${item.productSku}`,
+                url: `/zolargestion/products/${item.product.sku}`,
                 tag: 'low-stock'
               })
             })
@@ -298,10 +298,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Store notification in database (persists even if admin is offline)
-    const loyaltyBadge = dbCustomer.totalOrders >= 10 ? '👑' : 
-                        dbCustomer.totalOrders >= 5 ? '💎' : 
-                        dbCustomer.totalOrders >= 2 ? '⭐' : '🆕'
-    
+    const loyaltyBadge = dbCustomer.totalOrders >= 10 ? '👑' :
+      dbCustomer.totalOrders >= 5 ? '💎' :
+        dbCustomer.totalOrders >= 2 ? '⭐' : '🆕'
+
     try {
       await prisma.adminNotification.create({
         data: {
@@ -348,7 +348,7 @@ export async function POST(request: NextRequest) {
         createdAt: order.createdAt,
         itemCount: items.length
       }
-      
+
       await pusherServer.trigger('admin-orders', 'new-order', pusherPayload)
     } catch (pusherError) {
       if (process.env.NODE_ENV === 'development') {
@@ -367,7 +367,7 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({
           title: '🎉 New Order Received!',
           body: `Order from ${dbCustomer.name} - ${(totalCents / 100).toFixed(2)} MAD`,
-          url: `/admin/orders/${order.id}`,
+          url: `/zolargestion/orders/${order.id}`,
           orderId: order.id
         })
       })

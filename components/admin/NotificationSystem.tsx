@@ -43,10 +43,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         const data = await response.json()
         const notifs = data.notifications || []
         const count = data.unreadCount || 0
-        
+
         setNotifications(notifs)
         setUnreadCount(count)
-        
+
         if (process.env.NODE_ENV === 'development') {
           console.log(`✅ Fetched ${notifs.length} notifications (${count} unread)`)
         }
@@ -71,7 +71,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
           if (process.env.NODE_ENV === 'development') {
             console.log('✅ Service Worker registered')
           }
-          
+
           // Check if push is already enabled
           registration.pushManager.getSubscription()
             .then(subscription => {
@@ -88,32 +88,32 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
             console.error('❌ Service Worker registration failed:', err)
           }
         })
-      
+
       // Listen for messages from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {
         if (event.data.type === 'NEW_ORDER_NOTIFICATION') {
           // Show in-app notification when app is open
           const notificationData = event.data.data
-          
+
           // Play sound
           if (soundEnabled) {
             playNotificationSound().catch(() => {
               console.log('Sound failed to play')
             })
           }
-          
+
           // Fetch latest notifications to update UI
           fetchNotifications()
-          
+
           // Call parent callback if provided
           if (onNewOrder) {
             onNewOrder(notificationData)
           }
-          
+
           // Dispatch custom event for other components
           const customEvent = new CustomEvent('new-order-event', { detail: notificationData })
           window.dispatchEvent(customEvent)
-          
+
         } else if (event.data.type === 'PLAY_SOUND') {
           if (soundEnabled) {
             playNotificationSound()
@@ -167,14 +167,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         console.log('✅ Pusher connected')
       }
     }
-    
+
     const handleDisconnected = () => {
       setPusherConnected(false)
       if (process.env.NODE_ENV === 'development') {
         console.log('⚠️ Pusher disconnected')
       }
     }
-    
+
     const handleError = (err: any) => {
       setPusherConnected(false)
       console.error('❌ Pusher connection error:', err)
@@ -231,17 +231,17 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         // Using a simple "cha-ching" sound pattern
         audio.volume = 0.6
         audio.playbackRate = 1.0
-        
+
         // Try cash register sound file first, then fallback to existing notification.mp3, then Web Audio API
         const cashSoundUrl = '/notification-cash.mp3'
         const fallbackSoundUrl = '/notification.mp3'
-        
+
         // Try to load the cash register sound file
         audio.src = cashSoundUrl
         audio.load()
-        
+
         const playPromise = audio.play()
-        
+
         if (playPromise !== undefined) {
           await playPromise.catch(async (error) => {
             // If cash sound file doesn't exist, try fallback notification.mp3
@@ -291,14 +291,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       }
 
       const audioContext = audioContextRef.current
-      
+
       // Resume audio context if suspended (required by browser autoplay policies)
       if (audioContext.state === 'suspended') {
         await audioContext.resume()
       }
 
       const now = audioContext.currentTime
-      
+
       // Create "cha-ching" cash register sound
       // First "cha" - quick high-pitched sound
       const cha1 = audioContext.createOscillator()
@@ -367,7 +367,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     setSoundEnabled(true)
     setShowSoundPrompt(false)
     localStorage.setItem('zolar-sound-enabled', 'true')
-    
+
     try {
       await playNotificationSound()
     } catch (err) {
@@ -381,7 +381,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   const enablePushNotifications = async () => {
     try {
       console.log('🔔 Starting push notification setup...')
-      
+
       // Check if service worker is supported
       if (!('serviceWorker' in navigator)) {
         throw new Error('Service Workers are not supported in this browser')
@@ -395,7 +395,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       console.log('📝 Requesting notification permission...')
       const permission = await Notification.requestPermission()
       console.log('Permission result:', permission)
-      
+
       if (permission !== 'granted') {
         alert('❌ Push notifications permission denied. Please allow notifications in your browser settings.')
         localStorage.setItem('zolar-push-prompted', 'true')
@@ -417,7 +417,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       // Get VAPID public key from environment
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
       console.log('🔑 VAPID key available:', !!vapidPublicKey)
-      
+
       if (!vapidPublicKey) {
         throw new Error('VAPID public key not configured. Please contact administrator.')
       }
@@ -449,11 +449,11 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       setPushEnabled(true)
       setShowPushPrompt(false)
       localStorage.setItem('zolar-push-prompted', 'true')
-      
+
       // Auto-enable sound when push is enabled
       setSoundEnabled(true)
       localStorage.setItem('zolar-sound-enabled', 'true')
-      
+
       alert('✅ Push notifications enabled! You will now receive order alerts with sound.')
     } catch (error: any) {
       console.error('❌ Failed to enable push notifications:', error)
@@ -468,10 +468,10 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     const base64 = (base64String + padding)
       .replace(/\-/g, '+')
       .replace(/_/g, '/')
-    
+
     const rawData = window.atob(base64)
     const outputArray = new Uint8Array(rawData.length)
-    
+
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i)
     }
@@ -486,7 +486,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       const subscription = await swRegistrationRef.current.pushManager.getSubscription()
       if (subscription) {
         await subscription.unsubscribe()
-        
+
         // Remove from server
         await fetch('/api/push/subscribe', {
           method: 'DELETE',
@@ -520,7 +520,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       if (process.env.NODE_ENV === 'development') {
         console.log('🔔 New order event received via Pusher', data)
       }
-      
+
       // Refresh notifications from database
       fetchNotifications()
 
@@ -548,7 +548,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
       if (process.env.NODE_ENV === 'development') {
         console.log('⚠️ Low stock event received via Pusher', data)
       }
-      
+
       // Refresh notifications from database
       fetchNotifications()
 
@@ -628,7 +628,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
   // Format time ago
   const formatTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000)
-    
+
     if (seconds < 60) return 'Just now'
     const minutes = Math.floor(seconds / 60)
     if (minutes < 60) return `${minutes}m ago`
@@ -643,16 +643,16 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
     if (!notif.isRead) {
       markAsRead(notif.id)
     }
-    
+
     if (notif.type === 'new-order' && notif.data) {
       try {
         const data = JSON.parse(notif.data)
-        router.push(`/admin/orders/${data.id}`)
+        router.push(`/zolargestion/orders/${data.id}`)
       } catch (e) {
         // Invalid data
       }
     }
-    
+
     setShowDropdown(false)
   }
 
@@ -671,18 +671,18 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Enable Order Sounds?</h3>
               <p className="text-xs text-gray-600 mb-3 sm:mb-4">Hear a notification sound when new orders arrive</p>
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
+                <button
                   onClick={enableSound}
                   className="px-3 sm:px-4 py-2 bg-orange-500 text-white text-xs font-medium rounded hover:bg-orange-600 transition-colors"
-              >
+                >
                   Enable Sound
-              </button>
-              <button
+                </button>
+                <button
                   onClick={() => setShowSoundPrompt(false)}
                   className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
-              >
+                >
                   Maybe Later
-              </button>
+                </button>
               </div>
             </div>
           </div>
@@ -702,21 +702,21 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               <h3 className="text-xs sm:text-sm font-semibold text-gray-900 mb-2">Get Push Notifications?</h3>
               <p className="text-xs text-gray-600 mb-3 sm:mb-4">Receive order alerts even when the browser is closed or in background</p>
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-              <button
+                <button
                   onClick={enablePushNotifications}
                   className="px-3 sm:px-4 py-2 bg-blue-500 text-white text-xs font-medium rounded hover:bg-blue-600 transition-colors"
-              >
+                >
                   Enable Push
-              </button>
-              <button
+                </button>
+                <button
                   onClick={() => {
                     setShowPushPrompt(false)
                     localStorage.setItem('zolar-push-prompted', 'true')
                   }}
                   className="px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 text-xs font-medium rounded hover:bg-gray-300 transition-colors"
-              >
+                >
                   No Thanks
-              </button>
+                </button>
               </div>
             </div>
           </div>
@@ -754,22 +754,22 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         {/* Dropdown */}
         {showDropdown && (
           <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-[600px] overflow-hidden flex flex-col">
-              {/* Header */}
+            {/* Header */}
             <div className="p-4 border-b border-gray-200 bg-gray-50">
               <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 <div className="flex items-center space-x-2 flex-wrap">
                   <span className={`text-xs px-2 py-1 rounded-full ${pusherConnected ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                     {pusherConnected ? '● Live' : '○ Offline'}
                   </span>
                   {soundEnabled && (
-                      <button
+                    <button
                       onClick={() => playNotificationSound()}
                       className="text-xs text-orange-600 hover:text-orange-800 font-medium underline"
-                      >
+                    >
                       🔊
-                      </button>
-                    )}
+                    </button>
+                  )}
                   {pushEnabled ? (
                     <button
                       onClick={disablePushNotifications}
@@ -791,16 +791,15 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               </div>
 
               {/* Filters */}
-                  <div className="flex space-x-2">
+              <div className="flex space-x-2">
                 {(['all', 'unread', 'orders', 'stock'] as const).map((f) => (
                   <button
                     key={f}
                     onClick={() => setFilter(f)}
-                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                      filter === f
+                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${filter === f
                         ? 'bg-orange-500 text-white'
                         : 'bg-white text-gray-600 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     {f === 'all' && 'All'}
                     {f === 'unread' && `Unread (${unreadCount})`}
@@ -811,14 +810,14 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
               </div>
 
               {filteredNotifications.length > 0 && (
-                    <button
-                      onClick={markAllAsRead}
+                <button
+                  onClick={markAllAsRead}
                   className="mt-2 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Mark all read
-                    </button>
-                )}
-              </div>
+                >
+                  Mark all read
+                </button>
+              )}
+            </div>
 
             {/* Notifications List */}
             <div className="overflow-y-auto flex-1">
@@ -828,17 +827,16 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                 <div className="p-8 text-center text-gray-500">
                   <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
+                  </svg>
                   <p className="text-sm">No notifications</p>
-                  </div>
-                ) : (
+                </div>
+              ) : (
                 filteredNotifications.map((notif) => (
                   <button
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`w-full text-left p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors ${
-                      !notif.isRead ? 'bg-orange-50' : ''
-                    }`}
+                    className={`w-full text-left p-4 hover:bg-gray-50 border-b border-gray-100 transition-colors ${!notif.isRead ? 'bg-orange-50' : ''
+                      }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -851,7 +849,7 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                         <p className="text-sm text-gray-600">{notif.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(notif.createdAt)}</p>
                       </div>
-                  </div>
+                    </div>
                   </button>
                 ))
               )}
