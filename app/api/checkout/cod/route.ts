@@ -420,10 +420,12 @@ export async function POST(request: NextRequest) {
     // Send success response
     return NextResponse.json({
       success: true,
-      orderId: order.id,
+      orderId: order.orderId,  // Human-readable ID like ORD-20251201-A1B2C3
+      internalId: order.id,    // Database UUID for API lookups
       message: 'Order placed successfully',
       order: {
         id: order.id,
+        orderId: order.orderId,
         subtotalCents,
         taxCents,
         shippingCents,

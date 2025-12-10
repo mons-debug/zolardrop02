@@ -11,7 +11,7 @@ export default function CheckoutPage() {
   const { state, clearCart, removeItem } = useCart()
   const router = useRouter()
   const items = state.items
-  
+
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   // Validate cart items on mount - remove any with invalid UUIDs
   useEffect(() => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    
+
     let hasInvalidItems = false
     items?.forEach(item => {
       // Check if variantId is a valid UUID
@@ -36,7 +36,7 @@ export default function CheckoutPage() {
       alert('Some items in your cart were outdated and have been removed. Please add items again from the products page.')
     }
   }, []) // Run once on mount
-  
+
   // Default Moroccan cities
   const cities = [
     'Casablanca',
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
     'Nador',
     'Khouribga'
   ]
-  
+
   const [submitting, setSubmitting] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
   const [orderId, setOrderId] = useState('')
@@ -110,7 +110,8 @@ export default function CheckoutPage() {
       if (response.ok && data.success) {
         clearCart()
         // Redirect to thank you page with order details
-        router.push(`/thank-you?orderId=${data.orderId}&total=${total}&items=${items.length}`)
+        // orderId = human-readable (ORD-xxx), id = database UUID for API
+        router.push(`/thank-you?orderId=${data.orderId}&id=${data.internalId}&total=${total}&items=${items.length}`)
       } else {
         // Handle specific error cases
         if (data.message && data.message.includes('not found')) {
@@ -217,7 +218,7 @@ export default function CheckoutPage() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 
+            <h1
               className="text-4xl md:text-5xl font-light tracking-tight text-black"
               style={{ fontFamily: 'Playfair Display, Georgia, serif' }}
             >
@@ -238,7 +239,7 @@ export default function CheckoutPage() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-2xl font-light text-black mb-6">Delivery Information</h2>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
@@ -255,19 +256,19 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                  <div>
-                    <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
+                <div>
+                  <label className="block text-xs uppercase tracking-widest text-gray-500 mb-2">
                     Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      required
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    required
                     placeholder="Enter your phone number"
                     className="w-full px-4 py-3 border border-gray-300 bg-white text-sm focus:border-black focus:outline-none transition-colors"
-                    />
+                  />
                 </div>
 
                 <div>
@@ -316,7 +317,7 @@ export default function CheckoutPage() {
             >
               <div className="bg-gray-50 border border-gray-200 p-6">
                 <h2 className="text-2xl font-light text-black mb-6">Order Summary</h2>
-                
+
                 <div className="space-y-4 mb-6">
                   {items?.map((item) => (
                     <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">

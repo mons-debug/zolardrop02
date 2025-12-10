@@ -42,6 +42,7 @@ interface Customer {
 
 interface Order {
   id: string
+  orderId: string | null  // Human-readable order ID like ORD-20251201-A1B2C3
   customerId: string | null
   customer: Customer | null
   items: string
@@ -346,7 +347,7 @@ export default function OrderDetailPage() {
               </Link>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Order Details</h1>
-                <p className="text-gray-600 mt-1">Order #{order.id.slice(0, 8)}</p>
+                <p className="text-gray-600 mt-1 font-mono font-semibold">{order.orderId || `#${order.id.slice(0, 8)}`}</p>
               </div>
             </div>
 

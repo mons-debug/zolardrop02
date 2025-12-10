@@ -35,35 +35,38 @@ export default function ThankYouPage() {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([])
   const [loadingItems, setLoadingItems] = useState(false)
   const [orderData, setOrderData] = useState<any>(null)
-  
+
+  // orderId = human-readable ID for display (ORD-20251201-A1B2C3)
+  // id = database UUID for API lookups
   const orderId = searchParams.get('orderId')
+  const internalId = searchParams.get('id') || orderId  // Fallback to orderId for backwards compatibility
   const total = searchParams.get('total')
   const items = searchParams.get('items')
 
   useEffect(() => {
-    if (!orderId) {
+    if (!orderId && !internalId) {
       router.push('/')
       return
     }
 
     // Fetch tracking settings
     fetchTrackingSettings()
-    
+
     // Fetch order details to show items
-    if (orderId) {
+    if (internalId) {
       fetchOrderDetails()
     }
-  }, [orderId])
+  }, [orderId, internalId])
 
   const fetchOrderDetails = async () => {
     try {
       setLoadingItems(true)
-      const response = await fetch(`/api/admin/orders/${orderId}`)
+      const response = await fetch(`/api/admin/orders/${internalId}`)
       if (response.ok) {
         const data = await response.json()
         setOrderData(data.order) // Store full order data
         const items = JSON.parse(data.order.items || '[]') as OrderItem[]
-        
+
         // Fetch product details for each item
         const itemsWithDetails = await Promise.all(
           items.map(async (item) => {
@@ -97,19 +100,21 @@ export default function ThankYouPage() {
   }
 
   const downloadReceipt = async () => {
-    if (!orderId) return
-    
+    if (!internalId) return
+
     try {
-      const response = await fetch(`/api/admin/orders/${orderId}/receipt`)
+      const response = await fetch(`/api/admin/orders/${internalId}/receipt`)
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `receipt-${orderId.slice(0, 8).toUpperCase()}.html`
+        // Use human-readable orderId for filename if available
+        const displayId = orderId || internalId?.slice(0, 8).toUpperCase() || 'receipt'
+        a.download = `receipt-${displayId}.html`
         document.body.appendChild(a)
         a.click()
-        
+
         // Also open in new window for print
         const printWindow = window.open(url, '_blank')
         if (printWindow) {
@@ -119,7 +124,7 @@ export default function ThankYouPage() {
             }, 500)
           }
         }
-        
+
         setTimeout(() => {
           window.URL.revokeObjectURL(url)
           document.body.removeChild(a)
@@ -141,7 +146,7 @@ export default function ThankYouPage() {
       if (response.ok) {
         const settings = await response.json()
         setTrackingSettings(settings)
-        
+
         // Fire tracking pixels if active
         if (settings.isActive) {
           fireTrackingPixels(settings)
@@ -165,7 +170,7 @@ export default function ThankYouPage() {
         if (typeof gtag !== 'undefined') {
           // @ts-ignore
           gtag('event', 'conversion', {
-            'send_to': settings.googleAdsLabel 
+            'send_to': settings.googleAdsLabel
               ? `${settings.googleAdsId}/${settings.googleAdsLabel}`
               : settings.googleAdsId,
             'value': totalValue,

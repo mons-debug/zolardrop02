@@ -17,6 +17,7 @@ interface Customer {
 
 interface Order {
     id: string
+    orderId: string | null  // Human-readable order ID like ORD-20251201-A1B2C3
     customerId: string | null
     items: string
     subtotalCents: number
@@ -98,6 +99,7 @@ export default function OrdersPage() {
             const searchLower = search.toLowerCase()
             filtered = filtered.filter(o =>
                 o.id.toLowerCase().includes(searchLower) ||
+                o.orderId?.toLowerCase().includes(searchLower) ||
                 (o.customer?.name?.toLowerCase().includes(searchLower)) ||
                 (o.customer?.phone?.includes(search)) ||
                 (o.customer?.city?.toLowerCase().includes(searchLower))
@@ -409,9 +411,9 @@ export default function OrdersPage() {
                                                     <div className="flex flex-col space-y-1">
                                                         <Link
                                                             href={`/zolargestion/orders/${order.id}`}
-                                                            className="text-xs font-mono text-blue-600 hover:text-blue-800"
+                                                            className="text-xs font-mono text-blue-600 hover:text-blue-800 font-semibold"
                                                         >
-                                                            #{order.id.slice(0, 8)}...
+                                                            {order.orderId || `#${order.id.slice(0, 8)}`}
                                                         </Link>
                                                         <span className="text-xs text-gray-500">
                                                             {items.length} item{items.length !== 1 ? 's' : ''}
