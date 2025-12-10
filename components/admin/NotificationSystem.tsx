@@ -229,40 +229,26 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
         const audio = new Audio()
         // Create cash register sound using data URI (base64 encoded short cash register sound)
         // Using a simple "cha-ching" sound pattern
-        audio.volume = 0.6
+        audio.volume = 0.8
         audio.playbackRate = 1.0
 
-        // Try cash register sound file first, then fallback to existing notification.mp3, then Web Audio API
-        const cashSoundUrl = '/notification-cash.mp3'
-        const fallbackSoundUrl = '/notification.mp3'
+        // Use notification.mp3 if available, otherwise Web Audio API fallback
+        const soundUrl = '/notification.mp3'
 
-        // Try to load the cash register sound file
-        audio.src = cashSoundUrl
+        // Try to load the sound file
+        audio.src = soundUrl
         audio.load()
 
         const playPromise = audio.play()
 
         if (playPromise !== undefined) {
           await playPromise.catch(async (error) => {
-            // If cash sound file doesn't exist, try fallback notification.mp3
-            if (error.name !== 'NotAllowedError' && error.name !== 'NotSupportedError') {
-              try {
-                audio.src = fallbackSoundUrl
-                audio.load()
-                const fallbackPromise = audio.play()
-                if (fallbackPromise !== undefined) {
-                  await fallbackPromise.catch(async () => {
-                    // If fallback also fails, generate cash register sound with Web Audio API
-                    await playCashRegisterSound()
-                  })
-                }
-              } catch {
-                // If fallback fails, use Web Audio API
-                await playCashRegisterSound()
-              }
-            } else {
-              // Permission error, fallback to Web Audio API
+            // If audio file fails or permission denied, use Web Audio API
+            if (error.name !== 'NotAllowedError') {
               await playCashRegisterSound()
+            } else {
+              // Permission error - user needs to interact with page first
+              console.log('Audio blocked - user interaction needed')
             }
           })
         }
@@ -797,8 +783,8 @@ export default function NotificationSystem({ userId, onNewOrder }: NotificationS
                     key={f}
                     onClick={() => setFilter(f)}
                     className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${filter === f
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-white text-gray-600 hover:bg-gray-100'
+                      ? 'bg-orange-500 text-white'
+                      : 'bg-white text-gray-600 hover:bg-gray-100'
                       }`}
                   >
                     {f === 'all' && 'All'}
