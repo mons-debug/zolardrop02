@@ -97,13 +97,44 @@ export default function OrderDetailPage() {
         const itemsWithProducts = await Promise.all(
           items.map(async (item) => {
             try {
-              const productRes = await fetch(`/api/products/${item.productId}`)
+              // First try to fetch by productId
+              let productRes = await fetch(`/api/products/${item.productId}`)
               if (productRes.ok) {
                 const productData = await productRes.json()
                 return { ...item, product: productData.product }
               }
+
+              // If productId didn't work, try variantId (for variant-as-product items)
+              if (item.variantId && item.variantId !== item.productId) {
+                productRes = await fetch(`/api/products/${item.variantId}`)
+                if (productRes.ok) {
+                  const productData = await productRes.json()
+                  return { ...item, product: productData.product }
+                }
+              }
+
+              // Fallback: use stored item data if available (from new checkout flow)
+              if (item.title && item.image) {
+                return {
+                  ...item,
+                  product: {
+                    title: item.title,
+                    images: JSON.stringify([item.image])
+                  }
+                }
+              }
             } catch (err) {
               console.error('Failed to fetch product:', err)
+              // Still try to use stored item data on error
+              if (item.title && item.image) {
+                return {
+                  ...item,
+                  product: {
+                    title: item.title,
+                    images: JSON.stringify([item.image])
+                  }
+                }
+              }
             }
             return item
           })
