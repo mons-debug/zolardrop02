@@ -403,17 +403,18 @@ export default function OrderDetailPage() {
               </div>
               <div className="divide-y divide-gray-200">
                 {orderItems.map((item, index) => {
-                  // Try to get image from: 1) fetched product, 2) stored item data, 3) placeholder
+                  // Try to get image from: 1) stored item data (cart), 2) fetched product, 3) placeholder
+                  // IMPORTANT: Prioritize item.image as it contains the correct variant image
                   let firstImage = '/placeholder.png'
-                  if (item.product?.images) {
+                  if (item.image) {
+                    firstImage = item.image
+                  } else if (item.product?.images) {
                     try {
                       const images = JSON.parse(item.product.images)
-                      firstImage = images[0] || item.image || '/placeholder.png'
+                      firstImage = images[0] || '/placeholder.png'
                     } catch {
-                      firstImage = item.image || '/placeholder.png'
+                      firstImage = '/placeholder.png'
                     }
-                  } else if (item.image) {
-                    firstImage = item.image
                   }
 
                   // Get product title from: 1) fetched product, 2) stored item data
