@@ -228,10 +228,12 @@ export async function POST(request: NextRequest) {
           const priceCents = result?.variant?.priceCents || result?.product?.priceCents || 0
 
           // Get product/variant info for order display
-          const productTitle = result?.variant?.product?.title || result?.product?.title || item.title || 'Unknown Product'
-          const variantColor = result?.variant?.color || item.variantName || ''
+          // IMPORTANT: Prioritize cart-sent data over DB lookups
+          // The cart has the correct customer-selected variant info
+          const productTitle = item.title || result?.variant?.product?.title || result?.product?.title || 'Unknown Product'
+          const variantColor = item.variantName || result?.variant?.color || ''
 
-          // Determine image - use item.image if provided, otherwise try to get from variant/product
+          // Determine image - prioritize item.image from cart
           let itemImage = item.image || ''
           if (!itemImage && result?.variant?.images) {
             try {
@@ -256,7 +258,7 @@ export async function POST(request: NextRequest) {
             qty: item.qty,
             priceCents,
             size: item.size, // Include size if available
-            // Store these for order display
+            // Store these for order display - cart data takes priority
             title: productTitle,
             image: itemImage,
             variantName: variantColor
