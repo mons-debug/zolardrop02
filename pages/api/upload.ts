@@ -1,11 +1,18 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { put } from '@vercel/blob'
+import { v2 as cloudinary } from 'cloudinary'
 
 export const config = {
   api: {
     bodyParser: false, // Disable body parser to handle file upload
   },
 }
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 async function parseMultipartForm(req: NextApiRequest): Promise<{ file: Buffer; filename: string; contentType: string }> {
   return new Promise((resolve, reject) => {
@@ -29,7 +36,7 @@ async function parseMultipartForm(req: NextApiRequest): Promise<{ file: Buffer; 
 
     req.on('end', () => {
       const buffer = Buffer.concat(chunks)
-      
+
       if (boundary) {
         // Parse multipart data
         const parts = buffer.toString('binary').split(boundary)
@@ -40,7 +47,7 @@ async function parseMultipartForm(req: NextApiRequest): Promise<{ file: Buffer; 
             if (filenameMatch) {
               filename = filenameMatch[1]
             }
-            
+
             // Extract content type
             const contentTypeMatch = part.match(/Content-Type: ([^\r\n]+)/)
             if (contentTypeMatch) {
@@ -59,7 +66,7 @@ async function parseMultipartForm(req: NextApiRequest): Promise<{ file: Buffer; 
           }
         }
       }
-      
+
       reject(new Error('No file found in request'))
     })
 
@@ -76,12 +83,12 @@ export default async function handler(
   }
 
   try {
-    // Check if BLOB_READ_WRITE_TOKEN is set
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('BLOB_READ_WRITE_TOKEN not set in environment variables')
-      return res.status(500).json({ 
+    // Check if Cloudinary is configured
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      console.error('Cloudinary credentials not set in environment variables')
+      return res.status(500).json({
         message: 'Upload configuration error',
-        error: 'Storage credentials not configured. Please set BLOB_READ_WRITE_TOKEN in environment variables.'
+        error: 'Storage credentials not configured. Please set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in environment variables.'
       })
     }
 
@@ -90,7 +97,7 @@ export default async function handler(
 
     // Validate file size (max 10MB)
     if (file.length > 10 * 1024 * 1024) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'File too large',
         error: 'File size must be less than 10MB'
       })
@@ -100,29 +107,39 @@ export default async function handler(
     const timestamp = Date.now()
     const randomId = Math.random().toString(36).substring(7)
     const extension = filename.split('.').pop() || 'jpg'
-    const uniqueFilename = `hero/${timestamp}-${randomId}.${extension}`
+    const publicId = `zolar/${timestamp}-${randomId}`
 
-    console.log(`Uploading ${uniqueFilename} (${file.length} bytes, ${contentType})`)
+    console.log(`Uploading ${publicId} (${file.length} bytes, ${contentType})`)
 
-    // Upload to Vercel Blob
-    const blob = await put(uniqueFilename, file, {
-      access: 'public',
-      contentType,
+    // Upload to Cloudinary
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          folder: 'zolar-products',
+          resource_type: 'auto',
+        },
+        (error, result) => {
+          if (error) reject(error)
+          else resolve(result)
+        }
+      )
+
+      uploadStream.end(file)
     })
 
-    console.log('Upload successful:', blob.url)
+    console.log('Upload successful:', result.secure_url)
 
     res.status(200).json({
       success: true,
-      url: blob.url,
+      url: result.secure_url,
       message: 'File uploaded successfully'
     })
   } catch (error) {
     console.error('Upload error:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Upload failed',
       error: error instanceof Error ? error.message : 'Unknown error'
     })
   }
 }
-

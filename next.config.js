@@ -27,6 +27,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: '0nugpwqw3muf6tro.public.blob.vercel-storage.com',
       },
+      {
+        // Cloudinary for new image uploads
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
     // Add these for better image handling
     dangerouslyAllowSVG: true,
