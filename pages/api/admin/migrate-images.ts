@@ -128,39 +128,47 @@ export default async function handler(
             }
         }
 
-        // 4. Migrate Fashion Carousel
-        const carouselImages = await prisma.fashionCarousel.findMany()
-        results.fashionCarousel.total = carouselImages.length
+        // 4. Migrate Fashion Carousel (wrapped in try-catch for schema compatibility)
+        try {
+            const carouselImages = await prisma.fashionCarousel.findMany()
+            results.fashionCarousel.total = carouselImages.length
 
-        for (const item of carouselImages) {
-            if (isBlobUrl(item.url)) {
-                const newUrl = await uploadToCloudinary(item.url)
-                if (newUrl) {
-                    await prisma.fashionCarousel.update({
-                        where: { id: item.id },
-                        data: { url: newUrl }
-                    })
-                    results.fashionCarousel.migrated++
+            for (const item of carouselImages) {
+                if (isBlobUrl(item.url)) {
+                    const newUrl = await uploadToCloudinary(item.url)
+                    if (newUrl) {
+                        await prisma.fashionCarousel.update({
+                            where: { id: item.id },
+                            data: { url: newUrl }
+                        })
+                        results.fashionCarousel.migrated++
+                    }
                 }
             }
+        } catch (e) {
+            console.log('Skipped fashionCarousel (schema mismatch):', e)
         }
 
-        // 5. Migrate Collection Stacks
-        const stacks = await prisma.collectionStack.findMany()
-        results.collectionStacks.total = stacks.length
+        // 5. Migrate Collection Stacks (wrapped in try-catch for schema compatibility)
+        try {
+            const stacks = await prisma.collectionStack.findMany()
+            results.collectionStacks.total = stacks.length
 
-        for (const stack of stacks) {
-            if (stack.images && isBlobUrl(stack.images)) {
-                const { newJson, migrated } = await migrateImageArray(stack.images)
-                if (migrated > 0) {
-                    await prisma.collectionStack.update({
-                        where: { id: stack.id },
-                        data: { images: newJson }
-                    })
-                    results.collectionStacks.migrated++
-                    results.collectionStacks.images += migrated
+            for (const stack of stacks) {
+                if (stack.images && isBlobUrl(stack.images)) {
+                    const { newJson, migrated } = await migrateImageArray(stack.images)
+                    if (migrated > 0) {
+                        await prisma.collectionStack.update({
+                            where: { id: stack.id },
+                            data: { images: newJson }
+                        })
+                        results.collectionStacks.migrated++
+                        results.collectionStacks.images += migrated
+                    }
                 }
             }
+        } catch (e) {
+            console.log('Skipped collectionStacks (schema mismatch):', e)
         }
 
         return res.status(200).json({
