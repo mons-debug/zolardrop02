@@ -20,7 +20,12 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '**.public.blob.vercel-storage.com',
+        hostname: '*.public.blob.vercel-storage.com',
+      },
+      {
+        // Your specific Vercel Blob store
+        protocol: 'https',
+        hostname: '0nugpwqw3muf6tro.public.blob.vercel-storage.com',
       },
     ],
     // Add these for better image handling

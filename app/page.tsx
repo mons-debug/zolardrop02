@@ -269,6 +269,20 @@ export default function Home() {
     'Heather Gray': '#9CA3AF'
   }
 
+  // Safe helper to parse product images - handles both string and array formats
+  const getProductImage = (product: any, index: number = 0): string => {
+    if (!product?.images) return '/placeholder.jpg'
+    try {
+      const images = typeof product.images === 'string'
+        ? JSON.parse(product.images)
+        : product.images
+      return Array.isArray(images) && images[index] ? images[index] : '/placeholder.jpg'
+    } catch {
+      return '/placeholder.jpg'
+    }
+  }
+
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -806,7 +820,7 @@ export default function Home() {
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     {products[0] && (
                       <Image
-                        src={JSON.parse(products[0].images)[0] || '/placeholder.jpg'}
+                        src={getProductImage(products[0])}
                         alt="ZOLAR style 1"
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -831,7 +845,7 @@ export default function Home() {
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     {products[1] && (
                       <Image
-                        src={JSON.parse(products[1].images)[0] || '/placeholder.jpg'}
+                        src={getProductImage(products[1])}
                         alt="ZOLAR style 2"
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -856,7 +870,7 @@ export default function Home() {
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     {products[2] && (
                       <Image
-                        src={JSON.parse(products[2].images)[0] || '/placeholder.jpg'}
+                        src={getProductImage(products[2])}
                         alt="ZOLAR style 3"
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -881,7 +895,7 @@ export default function Home() {
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     {products[3] && (
                       <Image
-                        src={JSON.parse(products[3].images)[0] || '/placeholder.jpg'}
+                        src={getProductImage(products[3])}
                         alt="ZOLAR style 4"
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -906,7 +920,7 @@ export default function Home() {
                   <div className="relative aspect-[3/4] overflow-hidden bg-gray-100">
                     {products[4] && (
                       <Image
-                        src={JSON.parse(products[4].images)[0] || '/placeholder.jpg'}
+                        src={getProductImage(products[4])}
                         alt="ZOLAR style 5"
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
