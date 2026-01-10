@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
+import { trackAddToCart } from '@/lib/meta-pixel'
 
 export interface CartItem {
   productId: string
@@ -44,8 +45,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'ADD_ITEM': {
       // Match items by productId, variantId, AND size (if size exists)
       const existingItemIndex = state.items.findIndex(
-        item => 
-          item.productId === action.payload.productId && 
+        item =>
+          item.productId === action.payload.productId &&
           item.variantId === action.payload.variantId &&
           item.size === action.payload.size
       )
@@ -69,7 +70,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         ...state,
         items: state.items.filter(
           item => !(
-            item.productId === action.payload.productId && 
+            item.productId === action.payload.productId &&
             item.variantId === action.payload.variantId &&
             item.size === action.payload.size
           )
@@ -80,7 +81,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     case 'UPDATE_QUANTITY': {
       const updatedItems = state.items.map(item => {
         if (
-          item.productId === action.payload.productId && 
+          item.productId === action.payload.productId &&
           item.variantId === action.payload.variantId &&
           item.size === action.payload.size
         ) {
@@ -135,6 +136,16 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       type: 'ADD_ITEM',
       payload: { ...item, qty: item.qty || 1 }
     })
+
+    // Track AddToCart event with Meta Pixel
+    trackAddToCart({
+      id: item.productId,
+      name: item.title,
+      price: item.priceCents,
+      quantity: item.qty || 1,
+      variant: item.variantName
+    })
+
     // Auto-open cart drawer when item is added
     if (!state.isOpen) {
       setTimeout(() => {

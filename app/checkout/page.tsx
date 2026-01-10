@@ -1,11 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useCart } from '@/components/CartContext'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { formatPrice } from '@/lib/currency'
+import { trackInitiateCheckout, trackLead } from '@/lib/meta-pixel'
 
 export default function CheckoutPage() {
   const { state, clearCart, removeItem } = useCart()
@@ -17,6 +18,9 @@ export default function CheckoutPage() {
     phone: '',
     city: ''
   })
+
+  // Track InitiateCheckout - only once per session
+  const hasTrackedCheckout = useRef(false)
 
   // Validate cart items on mount - remove any with invalid UUIDs
   useEffect(() => {
@@ -34,6 +38,21 @@ export default function CheckoutPage() {
 
     if (hasInvalidItems) {
       alert('Some items in your cart were outdated and have been removed. Please add items again from the products page.')
+    }
+
+    // Track InitiateCheckout event (only once)
+    if (!hasTrackedCheckout.current && items && items.length > 0) {
+      const total = items.reduce((sum, item) => sum + (item.priceCents * item.qty), 0)
+      trackInitiateCheckout({
+        items: items.map(item => ({
+          id: item.productId,
+          name: item.title,
+          price: item.priceCents,
+          quantity: item.qty
+        })),
+        total: total
+      })
+      hasTrackedCheckout.current = true
     }
   }, []) // Run once on mount
 
@@ -75,6 +94,15 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+
+    // Track Lead event - user is attempting to place an order
+    const cartTotal = items?.reduce((sum, item) => sum + (item.priceCents * item.qty), 0) || 0
+    trackLead({
+      name: formData.name,
+      phone: formData.phone,
+      city: formData.city,
+      cartValue: cartTotal
+    })
 
     try {
       const response = await fetch('/api/checkout/cod', {
